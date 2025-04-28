@@ -22,83 +22,65 @@ const TruckAnimation = ({ setShowConfetti, setConfettiSize }: TruckAnimationProp
     // Kamyon animasyonunu başlat
     useEffect(() => {
         const startTruckAnimation = async () => {
-            // Animasyon konteynerinin boyutlarını al
             if (animationContainerRef.current) {
                 const containerWidth = animationContainerRef.current.offsetWidth
 
-                // Yol rengini başlangıçta gri yap
+                // 1️⃣ Yol gri başlasın
                 await roadColorControls.start({
-                    backgroundColor: "#e5e7eb", // bg-gray-200
+                    backgroundColor: "#e5e7eb",
                     transition: { duration: 0.1 }
                 })
 
-                // Kamyonu soldan sağa doğru hareket ettir (6 saniye)
-                await truckAnimationControls.start({
-                    x: containerWidth - 50, // Kamyonun genişliğini hesaba katarak
-                    transition: {
-                        duration: 6,
-                        ease: "linear",
-                    },
+                // 2️⃣ Kamyon hareket etmeye başlasın + Yol yeşile dönüşsün
+                truckAnimationControls.start({
+                    x: containerWidth - 80,
+                    transition: { duration: 6, ease: "linear" }
                 })
 
-                // Kamyon hedefe ulaştığında
-                setTruckReachedTarget(true)
-
-                // Yol rengini yeşil yap
-                await roadColorControls.start({
-                    backgroundColor: "#86efac", // bg-green-300
-                    transition: { duration: 0.5 }
+                roadColorControls.start({
+                    backgroundColor: "#86efac",
+                    transition: { duration: 6, ease: "linear" }
                 })
 
-                // Konfeti efektini göster
-                if (targetRef.current) {
-                    setConfettiSize({
-                        width: window.innerWidth,
-                        height: window.innerHeight,
-                    })
+                // 3️⃣ Hareket bitince hedefe ulaşıldı
+                setTimeout(async () => {
+                    setTruckReachedTarget(true)
+
+                    // Konfeti patlat
+                    setConfettiSize({ width: window.innerWidth, height: window.innerHeight })
                     setShowConfetti(true)
 
-                    // 3 saniye sonra konfetileri kaldır
                     await new Promise((resolve) => setTimeout(resolve, 3000))
                     setShowConfetti(false)
 
-                    // Kamyonu sağdan dışarı çıkar
+                    // 4️⃣ Kamyon sağdan çıkıyor, tik çarpıya dönüyor, yol gri oluyor
                     await truckAnimationControls.start({
                         x: containerWidth + 100,
-                        transition: {
-                            duration: 2,
-                            ease: "easeIn",
-                        },
+                        transition: { duration: 2, ease: "easeIn" }
                     })
 
-                    // Kamyonu doğrudan sol başlangıç noktasına ayarla ve görünür yap
-                    truckAnimationControls.set({ x: -50 })
+                    await roadColorControls.start({
+                        backgroundColor: "#e5e7eb",
+                        transition: { duration: 0.5 }
+                    })
 
-                    // Tik işaretini çarpıya geri döndür
                     setTruckReachedTarget(false)
 
-                    // Animasyon döngüsünü artır
-                    setAnimationCycle((prev) => prev + 1)
+                    // 5️⃣ Reset: Kamyon başa dönüyor
+                    truckAnimationControls.set({ x: -100 })
 
-                    // Animasyonu tekrar başlat (1 saniye bekle)
-                    setTimeout(() => {
-                        startTruckAnimation()
-                    }, 1000)
-                }
+                    setAnimationCycle(prev => prev + 1)
+                }, 6000)  // Kamyonun hareket süresi kadar bekliyoruz
             }
         }
 
-        // Sayfa yüklendikten 1 saniye sonra animasyonu başlat
-        const timer = setTimeout(() => {
-            startTruckAnimation()
-        }, 1000)
-
-        return () => clearTimeout(timer)
-    }, [animationCycle, setShowConfetti, setConfettiSize, truckAnimationControls, roadColorControls])
+        startTruckAnimation()
+    }, [animationCycle])
 
     return (
-        <div ref={animationContainerRef} className="relative h-20 w-full max-w-[900px] mx-auto mb-0 overflow-hidden">
-            {/* Hedef çarpı işareti */}
+        <div ref={animationContainerRef} className="relative h-20 w-screen overflow-hidden">
+
+        {/* Hedef çarpı işareti */}
             <div ref={targetRef} className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10">
                 <div
                     className={`p-2 rounded-full bg-red-100 transition-all duration-300 ${truckReachedTarget ? "scale-150 bg-green-100" : ""}`}
