@@ -24,7 +24,7 @@ const HeroSection = ({ setShowConfetti, setConfettiSize }: HeroSectionProps) => 
                     id="hero"
                     className="w-full py-12 md:py-24 lg:py-32 overflow-hidden"
                 >
-                    <div className="container px-4 md:px-6">
+                    <div className="mx-auto px-4 md:px-6 max-w-7xl">
                         <div className="flex flex-col items-center justify-center text-center">
                             <div className="max-w-[800px] space-y-4 mb-8">
                                 <motion.h1

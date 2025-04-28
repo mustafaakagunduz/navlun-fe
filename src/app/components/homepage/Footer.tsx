@@ -18,7 +18,7 @@ const Footer = () => {
         <Card className="border-0 shadow-none rounded-none bg-green-50">
             <CardContent className="p-0">
                 <footer className="w-full border-t py-6 md:py-12">
-                    <div className="container px-4 md:px-6">
+                    <div className="mx-auto px-4 md:px-6 max-w-7xl">
                         <div className="grid gap-8 lg:grid-cols-4">
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2">

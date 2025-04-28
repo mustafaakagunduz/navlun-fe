@@ -40,7 +40,7 @@ const NavbarWithoutLogin = () => {
                     : "bg-gradient-to-b from-green-50 to-white border-transparent"
             }`}
         >
-            <div className="container flex h-16 items-center justify-between">
+            <div className="mx-auto flex h-16 items-center justify-between px-4 md:px-6 max-w-7xl">
                 <div className="flex items-center gap-2">
                     <Leaf className="h-6 w-6 text-green-600" />
                     <span className="text-xl font-bold">EkoTaşıma</span>
