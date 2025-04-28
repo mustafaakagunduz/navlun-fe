@@ -1,0 +1,94 @@
+{
+  "navbar": {
+    "home": "Home",
+    "about": "About",
+    "services": "Services",
+    "contact": "Contact",
+    "login": "Login / Register"
+  },
+  "hero": {
+    "title": "Ecological Transportation Solutions",
+    "description": "We connect carriers and those who need transport services. The right address for environmentally friendly, efficient and economical transportation.",
+    "getService": "Get Transport Service",
+    "joinAsCarrier": "Join As Carrier",
+    "safe": "100% Safe",
+    "ecofriendly": "Eco-Friendly",
+    "sustainable": "Sustainable"
+  },
+  "about": {
+    "title": "Pioneer of Ecological Transportation",
+    "subtitle": "About Us",
+    "description": "Since 2015, we have been providing environmentally friendly solutions in the transportation industry. Our goal is to provide efficient and economical transportation services while reducing the carbon footprint.",
+    "mission": {
+      "title": "Our Mission",
+      "description": "To minimize environmental damage by offering ecological solutions in the transportation sector and contribute to a sustainable future."
+    },
+    "vision": {
+      "title": "Our Vision",
+      "description": "To become Turkey's largest ecological transportation platform and lead the spread of environmentally friendly practices in the industry."
+    },
+    "values": {
+      "title": "Our Values",
+      "description": "Sustainability, reliability, transparency and customer satisfaction are our core values."
+    }
+  },
+  "services": {
+    "title": "Our Ecological Transportation Solutions",
+    "subtitle": "Our Services",
+    "description": "Meet our environmentally friendly transportation services tailored to your needs.",
+    "items": [
+      {
+        "title": "Urban Transportation",
+        "description": "We provide fast and reliable transportation services within the city."
+      },
+      {
+        "title": "Intercity Transportation",
+        "description": "Ecological and economical transportation solutions between cities."
+      },
+      {
+        "title": "International Transportation",
+        "description": "Environmentally friendly international transportation services that cross borders."
+      },
+      {
+        "title": "Special Goods Transportation",
+        "description": "Special transportation solutions for your valuable and delicate items."
+      },
+      {
+        "title": "Home & Office Moving",
+        "description": "Professional and ecological service in home and office moving."
+      },
+      {
+        "title": "Logistics Consulting",
+        "description": "Sustainable logistics solutions and consulting for your company."
+      }
+    ],
+    "moreInfo": "More Information"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "Contact",
+    "description": "You can contact us for your questions, suggestions or transportation needs.",
+    "phone": "Phone",
+    "email": "Email",
+    "address": "Address",
+    "sendMessage": "Send Message",
+    "form": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone",
+      "message": "Message",
+      "submit": "Send"
+    }
+  },
+  "footer": {
+    "description": "A platform that connects carriers and those who need transportation services, supporting ecological transportation.",
+    "quickLinks": "Quick Links",
+    "services": "Services",
+    "contact": "Contact",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfUse": "Terms of Use",
+    "pdpl": "PDPL",
+    "copyright": "All rights reserved."
+  }
+}

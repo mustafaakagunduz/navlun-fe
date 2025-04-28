@@ -5,9 +5,12 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Leaf } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import LanguageSwitcher from "./LanguageSwitcher"
+import { useLanguage } from "@/app/context/LanguageContext"
 
 const NavbarWithoutLogin = () => {
     const [isScrolled, setIsScrolled] = useState<boolean>(false)
+    const { t } = useLanguage();
 
     // Sayfa kaydırıldığında navbarın arkaplan rengini değiştir
     useEffect(() => {
@@ -44,19 +47,24 @@ const NavbarWithoutLogin = () => {
                 </div>
                 <nav className="hidden md:flex gap-6">
                     <Link href="#hero" className="text-sm font-medium hover:text-green-600 transition-colors">
-                        Ana Sayfa
+                        {t("navbar.home")}
                     </Link>
                     <Link href="#about" className="text-sm font-medium hover:text-green-600 transition-colors">
-                        Hakkımızda
+                        {t("navbar.about")}
                     </Link>
                     <Link href="#services" className="text-sm font-medium hover:text-green-600 transition-colors">
-                        Hizmetlerimiz
+                        {t("navbar.services")}
                     </Link>
                     <Link href="#contact" className="text-sm font-medium hover:text-green-600 transition-colors">
-                        İletişim
+                        {t("navbar.contact")}
                     </Link>
                 </nav>
-                <Button className="bg-green-600 hover:bg-green-700">Giriş Yap / Üye Ol</Button>
+                <div className="flex items-center gap-2">
+                    <LanguageSwitcher />
+                    <Button className="bg-green-600 hover:bg-green-700">
+                        {t("navbar.login")}
+                    </Button>
+                </div>
             </div>
         </header>
     )
