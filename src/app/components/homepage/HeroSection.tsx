@@ -63,8 +63,20 @@ const HeroSection = ({ setShowConfetti, setConfettiSize }: HeroSectionProps) => 
                         </motion.div>
 
                         {/* İkonlar */}
+                        {/* İkonlar */}
                         <div className="flex items-center justify-center gap-6 pt-4">
-                            {/* ... ikonlar aynı şekilde kalıyor */}
+                            <div className="flex items-center gap-1">
+                                <CheckCircle className="h-5 w-5 text-green-600" />
+                                <span className="text-sm">{t("hero.safe")}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                                <Leaf className="h-5 w-5 text-green-600" />
+                                <span className="text-sm">{t("hero.ecofriendly")}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                                <Recycle className="h-5 w-5 text-green-600" />
+                                <span className="text-sm">{t("hero.sustainable")}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
