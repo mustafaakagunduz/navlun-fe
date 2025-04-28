@@ -56,7 +56,7 @@ const NavbarWithoutLogin = () => {
                         İletişim
                     </Link>
                 </nav>
-                <Button className="bg-green-600 hover:bg-green-700">Teklif Al</Button>
+                <Button className="bg-green-600 hover:bg-green-700">Giriş Yap / Üye Ol</Button>
             </div>
         </header>
     )
