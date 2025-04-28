@@ -1,46 +1,51 @@
 // components/ServicesSection.tsx
+"use client"
+
 import { Truck, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { JSX } from "react"
+import { useLanguage } from "@/app/context/LanguageContext"
 
 interface Service {
     icon: JSX.Element;
-    title: string;
-    description: string;
+    titleKey: string;
+    descriptionKey: string;
 }
 
 const ServicesSection = () => {
+    const { t } = useLanguage();
+
     const services: Service[] = [
         {
             icon: <Truck className="h-10 w-10 text-green-600" />,
-            title: "Şehir İçi Taşımacılık",
-            description: "Şehir içinde hızlı ve güvenilir taşımacılık hizmetleri sunuyoruz.",
+            titleKey: "services.items.city.title",
+            descriptionKey: "services.items.city.description",
         },
         {
             icon: <Truck className="h-10 w-10 text-green-600" />,
-            title: "Şehirler Arası Taşımacılık",
-            description: "Şehirler arası ekolojik ve ekonomik taşımacılık çözümleri.",
+            titleKey: "services.items.intercity.title",
+            descriptionKey: "services.items.intercity.description",
         },
         {
             icon: <Truck className="h-10 w-10 text-green-600" />,
-            title: "Uluslararası Taşımacılık",
-            description: "Sınırları aşan, çevre dostu uluslararası taşımacılık hizmetleri.",
+            titleKey: "services.items.international.title",
+            descriptionKey: "services.items.international.description",
         },
         {
             icon: <Truck className="h-10 w-10 text-green-600" />,
-            title: "Özel Eşya Taşımacılığı",
-            description: "Değerli ve hassas eşyalarınız için özel taşımacılık çözümleri.",
+            titleKey: "services.items.special.title",
+            descriptionKey: "services.items.special.description",
         },
         {
             icon: <Truck className="h-10 w-10 text-green-600" />,
-            title: "Ev & Ofis Taşımacılığı",
-            description: "Ev ve ofis taşımacılığında profesyonel ve ekolojik hizmet.",
+            titleKey: "services.items.home.title",
+            descriptionKey: "services.items.home.description",
         },
         {
             icon: <Truck className="h-10 w-10 text-green-600" />,
-            title: "Lojistik Danışmanlık",
-            description: "Şirketiniz için sürdürülebilir lojistik çözümleri ve danışmanlık.",
+            titleKey: "services.items.consultancy.title",
+            descriptionKey: "services.items.consultancy.description",
         },
     ]
 
@@ -52,11 +57,13 @@ const ServicesSection = () => {
                         <div className="flex flex-col items-center justify-center space-y-4 text-center">
                             <div className="space-y-2">
                                 <div className="inline-block rounded-lg bg-green-100 px-3 py-1 text-sm text-green-800">
-                                    Hizmetlerimiz
+                                    {t("services.label")}
                                 </div>
-                                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">Ekolojik Taşımacılık Çözümlerimiz</h2>
+                                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
+                                    {t("services.title")}
+                                </h2>
                                 <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                                    İhtiyacınıza uygun, çevre dostu taşımacılık hizmetlerimiz ile tanışın.
+                                    {t("services.description")}
                                 </p>
                             </div>
                         </div>
@@ -66,10 +73,10 @@ const ServicesSection = () => {
                                     <CardContent className="p-6">
                                         <div className="flex flex-col items-center space-y-2">
                                             {service.icon}
-                                            <h3 className="text-xl font-bold">{service.title}</h3>
-                                            <p className="text-muted-foreground text-center">{service.description}</p>
+                                            <h3 className="text-xl font-bold">{t(service.titleKey)}</h3>
+                                            <p className="text-muted-foreground text-center">{t(service.descriptionKey)}</p>
                                             <Button variant="link" className="text-green-600 mt-2">
-                                                Detaylı Bilgi <ArrowRight className="ml-1 h-4 w-4" />
+                                                {t("services.moreInfo")} <ArrowRight className="ml-1 h-4 w-4" />
                                             </Button>
                                         </div>
                                     </CardContent>

@@ -1,11 +1,16 @@
 // components/ContactSection.tsx
+"use client"
+
 import { Phone, Mail, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
+import { useLanguage } from "@/app/context/LanguageContext"
 
 const ContactSection = () => {
+    const { t } = useLanguage();
+
     return (
         <Card className="border-0 shadow-none bg-background">
             <CardContent className="p-0">
@@ -16,37 +21,39 @@ const ContactSection = () => {
                                 <CardContent className="p-6">
                                     <div className="space-y-4">
                                         <div className="space-y-2">
-                                            <div className="inline-block rounded-lg bg-green-100 px-3 py-1 text-sm text-green-800">İletişim</div>
+                                            <div className="inline-block rounded-lg bg-green-100 px-3 py-1 text-sm text-green-800">
+                                                {t("contact.label")}
+                                            </div>
                                             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                                                Bizimle İletişime Geçin
+                                                {t("contact.title")}
                                             </h2>
                                             <p className="max-w-[600px] text-muted-foreground md:text-xl/relaxed">
-                                                Sorularınız, önerileriniz veya taşımacılık ihtiyaçlarınız için bizimle iletişime geçebilirsiniz.
+                                                {t("contact.description")}
                                             </p>
                                         </div>
                                         <div className="space-y-4">
                                             <div className="flex items-start gap-4">
                                                 <Phone className="h-6 w-6 text-green-600 mt-1" />
                                                 <div>
-                                                    <h3 className="font-bold">Telefon</h3>
-                                                    <p className="text-muted-foreground">+90 (212) 123 45 67</p>
+                                                    <h3 className="font-bold">{t("contact.phone.label")}</h3>
+                                                    <p className="text-muted-foreground">{t("contact.phone.value")}</p>
                                                 </div>
                                             </div>
                                             <div className="flex items-start gap-4">
                                                 <Mail className="h-6 w-6 text-green-600 mt-1" />
                                                 <div>
-                                                    <h3 className="font-bold">E-posta</h3>
-                                                    <p className="text-muted-foreground">info@ekotasima.com</p>
+                                                    <h3 className="font-bold">{t("contact.email.label")}</h3>
+                                                    <p className="text-muted-foreground">{t("contact.email.value")}</p>
                                                 </div>
                                             </div>
                                             <div className="flex items-start gap-4">
                                                 <MapPin className="h-6 w-6 text-green-600 mt-1" />
                                                 <div>
-                                                    <h3 className="font-bold">Adres</h3>
+                                                    <h3 className="font-bold">{t("contact.address.label")}</h3>
                                                     <p className="text-muted-foreground">
-                                                        Yeşil Vadi İş Merkezi, Kat: 5, No: 42
+                                                        {t("contact.address.line1")}
                                                         <br />
-                                                        Levent, İstanbul
+                                                        {t("contact.address.line2")}
                                                     </p>
                                                 </div>
                                             </div>
@@ -56,7 +63,7 @@ const ContactSection = () => {
                             </Card>
                             <Card className="shadow-md">
                                 <CardContent className="p-6">
-                                    <h3 className="text-xl font-bold mb-4">Mesaj Gönder</h3>
+                                    <h3 className="text-xl font-bold mb-4">{t("contact.form.title")}</h3>
                                     <form className="space-y-4">
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="space-y-2">
@@ -64,18 +71,18 @@ const ContactSection = () => {
                                                     htmlFor="name"
                                                     className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                                                 >
-                                                    İsim
+                                                    {t("contact.form.name")}
                                                 </label>
-                                                <Input id="name" placeholder="İsminiz" />
+                                                <Input id="name" placeholder={t("contact.form.namePlaceholder")} />
                                             </div>
                                             <div className="space-y-2">
                                                 <label
                                                     htmlFor="surname"
                                                     className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                                                 >
-                                                    Soyisim
+                                                    {t("contact.form.surname")}
                                                 </label>
-                                                <Input id="surname" placeholder="Soyisminiz" />
+                                                <Input id="surname" placeholder={t("contact.form.surnamePlaceholder")} />
                                             </div>
                                         </div>
                                         <div className="space-y-2">
@@ -83,29 +90,31 @@ const ContactSection = () => {
                                                 htmlFor="email"
                                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                                             >
-                                                E-posta
+                                                {t("contact.form.email")}
                                             </label>
-                                            <Input id="email" type="email" placeholder="E-posta adresiniz" />
+                                            <Input id="email" type="email" placeholder={t("contact.form.emailPlaceholder")} />
                                         </div>
                                         <div className="space-y-2">
                                             <label
                                                 htmlFor="phone"
                                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                                             >
-                                                Telefon
+                                                {t("contact.form.phone")}
                                             </label>
-                                            <Input id="phone" placeholder="Telefon numaranız" />
+                                            <Input id="phone" placeholder={t("contact.form.phonePlaceholder")} />
                                         </div>
                                         <div className="space-y-2">
                                             <label
                                                 htmlFor="message"
                                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                                             >
-                                                Mesaj
+                                                {t("contact.form.message")}
                                             </label>
-                                            <Textarea id="message" placeholder="Mesajınız" className="min-h-[120px]" />
+                                            <Textarea id="message" placeholder={t("contact.form.messagePlaceholder")} className="min-h-[120px]" />
                                         </div>
-                                        <Button className="w-full bg-green-600 hover:bg-green-700">Gönder</Button>
+                                        <Button className="w-full bg-green-600 hover:bg-green-700">
+                                            {t("contact.form.submit")}
+                                        </Button>
                                     </form>
                                 </CardContent>
                             </Card>
