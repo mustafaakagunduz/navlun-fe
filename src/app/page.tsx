@@ -11,7 +11,7 @@ import Footer from "@/app/components/homepage/Footer";
 import ReactConfetti from "react-confetti"
 
 export default function Home() {
-    // Konfeti efekti için state
+    // Konfeti efekti için statesi
     const [showConfetti, setShowConfetti] = useState<boolean>(false)
     const [confettiSize, setConfettiSize] = useState<{ width: number; height: number }>({ width: 0, height: 0 })
 
