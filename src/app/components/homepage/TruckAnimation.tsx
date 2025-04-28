@@ -19,63 +19,68 @@ const TruckAnimation = ({ setShowConfetti, setConfettiSize }: TruckAnimationProp
     const targetRef = useRef<HTMLDivElement>(null)
     const animationContainerRef = useRef<HTMLDivElement>(null)
 
+
+
     // Kamyon animasyonunu başlat
     useEffect(() => {
         const startTruckAnimation = async () => {
-            if (animationContainerRef.current) {
-                const containerWidth = animationContainerRef.current.offsetWidth
+            if (!animationContainerRef.current) return;
 
-                // 1️⃣ Yol gri başlasın
-                await roadColorControls.start({
-                    backgroundColor: "#e5e7eb",
-                    transition: { duration: 0.1 }
-                })
+            const containerWidth = animationContainerRef.current.offsetWidth;
 
-                // 2️⃣ Kamyon hareket etmeye başlasın + Yol yeşile dönüşsün
+            const targetOffset = 48;   // Çarpı ikonunun genişliği (px)
+            const truckOffset = 64;    // Kamyon ikonunun genişliği (px)
+            const destination = containerWidth - targetOffset - truckOffset + 10;  // Tam çarpıya değecek nokta
+
+            // 1️⃣ Yol gri, kamyon hareket ediyor ve yol yeşile dönüyor (aynı anda başlatıyoruz)
+            await Promise.all([
                 truckAnimationControls.start({
-                    x: containerWidth - 80,
+                    x: destination,
                     transition: { duration: 6, ease: "linear" }
-                })
-
+                }),
                 roadColorControls.start({
                     backgroundColor: "#86efac",
                     transition: { duration: 6, ease: "linear" }
                 })
+            ]);
 
-                // 3️⃣ Hareket bitince hedefe ulaşıldı
-                setTimeout(async () => {
-                    setTruckReachedTarget(true)
+            // 2️⃣ Hedefe ulaşıldı -> Tik'e dönüş ve konfeti
+            setTruckReachedTarget(true);
+            setConfettiSize({ width: window.innerWidth, height: window.innerHeight });
+            setShowConfetti(true);
 
-                    // Konfeti patlat
-                    setConfettiSize({ width: window.innerWidth, height: window.innerHeight })
-                    setShowConfetti(true)
+            // Konfeti 3 saniye göster
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            setShowConfetti(false);
 
-                    await new Promise((resolve) => setTimeout(resolve, 3000))
-                    setShowConfetti(false)
+            // 3️⃣ Kamyon sağdan çıkıyor
+            await truckAnimationControls.start({
+                x: containerWidth + 100,
+                transition: { duration: 2, ease: "easeIn" }
+            });
 
-                    // 4️⃣ Kamyon sağdan çıkıyor, tik çarpıya dönüyor, yol gri oluyor
-                    await truckAnimationControls.start({
-                        x: containerWidth + 100,
-                        transition: { duration: 2, ease: "easeIn" }
-                    })
+            // Yol tekrar gri oluyor
+            await roadColorControls.start({
+                backgroundColor: "#e5e7eb",
+                transition: { duration: 0.5 }
+            });
 
-                    await roadColorControls.start({
-                        backgroundColor: "#e5e7eb",
-                        transition: { duration: 0.5 }
-                    })
+            // Tik tekrar çarpıya dönüyor
+            setTruckReachedTarget(false);
 
-                    setTruckReachedTarget(false)
+            // 4️⃣ Reset: Kamyon başa dönüyor
+            truckAnimationControls.set({ x: -100 });
 
-                    // 5️⃣ Reset: Kamyon başa dönüyor
-                    truckAnimationControls.set({ x: -100 })
+            // Döngü başa sarıyor
+            setAnimationCycle(prev => prev + 1);
+        };
 
-                    setAnimationCycle(prev => prev + 1)
-                }, 6000)  // Kamyonun hareket süresi kadar bekliyoruz
-            }
-        }
+        startTruckAnimation();
+    }, [animationCycle]);
 
-        startTruckAnimation()
-    }, [animationCycle])
+
+
+
 
     return (
         <div ref={animationContainerRef} className="relative h-20 w-screen overflow-hidden">

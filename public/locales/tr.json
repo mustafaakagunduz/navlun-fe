@@ -90,5 +90,13 @@
     "termsOfUse": "Kullanım Koşulları",
     "pdpl": "KVKK",
     "copyright": "Tüm hakları saklıdır."
+  },
+  "auth": {
+    "loginTitle": "Giriş Paneli",
+    "login": "Giriş Yap",
+    "signup": "Üye Ol",
+    "email": "E-posta",
+    "password": "Şifre"
   }
+
 }

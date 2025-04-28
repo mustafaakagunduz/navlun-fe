@@ -90,5 +90,13 @@
     "termsOfUse": "Terms of Use",
     "pdpl": "PDPL",
     "copyright": "All rights reserved."
+  },
+  "auth": {
+    "loginTitle": "Giriş Paneli",
+    "login": "Giriş Yap",
+    "signup": "Üye Ol",
+    "email": "E-posta",
+    "password": "Şifre"
   }
+
 }
