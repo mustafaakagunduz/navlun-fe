@@ -9,43 +9,44 @@ import { useLanguage } from "@/app/context/LanguageContext"
 
 interface Service {
     icon: JSX.Element;
-    titleKey: string;
-    descriptionKey: string;
+    titleIndex: number;
+    descriptionIndex: number;
 }
 
 const ServicesSection = () => {
     const { t } = useLanguage();
 
+    // JSON yapısında items dizisinin indekslerini kullanıyoruz
     const services: Service[] = [
         {
             icon: <Truck className="h-10 w-10 text-green-600" />,
-            titleKey: "services.items.city.title",
-            descriptionKey: "services.items.city.description",
+            titleIndex: 0,
+            descriptionIndex: 0,
         },
         {
             icon: <Truck className="h-10 w-10 text-green-600" />,
-            titleKey: "services.items.intercity.title",
-            descriptionKey: "services.items.intercity.description",
+            titleIndex: 1,
+            descriptionIndex: 1,
         },
         {
             icon: <Truck className="h-10 w-10 text-green-600" />,
-            titleKey: "services.items.international.title",
-            descriptionKey: "services.items.international.description",
+            titleIndex: 2,
+            descriptionIndex: 2,
         },
         {
             icon: <Truck className="h-10 w-10 text-green-600" />,
-            titleKey: "services.items.special.title",
-            descriptionKey: "services.items.special.description",
+            titleIndex: 3,
+            descriptionIndex: 3,
         },
         {
             icon: <Truck className="h-10 w-10 text-green-600" />,
-            titleKey: "services.items.home.title",
-            descriptionKey: "services.items.home.description",
+            titleIndex: 4,
+            descriptionIndex: 4,
         },
         {
             icon: <Truck className="h-10 w-10 text-green-600" />,
-            titleKey: "services.items.consultancy.title",
-            descriptionKey: "services.items.consultancy.description",
+            titleIndex: 5,
+            descriptionIndex: 5,
         },
     ]
 
@@ -57,7 +58,7 @@ const ServicesSection = () => {
                         <div className="flex flex-col items-center justify-center space-y-4 text-center">
                             <div className="space-y-2">
                                 <div className="inline-block rounded-lg bg-green-100 px-3 py-1 text-sm text-green-800">
-                                    {t("services.label")}
+                                    {t("services.subtitle")}
                                 </div>
                                 <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
                                     {t("services.title")}
@@ -73,8 +74,8 @@ const ServicesSection = () => {
                                     <CardContent className="p-6">
                                         <div className="flex flex-col items-center space-y-2">
                                             {service.icon}
-                                            <h3 className="text-xl font-bold">{t(service.titleKey)}</h3>
-                                            <p className="text-muted-foreground text-center">{t(service.descriptionKey)}</p>
+                                            <h3 className="text-xl font-bold">{t(`services.items.${service.titleIndex}.title`)}</h3>
+                                            <p className="text-muted-foreground text-center">{t(`services.items.${service.descriptionIndex}.description`)}</p>
                                             <Button variant="link" className="text-green-600 mt-2">
                                                 {t("services.moreInfo")} <ArrowRight className="ml-1 h-4 w-4" />
                                             </Button>

@@ -22,7 +22,7 @@ const ContactSection = () => {
                                     <div className="space-y-4">
                                         <div className="space-y-2">
                                             <div className="inline-block rounded-lg bg-green-100 px-3 py-1 text-sm text-green-800">
-                                                {t("contact.label")}
+                                                {t("contact.subtitle")}
                                             </div>
                                             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
                                                 {t("contact.title")}
@@ -35,25 +35,25 @@ const ContactSection = () => {
                                             <div className="flex items-start gap-4">
                                                 <Phone className="h-6 w-6 text-green-600 mt-1" />
                                                 <div>
-                                                    <h3 className="font-bold">{t("contact.phone.label")}</h3>
-                                                    <p className="text-muted-foreground">{t("contact.phone.value")}</p>
+                                                    <h3 className="font-bold">{t("contact.phone")}</h3>
+                                                    <p className="text-muted-foreground">+90 (212) 123 45 67</p>
                                                 </div>
                                             </div>
                                             <div className="flex items-start gap-4">
                                                 <Mail className="h-6 w-6 text-green-600 mt-1" />
                                                 <div>
-                                                    <h3 className="font-bold">{t("contact.email.label")}</h3>
-                                                    <p className="text-muted-foreground">{t("contact.email.value")}</p>
+                                                    <h3 className="font-bold">{t("contact.email")}</h3>
+                                                    <p className="text-muted-foreground">info@ekotasima.com</p>
                                                 </div>
                                             </div>
                                             <div className="flex items-start gap-4">
                                                 <MapPin className="h-6 w-6 text-green-600 mt-1" />
                                                 <div>
-                                                    <h3 className="font-bold">{t("contact.address.label")}</h3>
+                                                    <h3 className="font-bold">{t("contact.address")}</h3>
                                                     <p className="text-muted-foreground">
-                                                        {t("contact.address.line1")}
+                                                        Levent, İstanbul
                                                         <br />
-                                                        {t("contact.address.line2")}
+                                                        Türkiye
                                                     </p>
                                                 </div>
                                             </div>
@@ -63,7 +63,7 @@ const ContactSection = () => {
                             </Card>
                             <Card className="shadow-md">
                                 <CardContent className="p-6">
-                                    <h3 className="text-xl font-bold mb-4">{t("contact.form.title")}</h3>
+                                    <h3 className="text-xl font-bold mb-4">{t("contact.sendMessage")}</h3>
                                     <form className="space-y-4">
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="space-y-2">
@@ -71,18 +71,18 @@ const ContactSection = () => {
                                                     htmlFor="name"
                                                     className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                                                 >
-                                                    {t("contact.form.name")}
+                                                    {t("contact.form.firstName")}
                                                 </label>
-                                                <Input id="name" placeholder={t("contact.form.namePlaceholder")} />
+                                                <Input id="name" placeholder={t("contact.form.firstName")} />
                                             </div>
                                             <div className="space-y-2">
                                                 <label
                                                     htmlFor="surname"
                                                     className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                                                 >
-                                                    {t("contact.form.surname")}
+                                                    {t("contact.form.lastName")}
                                                 </label>
-                                                <Input id="surname" placeholder={t("contact.form.surnamePlaceholder")} />
+                                                <Input id="surname" placeholder={t("contact.form.lastName")} />
                                             </div>
                                         </div>
                                         <div className="space-y-2">
@@ -92,7 +92,7 @@ const ContactSection = () => {
                                             >
                                                 {t("contact.form.email")}
                                             </label>
-                                            <Input id="email" type="email" placeholder={t("contact.form.emailPlaceholder")} />
+                                            <Input id="email" type="email" placeholder={t("contact.form.email")} />
                                         </div>
                                         <div className="space-y-2">
                                             <label
@@ -101,7 +101,7 @@ const ContactSection = () => {
                                             >
                                                 {t("contact.form.phone")}
                                             </label>
-                                            <Input id="phone" placeholder={t("contact.form.phonePlaceholder")} />
+                                            <Input id="phone" placeholder={t("contact.form.phone")} />
                                         </div>
                                         <div className="space-y-2">
                                             <label
@@ -110,7 +110,7 @@ const ContactSection = () => {
                                             >
                                                 {t("contact.form.message")}
                                             </label>
-                                            <Textarea id="message" placeholder={t("contact.form.messagePlaceholder")} className="min-h-[120px]" />
+                                            <Textarea id="message" placeholder={t("contact.form.message")} className="min-h-[120px]" />
                                         </div>
                                         <Button className="w-full bg-green-600 hover:bg-green-700">
                                             {t("contact.form.submit")}
