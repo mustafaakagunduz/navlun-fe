@@ -97,7 +97,7 @@ const TruckAnimation = ({ setShowConfetti, setConfettiSize }: TruckAnimationProp
     }, [animationCycle, setShowConfetti, setConfettiSize, truckAnimationControls, roadColorControls])
 
     return (
-        <div ref={animationContainerRef} className="relative h-20 w-full max-w-[900px] mx-auto mb-12 overflow-hidden">
+        <div ref={animationContainerRef} className="relative h-20 w-full max-w-[900px] mx-auto mb-0 overflow-hidden">
             {/* Hedef çarpı işareti */}
             <div ref={targetRef} className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10">
                 <div

@@ -18,11 +18,11 @@ const HeroSection = ({ setShowConfetti, setConfettiSize }: HeroSectionProps) => 
     const { t } = useLanguage();
 
     return (
-        <Card className="border-0 shadow-none bg-gradient-to-b from-green-50 to-white">
+        <Card className="border-0 shadow-none bg-green-50">
             <CardContent className="p-0">
                 <section
                     id="hero"
-                    className="w-full py-12 md:py-24 lg:py-32 overflow-hidden"
+                    className="w-full pt-12 md:pt-20 lg:pt-24 pb-6 md:pb-10 lg:pb-12 overflow-hidden"
                 >
                     <div className="mx-auto px-4 md:px-6 max-w-7xl">
                         <div className="flex flex-col items-center justify-center text-center">
