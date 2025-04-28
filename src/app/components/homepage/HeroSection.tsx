@@ -1,5 +1,4 @@
 "use client"
-import Wrapper from "@/app/components/Wrapper";
 import Image from "next/image"
 import { motion } from "framer-motion"
 import { CheckCircle, Leaf, Recycle } from "lucide-react"
@@ -18,104 +17,105 @@ const HeroSection = ({ setShowConfetti, setConfettiSize }: HeroSectionProps) => 
     return (
         <section
             id="hero"
-            className="w-full min-h-screen flex flex-col justify-center bg-green-50"
+            className="w-full h-[calc(100vh-40px)] flex flex-col bg-green-50 overflow-hidden"
         >
-            <Wrapper>
-                <div className="flex flex-col items-center justify-center text-center flex-grow">
-                    <div className="max-w-[800px] space-y-4 mb-8">
-                        {/* Başlık */}
-                        <motion.h1
-                            className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5 }}
-                        >
-                            {t("hero.title")}
-                        </motion.h1>
-
-                        {/* Açıklama */}
-                        <motion.p
-                            className="text-muted-foreground md:text-xl mx-auto"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 0.2 }}
-                        >
-                            {t("hero.description")}
-                        </motion.p>
-
-                        {/* Butonlar */}
-                        <motion.div
-                            className="flex flex-col sm:flex-row gap-3 justify-center"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 0.4 }}
-                        >
-                            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                                <Button className="bg-green-600 hover:bg-green-700">
-                                    {t("hero.getService")}
-                                </Button>
-                            </motion.div>
-                            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                                <Button variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">
-                                    {t("hero.joinAsCarrier")}
-                                </Button>
-                            </motion.div>
-                        </motion.div>
-
-                        {/* İkonlar */}
-                        {/* İkonlar */}
-                        <div className="flex items-center justify-center gap-6 pt-4">
-                            <div className="flex items-center gap-1">
-                                <CheckCircle className="h-5 w-5 text-green-600" />
-                                <span className="text-sm">{t("hero.safe")}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                                <Leaf className="h-5 w-5 text-green-600" />
-                                <span className="text-sm">{t("hero.ecofriendly")}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                                <Recycle className="h-5 w-5 text-green-600" />
-                                <span className="text-sm">{t("hero.sustainable")}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Kamyon Animasyonu */}
+            {/* Kamyon Animasyonu - En üstte */}
+            <div className="w-full mt-6">
                 <TruckAnimation
                     setShowConfetti={setShowConfetti}
                     setConfettiSize={setConfettiSize}
                 />
+            </div>
 
-                {/* Görsel */}
-                <motion.div
-                    className="relative h-[250px] sm:h-[350px] lg:h-[400px] rounded-xl overflow-hidden w-full max-w-[800px] mx-auto mt-8"
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.7, delay: 0.3 }}
-                >
-                    <motion.div
-                        initial={{ y: 20 }}
-                        animate={{ y: 0 }}
-                        transition={{
-                            duration: 2,
-                            repeat: Number.POSITIVE_INFINITY,
-                            repeatType: "reverse",
-                            ease: "easeInOut",
-                        }}
+            {/* Ana içerik - tam ortalanmış */}
+            <div className="flex-1 flex items-center justify-center px-4">
+                <div className="max-w-[800px] flex flex-col items-center justify-center text-center">
+                    {/* Başlık */}
+                    <motion.h1
+                        className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
                     >
-                        <Image
-                            src="/placeholder.svg?height=500&width=800"
-                            alt="Ekolojik taşımacılık"
-                            fill
-                            className="object-cover"
-                            priority
-                        />
-                    </motion.div>
-                </motion.div>
-            </Wrapper>
-        </section>
+                        {t("hero.title")}
+                    </motion.h1>
 
+                    {/* Açıklama */}
+                    <motion.p
+                        className="text-muted-foreground md:text-xl mx-auto mt-4"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                    >
+                        {t("hero.description")}
+                    </motion.p>
+
+                    {/* Butonlar */}
+                    <motion.div
+                        className="flex flex-col sm:flex-row gap-3 justify-center mt-6"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.4 }}
+                    >
+                        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                            <Button className="bg-green-600 hover:bg-green-700">
+                                {t("hero.getService")}
+                            </Button>
+                        </motion.div>
+                        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                            <Button variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">
+                                {t("hero.joinAsCarrier")}
+                            </Button>
+                        </motion.div>
+                    </motion.div>
+
+                    {/* İkonlar */}
+                    <div className="flex items-center justify-center gap-6 mt-6">
+                        <div className="flex items-center gap-1">
+                            <CheckCircle className="h-5 w-5 text-green-600" />
+                            <span className="text-sm">{t("hero.safe")}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <Leaf className="h-5 w-5 text-green-600" />
+                            <span className="text-sm">{t("hero.ecofriendly")}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <Recycle className="h-5 w-5 text-green-600" />
+                            <span className="text-sm">{t("hero.sustainable")}</span>
+                        </div>
+                    </div>
+
+
+
+                    {/* Görsel */}
+                    <motion.div
+                        className="relative h-[200px] sm:h-[250px] rounded-xl overflow-hidden w-full max-w-[800px] mx-auto mt-8"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.7, delay: 0.3 }}
+                    >
+                        <motion.div
+                            initial={{ y: 20 }}
+                            animate={{ y: 0 }}
+                            transition={{
+                                duration: 2,
+                                repeat: Number.POSITIVE_INFINITY,
+                                repeatType: "reverse",
+                                ease: "easeInOut",
+                            }}
+                        >
+                            <Image
+                                src="/placeholder.svg?height=500&width=800"
+                                alt="Ekolojik taşımacılık"
+                                fill
+                                className="object-cover"
+                                priority
+                            />
+                        </motion.div>
+                    </motion.div>
+                </div>
+            </div>
+        </section>
     )
 }
 

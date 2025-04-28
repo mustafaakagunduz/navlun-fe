@@ -1,4 +1,3 @@
-// src/app/components/homepage/TruckAnimation.tsx
 "use client"
 
 import { useEffect, useRef, useState } from "react"
@@ -19,8 +18,6 @@ const TruckAnimation = ({ setShowConfetti, setConfettiSize }: TruckAnimationProp
     const targetRef = useRef<HTMLDivElement>(null)
     const animationContainerRef = useRef<HTMLDivElement>(null)
 
-
-
     // Kamyon animasyonunu başlat
     useEffect(() => {
         const startTruckAnimation = async () => {
@@ -28,9 +25,9 @@ const TruckAnimation = ({ setShowConfetti, setConfettiSize }: TruckAnimationProp
 
             const containerWidth = animationContainerRef.current.offsetWidth;
 
-            const targetOffset = 48;   // Çarpı ikonunun genişliği (px)
-            const truckOffset = 64;    // Kamyon ikonunun genişliği (px)
-            const destination = containerWidth - targetOffset - truckOffset + 10;  // Tam çarpıya değecek nokta
+            const targetOffset = 64;   // Çarpı ikonunun genişliği (px)
+            const truckOffset = 96;    // Kamyon ikonunun genişliği (px)
+            const destination = containerWidth - targetOffset - truckOffset + 10;
 
             // 1️⃣ Yol gri, kamyon hareket ediyor ve yol yeşile dönüyor (aynı anda başlatıyoruz)
             await Promise.all([
@@ -46,7 +43,10 @@ const TruckAnimation = ({ setShowConfetti, setConfettiSize }: TruckAnimationProp
 
             // 2️⃣ Hedefe ulaşıldı -> Tik'e dönüş ve konfeti
             setTruckReachedTarget(true);
-            setConfettiSize({ width: window.innerWidth, height: window.innerHeight });
+            setConfettiSize({
+                width: animationContainerRef.current.offsetWidth,
+                height: window.innerHeight
+            });
             setShowConfetti(true);
 
             // Konfeti 3 saniye göster
@@ -78,17 +78,20 @@ const TruckAnimation = ({ setShowConfetti, setConfettiSize }: TruckAnimationProp
         startTruckAnimation();
     }, [animationCycle]);
 
-
-
-
-
     return (
-        <div ref={animationContainerRef} className="relative h-20 w-screen overflow-hidden">
-
-        {/* Hedef çarpı işareti */}
-            <div ref={targetRef} className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10">
+        <div
+            ref={animationContainerRef}
+            className="relative h-20 w-full max-w-full overflow-hidden"
+        >
+            {/* Hedef çarpı işareti */}
+            <div
+                ref={targetRef}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10"
+            >
                 <div
-                    className={`p-2 rounded-full bg-red-100 transition-all duration-300 ${truckReachedTarget ? "scale-150 bg-green-100" : ""}`}
+                    className={`flex items-center justify-center w-16 h-16 rounded-full bg-red-100 transition-all duration-300 ${
+                        truckReachedTarget ? "bg-green-100" : ""
+                    }`}
                 >
                     {truckReachedTarget ? (
                         <CheckCircle className="h-8 w-8 text-green-600" />
@@ -110,7 +113,7 @@ const TruckAnimation = ({ setShowConfetti, setConfettiSize }: TruckAnimationProp
             {/* Yol çizgisi - uçtan uca ve kamyonun altında */}
             <motion.div
                 className="absolute left-0 right-0 bottom-3 h-1 rounded-full"
-                initial={{ backgroundColor: "#e5e7eb" }} // bg-gray-200
+                initial={{ backgroundColor: "#e5e7eb" }}
                 animate={roadColorControls}
             />
         </div>
