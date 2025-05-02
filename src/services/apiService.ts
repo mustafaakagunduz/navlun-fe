@@ -1,116 +1,103 @@
-// Bu servis, proxy route handler üzerinden backend API'ye istek atmak için kullanılır
+// src/services/apiService.ts
+import axiosInstance from '@/lib/axios';
+
+// Genel CRUD işlemleri için tip tanımlamaları
+type ApiResponse<T> = {
+    data: T;
+    message?: string;
+    status: number;
+};
+
 const apiService = {
-    // GET isteği
-    get: async <T>(path: string, params?: Record<string, any>): Promise<T> => {
+    /**
+     * GET isteği yapar
+     * @param endpoint API endpoint'i
+     * @param params URL parametreleri (opsiyonel)
+     */
+    get: async <T>(endpoint: string, params?: Record<string, any>): Promise<T> => {
         try {
-            // Query string oluştur
-            const queryString = params
-                ? '?' + new URLSearchParams(params as Record<string, string>).toString()
-                : '';
-
-            // Proxy route'a GET isteği at
-            const response = await fetch(`/api/proxy/${path}${queryString}`);
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-            }
-
-            return await response.json();
+            const response = await axiosInstance.get<ApiResponse<T>>(endpoint, { params });
+            return response.data.data;
         } catch (error) {
-            console.error(`GET /${path} error:`, error);
+            console.error(`GET ${endpoint} isteği başarısız:`, error);
             throw error;
         }
     },
 
-    // POST isteği
-    post: async <T>(path: string, data?: any): Promise<T> => {
+    /**
+     * POST isteği yapar
+     * @param endpoint API endpoint'i
+     * @param data Gönderilecek veri
+     */
+    post: async <T, D = any>(endpoint: string, data?: D): Promise<T> => {
         try {
-            // Proxy route'a POST isteği at
-            const response = await fetch(`/api/proxy/${path}`, {
-                method: 'POST',
+            const response = await axiosInstance.post<ApiResponse<T>>(endpoint, data);
+            return response.data.data;
+        } catch (error) {
+            console.error(`POST ${endpoint} isteği başarısız:`, error);
+            throw error;
+        }
+    },
+
+    /**
+     * PUT isteği yapar
+     * @param endpoint API endpoint'i
+     * @param data Güncellenecek veri
+     */
+    put: async <T, D = any>(endpoint: string, data?: D): Promise<T> => {
+        try {
+            const response = await axiosInstance.put<ApiResponse<T>>(endpoint, data);
+            return response.data.data;
+        } catch (error) {
+            console.error(`PUT ${endpoint} isteği başarısız:`, error);
+            throw error;
+        }
+    },
+
+    /**
+     * PATCH isteği yapar
+     * @param endpoint API endpoint'i
+     * @param data Kısmi güncelleme verisi
+     */
+    patch: async <T, D = any>(endpoint: string, data?: D): Promise<T> => {
+        try {
+            const response = await axiosInstance.patch<ApiResponse<T>>(endpoint, data);
+            return response.data.data;
+        } catch (error) {
+            console.error(`PATCH ${endpoint} isteği başarısız:`, error);
+            throw error;
+        }
+    },
+
+    /**
+     * DELETE isteği yapar
+     * @param endpoint API endpoint'i
+     */
+    delete: async <T>(endpoint: string): Promise<T> => {
+        try {
+            const response = await axiosInstance.delete<ApiResponse<T>>(endpoint);
+            return response.data.data;
+        } catch (error) {
+            console.error(`DELETE ${endpoint} isteği başarısız:`, error);
+            throw error;
+        }
+    },
+
+    /**
+     * Dosya yükleme isteği yapar
+     * @param endpoint API endpoint'i
+     * @param formData Dosya ve diğer form verileri
+     */
+    uploadFile: async <T>(endpoint: string, formData: FormData): Promise<T> => {
+        try {
+            const response = await axiosInstance.post<ApiResponse<T>>(endpoint, formData, {
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'multipart/form-data',
                 },
-                body: data ? JSON.stringify(data) : undefined,
             });
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-            }
-
-            return await response.json();
+            return response.data.data;
         } catch (error) {
-            console.error(`POST /${path} error:`, error);
-            throw error;
-        }
-    },
-
-    // PUT isteği
-    put: async <T>(path: string, data?: any): Promise<T> => {
-        try {
-            // Proxy route'a PUT isteği at
-            const response = await fetch(`/api/proxy/${path}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: data ? JSON.stringify(data) : undefined,
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-            }
-
-            return await response.json();
-        } catch (error) {
-            console.error(`PUT /${path} error:`, error);
-            throw error;
-        }
-    },
-
-    // DELETE isteği
-    delete: async <T>(path: string): Promise<T> => {
-        try {
-            // Proxy route'a DELETE isteği at
-            const response = await fetch(`/api/proxy/${path}`, {
-                method: 'DELETE',
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-            }
-
-            return await response.json();
-        } catch (error) {
-            console.error(`DELETE /${path} error:`, error);
-            throw error;
-        }
-    },
-
-    // PATCH isteği
-    patch: async <T>(path: string, data?: any): Promise<T> => {
-        try {
-            // Proxy route'a PATCH isteği at
-            const response = await fetch(`/api/proxy/${path}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: data ? JSON.stringify(data) : undefined,
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-            }
-
-            return await response.json();
-        } catch (error) {
-            console.error(`PATCH /${path} error:`, error);
+            console.error(`File upload to ${endpoint} failed:`, error);
             throw error;
         }
     },
