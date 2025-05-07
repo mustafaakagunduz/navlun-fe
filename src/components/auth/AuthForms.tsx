@@ -12,6 +12,7 @@ import { Check, Loader2, X, AlertCircle } from "lucide-react"
 import { useLanguage } from "@/context/LanguageContext"
 import { useAuth } from "@/context/AuthContext"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import authService from "@/services/authService"
 
 type SignupFormType = {
     firstName: string
@@ -48,6 +49,7 @@ const AuthForms = () => {
     const [isResetMode, setIsResetMode] = useState(false)
     const [resetEmail, setResetEmail] = useState("")
     const [passwordsMatch, setPasswordsMatch] = useState(true)
+    const [resetSuccess, setResetSuccess] = useState(false)
 
     // Form validation error states
     const [formErrors, setFormErrors] = useState<{
@@ -65,7 +67,7 @@ const AuthForms = () => {
         if (error) {
             clearError()
         }
-    }, [isResetMode])
+    }, [isResetMode, clearError, error])
 
     // Check password matching
     useEffect(() => {
@@ -248,15 +250,23 @@ const AuthForms = () => {
             return
         }
 
-        // TODO: Implement password reset logic with authService
-        console.log("Password reset requested for:", resetEmail)
-
-        // Show success message or handle in UI
+        try {
+            await authService.requestPasswordReset(resetEmail)
+            setResetSuccess(true)
+        } catch (error: any) {
+            setFormErrors({
+                ...formErrors,
+                reset: {
+                    email: error.response?.data?.message || t("auth.errors.resetFailed")
+                }
+            })
+        }
     }
 
     // Toggle between login and reset password forms
     const toggleResetMode = () => {
         setIsResetMode(!isResetMode)
+        setResetSuccess(false)
         clearError()
     }
 
@@ -472,8 +482,6 @@ const AuthForms = () => {
                                         )}
                                     </div>
 
-
-
                                     <Button
                                         type="submit"
                                         className="w-full bg-green-600 hover:bg-green-700"
@@ -505,46 +513,67 @@ const AuthForms = () => {
                             </Alert>
                         )}
 
-                        <form onSubmit={handleResetSubmit} className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="reset-email">{t("auth.email")}</Label>
-                                <Input
-                                    id="reset-email"
-                                    type="email"
-                                    placeholder="user@example.com"
-                                    value={resetEmail}
-                                    onChange={handleResetEmailChange}
-                                    className={formErrors.reset.email ? "border-red-500" : ""}
-                                />
-                                {formErrors.reset.email && (
-                                    <p className="text-sm text-red-500">{formErrors.reset.email}</p>
-                                )}
+                        {resetSuccess ? (
+                            <div className="space-y-4">
+                                <Alert className="bg-green-50 border-green-500 mb-4">
+                                    <Check className="h-4 w-4 text-green-500" />
+                                    <AlertDescription>
+                                        {t("auth.resetLinkSent")}
+                                    </AlertDescription>
+                                </Alert>
+                                <p className="text-sm text-gray-600">
+                                    {t("auth.resetInstructions")}
+                                </p>
+                                <Button
+                                    type="button"
+                                    className="w-full mt-4 bg-green-600 hover:bg-green-700"
+                                    onClick={toggleResetMode}
+                                >
+                                    {t("auth.backToLogin")}
+                                </Button>
                             </div>
+                        ) : (
+                            <form onSubmit={handleResetSubmit} className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="reset-email">{t("auth.email")}</Label>
+                                    <Input
+                                        id="reset-email"
+                                        type="email"
+                                        placeholder="user@example.com"
+                                        value={resetEmail}
+                                        onChange={handleResetEmailChange}
+                                        className={formErrors.reset.email ? "border-red-500" : ""}
+                                    />
+                                    {formErrors.reset.email && (
+                                        <p className="text-sm text-red-500">{formErrors.reset.email}</p>
+                                    )}
+                                </div>
 
-                            <Button
-                                type="submit"
-                                className="w-full bg-green-600 hover:bg-green-700"
-                                disabled={isLoading}
-                            >
-                                {isLoading ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        {t("auth.processing")}
-                                    </>
-                                ) : (
-                                    t("auth.sendResetLink")
-                                )}
-                            </Button>
+                                <Button
+                                    type="submit"
+                                    className="w-full bg-green-600 hover:bg-green-700"
+                                    disabled={isLoading}
+                                >
+                                    {isLoading ? (
+                                        <>
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            {t("auth.processing")}
+                                        </>
+                                    ) : (
+                                        t("auth.sendResetLink")
+                                    )}
+                                </Button>
 
-                            <Button
-                                type="button"
-                                variant="outline"
-                                className="w-full"
-                                onClick={toggleResetMode}
-                            >
-                                {t("auth.backToLogin")}
-                            </Button>
-                        </form>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    className="w-full"
+                                    onClick={toggleResetMode}
+                                >
+                                    {t("auth.backToLogin")}
+                                </Button>
+                            </form>
+                        )}
                     </CardContent>
                 </Card>
             )}

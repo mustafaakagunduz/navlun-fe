@@ -2,10 +2,11 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import apiService from '@/services/apiService';
 import { useRouter } from 'next/navigation';
+import authService from '@/services/authService';
+import apiService from '@/services/apiService';
 
-// Kullanıcı tipi tanımı
+// User type definition
 export type User = {
     id: string;
     email: string;
@@ -14,7 +15,7 @@ export type User = {
     role: string;
 };
 
-// Auth durumu tipi
+// Auth state type
 type AuthState = {
     user: User | null;
     isLoading: boolean;
@@ -22,7 +23,7 @@ type AuthState = {
     error: string | null;
 };
 
-// Context içeriği tipi
+// Context content type
 type AuthContextType = AuthState & {
     login: (email: string, password: string) => Promise<void>;
     signup: (userData: any) => Promise<void>;
@@ -31,7 +32,7 @@ type AuthContextType = AuthState & {
     clearError: () => void;
 };
 
-// Varsayılan değerler
+// Default values
 const defaultState: AuthState = {
     user: null,
     isLoading: true,
@@ -39,15 +40,15 @@ const defaultState: AuthState = {
     error: null,
 };
 
-// Auth Context oluşturma
+// Create Auth Context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Auth Provider bileşeni
+// Auth Provider component
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [state, setState] = useState<AuthState>(defaultState);
     const router = useRouter();
 
-    // Token doğrulama ve kullanıcı bilgisini alma
+    // Verify token and get user information
     useEffect(() => {
         const verifyToken = async () => {
             try {
@@ -60,8 +61,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     return;
                 }
 
-                // Kullanıcı profil bilgisini al
-                const user = await apiService.get<User>('/auth/me');
+                // Get user profile info
+                const user = await authService.getCurrentUser();
 
                 setState({
                     user,
@@ -71,36 +72,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 });
             } catch (error) {
                 console.error('Auth verification failed:', error);
-                localStorage.removeItem('accessToken');
-                localStorage.removeItem('refreshToken');
 
-                setState({
-                    ...defaultState,
-                    isLoading: false,
-                });
+                // Try to refresh the token
+                const refreshed = await refreshToken();
+
+                // If refresh failed, clear local storage and update state
+                if (!refreshed) {
+                    localStorage.removeItem('accessToken');
+                    localStorage.removeItem('refreshToken');
+
+                    setState({
+                        ...defaultState,
+                        isLoading: false,
+                    });
+                }
             }
         };
 
         verifyToken();
     }, []);
 
-    // Giriş işlemi
+    // Login function
     const login = async (email: string, password: string) => {
         setState({ ...state, isLoading: true, error: null });
 
         try {
-            const response = await apiService.post<{
-                userId: string;
-                email: string;
-                accessToken: string;
-                refreshToken: string;
-            }>('/auth/login', { email, password });
+            const response = await authService.login(email, password);
 
             localStorage.setItem('accessToken', response.accessToken);
             localStorage.setItem('refreshToken', response.refreshToken);
 
-            // Kullanıcı profil bilgisini al
-            const user = await apiService.get<User>('/auth/me');
+            // Get user profile info
+            const user = await authService.getCurrentUser();
 
             setState({
                 user,
@@ -109,26 +112,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 error: null,
             });
 
-            // Ana sayfaya yönlendir
+            // Redirect to dashboard
             router.push('/dashboard');
         } catch (error: any) {
             setState({
                 ...state,
                 isLoading: false,
                 isAuthenticated: false,
-                error: error.response?.data?.message || 'Giriş başarısız oldu',
+                error: error.response?.data?.message || 'Login failed',
             });
         }
     };
 
-    // Kayıt işlemi
+    // Signup function
     const signup = async (userData: any) => {
         setState({ ...state, isLoading: true, error: null });
 
         try {
-            await apiService.post('/auth/signup', userData);
+            await authService.signup(userData);
 
-            // Kayıt başarılı, giriş sayfasına yönlendir
+            // Redirect to login page with success message
             router.push('/auth/login?registered=true');
 
             setState({
@@ -140,25 +143,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setState({
                 ...state,
                 isLoading: false,
-                error: error.response?.data?.message || 'Kayıt işlemi başarısız oldu',
+                error: error.response?.data?.message || 'Signup failed',
             });
         }
     };
 
-    // Çıkış işlemi
+    // Logout function
     const logout = async () => {
         setState({ ...state, isLoading: true });
 
         try {
             const refreshToken = localStorage.getItem('refreshToken');
             if (refreshToken) {
-                // Refresh token'ı sunucuda iptal et
-                await apiService.post('/auth/logout', { refreshToken });
+                // Cancel refresh token on server
+                await authService.logout(refreshToken);
             }
         } catch (error) {
             console.error('Logout error:', error);
         } finally {
-            // Her durumda local storage'dan tokenleri temizle
+            // Always clean tokens from local storage
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
 
@@ -169,50 +172,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 error: null,
             });
 
-            // Giriş sayfasına yönlendir
+            // Redirect to login page
             router.push('/auth/login');
         }
     };
 
-    // Token yenileme
+    // Token refresh function
     const refreshToken = async (): Promise<boolean> => {
         try {
             const refreshTokenValue = localStorage.getItem('refreshToken');
             if (!refreshTokenValue) return false;
 
-            const response = await apiService.post<{
-                userId: string;
-                email: string;
-                accessToken: string;
-                refreshToken: string;
-            }>('/auth/refresh-token', { refreshToken: refreshTokenValue });
+            const response = await authService.refreshToken(refreshTokenValue);
 
             localStorage.setItem('accessToken', response.accessToken);
-            // Eğer yeni bir refresh token döndüyse onu da güncelle
+            // Update refresh token if a new one was returned
             if (response.refreshToken) {
                 localStorage.setItem('refreshToken', response.refreshToken);
             }
 
-            return true;
-        } catch (error) {
-            console.error('Token refresh failed:', error);
-            // Token yenileme başarısız, çıkış yap
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
+            // Get updated user info after successful refresh
+            const user = await authService.getCurrentUser();
 
             setState({
-                user: null,
+                user,
                 isLoading: false,
-                isAuthenticated: false,
+                isAuthenticated: true,
                 error: null,
             });
 
-            router.push('/auth/login');
+            return true;
+        } catch (error) {
+            console.error('Token refresh failed:', error);
             return false;
         }
     };
 
-    // Hata temizleme
+    // Clear error function
     const clearError = () => {
         setState({ ...state, error: null });
     };
