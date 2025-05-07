@@ -9,8 +9,8 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Check, Loader2, X, AlertCircle } from "lucide-react"
-import { useLanguage } from "@/app/context/LanguageContext"
-import { useAuth } from "@/app/context/AuthContext"
+import { useLanguage } from "@/context/LanguageContext"
+import { useAuth } from "@/context/AuthContext"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 type SignupFormType = {

@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import { Globe, Leaf, Truck } from "lucide-react"
-import { useLanguage } from "@/app/context/LanguageContext"
+import { useLanguage } from "@/context/LanguageContext"
 
 const AboutSection = () => {
     const { t } = useLanguage();

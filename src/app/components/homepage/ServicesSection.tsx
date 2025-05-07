@@ -5,7 +5,7 @@ import { Truck, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { JSX } from "react"
-import { useLanguage } from "@/app/context/LanguageContext"
+import { useLanguage } from "@/context/LanguageContext"
 
 interface Service {
     icon: JSX.Element;

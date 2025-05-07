@@ -1,5 +1,5 @@
 // src/utils/authUtils.ts
-import { User} from "@/app/services/authService";
+import { User} from "@/services/userService";
 
 // Kullanıcının rolünü kontrol eder
 export const hasRole = (user: User | null, requiredRoles: string[]): boolean => {

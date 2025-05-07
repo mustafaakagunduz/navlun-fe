@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Leaf } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import LanguageSwitcher from "./LanguageSwitcher"
-import { useLanguage } from "@/app/context/LanguageContext"
+import { useLanguage } from "@/context/LanguageContext"
 import AuthForms from "@/app/components/auth/AuthForms";
 import { Dialog, DialogTrigger, DialogContent, DialogTitle } from "@/components/ui/dialog"
 

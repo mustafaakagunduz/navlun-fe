@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Leaf, Phone, Mail, MapPin, Globe } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useLanguage } from "@/app/context/LanguageContext"
+import { useLanguage } from "@/context/LanguageContext"
 
 const Footer = () => {
     const { t, language, changeLanguage } = useLanguage();

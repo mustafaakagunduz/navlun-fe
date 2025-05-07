@@ -4,7 +4,7 @@ import { motion } from "framer-motion"
 import { CheckCircle, Leaf, Recycle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import TruckAnimation from "./TruckAnimation"
-import { useLanguage } from "@/app/context/LanguageContext"
+import { useLanguage } from "@/context/LanguageContext"
 
 interface HeroSectionProps {
     setShowConfetti: React.Dispatch<React.SetStateAction<boolean>>;

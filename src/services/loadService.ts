@@ -1,0 +1,443 @@
+// src/services/loadService.ts
+import apiService from '@/services/apiService';
+
+export enum LoadStatus {
+    PENDING = 'PENDING',
+    ASSIGNED = 'ASSIGNED',
+    IN_TRANSIT = 'IN_TRANSIT',
+    DELIVERED = 'DELIVERED',
+    COMPLETED = 'COMPLETED'
+}
+
+// Tip tanımlamaları
+export type Load = {
+    id: string;
+    title: string;
+    goodsType: string;
+    netWeight: number;
+    loadingAddress: string;
+    deliveryAddress: string;
+    loadingDate: string;
+    deliveryDate: string;
+    description?: string;
+    insuranceRequested: boolean;
+    estimatedCarbonFootprint: number;
+    status: LoadStatus;
+    isCompleted: boolean;
+    senderId: string;
+    createdAt?: string;
+    updatedAt?: string;
+};
+
+export type LoadRequest = {
+    title: string;
+    goodsType: string;
+    netWeight: number;
+    loadingAddress: string;
+    deliveryAddress: string;
+    loadingDate: string;
+    deliveryDate: string;
+    description?: string;
+    insuranceRequested: boolean;
+    senderId: string;
+};
+
+export type LoadUpdateRequest = {
+    title?: string;
+    goodsType?: string;
+    netWeight?: number;
+    loadingAddress?: string;
+    deliveryAddress?: string;
+    loadingDate?: string;
+    deliveryDate?: string;
+    description?: string;
+    insuranceRequested?: boolean;
+    status?: LoadStatus;
+    isCompleted?: boolean;
+};
+
+export type PageResponse<T> = {
+    content: T[];
+    page: number;
+    size: number;
+    totalElements: number;
+    totalPages: number;
+    first: boolean;
+    last: boolean;
+};
+
+export type SenderStatisticsDto = {
+    totalLoads: number;
+    averageWeight: number;
+    completedLoads: number;
+    pendingLoads: number;
+};
+
+const loadService = {
+    // Yeni yük oluşturur
+    createLoad: async (loadData: LoadRequest): Promise<Load> => {
+        try {
+            return await apiService.post<Load, LoadRequest>('/loads', loadData);
+        } catch (error) {
+            console.error('Create load error:', error);
+            throw error;
+        }
+    },
+
+    // Belirli bir yükü ID'ye göre getirir
+    getLoadById: async (id: string): Promise<Load> => {
+        try {
+            return await apiService.get<Load>(`/loads/${id}`);
+        } catch (error) {
+            console.error(`Get load by ID (${id}) error:`, error);
+            throw error;
+        }
+    },
+
+    // Tüm yükleri getirir
+    getAllLoads: async (): Promise<Load[]> => {
+        try {
+            return await apiService.get<Load[]>('/loads');
+        } catch (error) {
+            console.error('Get all loads error:', error);
+            throw error;
+        }
+    },
+
+    // Sayfalandırılmış yükleri getirir
+    getAllLoadsPaginated: async (
+        page: number = 0,
+        size: number = 20,
+        sortBy?: string,
+        sortDirection?: 'asc' | 'desc'
+    ): Promise<PageResponse<Load>> => {
+        try {
+            const params: Record<string, any> = { page, size };
+            if (sortBy) params.sortBy = sortBy;
+            if (sortDirection) params.sortDirection = sortDirection;
+
+            return await apiService.get<PageResponse<Load>>('/loads/paginated', params);
+        } catch (error) {
+            console.error('Get paginated loads error:', error);
+            throw error;
+        }
+    },
+
+    // Filtreli yükleri getirir
+    getLoads: async (params: {
+        senderId?: string;
+        status?: LoadStatus;
+        goodsType?: string;
+        insuranceRequested?: boolean;
+        isCompleted?: boolean;
+    }): Promise<Load[]> => {
+        try {
+            return await apiService.get<Load[]>('/loads', params);
+        } catch (error) {
+            console.error('Get filtered loads error:', error);
+            throw error;
+        }
+    },
+
+    // Gelişmiş arama ile yükleri getirir
+    advancedSearch: async (params: {
+        status?: LoadStatus;
+        goodsType?: string;
+        insuranceRequested?: boolean;
+        minWeight?: number;
+        maxWeight?: number;
+        fromDate?: string;
+        toDate?: string;
+        page?: number;
+        size?: number;
+    }): Promise<PageResponse<Load>> => {
+        try {
+            return await apiService.get<PageResponse<Load>>('/loads/search', params);
+        } catch (error) {
+            console.error('Advanced load search error:', error);
+            throw error;
+        }
+    },
+
+    // Gönderici ID'sine göre yükleri getirir
+    getLoadsBySender: async (senderId: string): Promise<Load[]> => {
+        try {
+            return await apiService.get<Load[]>(`/loads/by-sender/${senderId}`);
+        } catch (error) {
+            console.error(`Get loads by sender (${senderId}) error:`, error);
+            throw error;
+        }
+    },
+
+    // Gönderici ID'sine göre sayfalandırılmış yükleri getirir
+    getLoadsBySenderPaginated: async (
+        senderId: string,
+        page: number = 0,
+        size: number = 20
+    ): Promise<PageResponse<Load>> => {
+        try {
+            return await apiService.get<PageResponse<Load>>(`/loads/by-sender/${senderId}`, { page, size });
+        } catch (error) {
+            console.error(`Get paginated loads by sender (${senderId}) error:`, error);
+            throw error;
+        }
+    },
+
+    // Gönderici ID'sine ve duruma göre yükleri getirir
+    getLoadsBySenderAndStatus: async (senderId: string, status: LoadStatus): Promise<Load[]> => {
+        try {
+            return await apiService.get<Load[]>(`/loads/by-sender/${senderId}/status/${status}`);
+        } catch (error) {
+            console.error(`Get loads by sender (${senderId}) and status (${status}) error:`, error);
+            throw error;
+        }
+    },
+
+    // Gönderici ID'sine ve duruma göre sayfalandırılmış yükleri getirir
+    getLoadsBySenderAndStatusPaginated: async (
+        senderId: string,
+        status: LoadStatus,
+        page: number = 0,
+        size: number = 20
+    ): Promise<PageResponse<Load>> => {
+        try {
+            return await apiService.get<PageResponse<Load>>(
+                `/loads/by-sender/${senderId}/status/${status}`,
+                { page, size }
+            );
+        } catch (error) {
+            console.error(`Get paginated loads by sender (${senderId}) and status (${status}) error:`, error);
+            throw error;
+        }
+    },
+
+    // Yükleme tarihi aralığına göre yükleri getirir
+    getLoadsByLoadingDateRange: async (startDate: string, endDate: string): Promise<Load[]> => {
+        try {
+            return await apiService.get<Load[]>('/loads/by-loading-date', { startDate, endDate });
+        } catch (error) {
+            console.error(`Get loads by loading date range error:`, error);
+            throw error;
+        }
+    },
+
+    // Yükleme tarihi aralığına göre sayfalandırılmış yükleri getirir
+    getLoadsByLoadingDateRangePaginated: async (
+        startDate: string,
+        endDate: string,
+        page: number = 0,
+        size: number = 20
+    ): Promise<PageResponse<Load>> => {
+        try {
+            return await apiService.get<PageResponse<Load>>(
+                '/loads/by-loading-date',
+                { startDate, endDate, page, size }
+            );
+        } catch (error) {
+            console.error(`Get paginated loads by loading date range error:`, error);
+            throw error;
+        }
+    },
+
+    // Teslimat tarihi aralığına göre yükleri getirir
+    getLoadsByDeliveryDateRange: async (startDate: string, endDate: string): Promise<Load[]> => {
+        try {
+            return await apiService.get<Load[]>('/loads/by-delivery-date', { startDate, endDate });
+        } catch (error) {
+            console.error(`Get loads by delivery date range error:`, error);
+            throw error;
+        }
+    },
+
+    // Teslimat tarihi aralığına göre sayfalandırılmış yükleri getirir
+    getLoadsByDeliveryDateRangePaginated: async (
+        startDate: string,
+        endDate: string,
+        page: number = 0,
+        size: number = 20
+    ): Promise<PageResponse<Load>> => {
+        try {
+            return await apiService.get<PageResponse<Load>>(
+                '/loads/by-delivery-date',
+                { startDate, endDate, page, size }
+            );
+        } catch (error) {
+            console.error(`Get paginated loads by delivery date range error:`, error);
+            throw error;
+        }
+    },
+
+    // Belirli bir tarihten daha eski bekleyen yükleri getirir
+    getPendingLoadsOlderThan: async (cutoffDate: string): Promise<Load[]> => {
+        try {
+            return await apiService.get<Load[]>('/loads/pending-older-than', { cutoffDate });
+        } catch (error) {
+            console.error(`Get pending loads older than (${cutoffDate}) error:`, error);
+            throw error;
+        }
+    },
+
+    // Yaklaşan teslimatları getirir
+    getUpcomingDeliveries: async (startDate: string, endDate: string): Promise<Load[]> => {
+        try {
+            return await apiService.get<Load[]>('/loads/upcoming-deliveries', { startDate, endDate });
+        } catch (error) {
+            console.error(`Get upcoming deliveries error:`, error);
+            throw error;
+        }
+    },
+
+    // Konuma göre yükleri arar
+    searchByLocation: async (location: string): Promise<Load[]> => {
+        try {
+            return await apiService.get<Load[]>('/loads/search-by-location', { location });
+        } catch (error) {
+            console.error(`Search loads by location (${location}) error:`, error);
+            throw error;
+        }
+    },
+
+    // Benzer ağırlıktaki yükleri getirir
+    getLoadsBySimilarWeight: async (weight: number, tolerance: number = 0.5): Promise<Load[]> => {
+        try {
+            return await apiService.get<Load[]>('/loads/by-similar-weight', { weight, tolerance });
+        } catch (error) {
+            console.error(`Get loads by similar weight (${weight}, tolerance: ${tolerance}) error:`, error);
+            throw error;
+        }
+    },
+
+    // Çevre dostu yükleri getirir
+    getEcoFriendlyLoads: async (): Promise<Load[]> => {
+        try {
+            return await apiService.get<Load[]>('/loads/eco-friendly');
+        } catch (error) {
+            console.error('Get eco-friendly loads error:', error);
+            throw error;
+        }
+    },
+
+    // Teklif almayan yükleri getirir
+    getLoadsWithNoOffers: async (): Promise<Load[]> => {
+        try {
+            return await apiService.get<Load[]>('/loads/no-offers');
+        } catch (error) {
+            console.error('Get loads with no offers error:', error);
+            throw error;
+        }
+    },
+
+    // Tekliflerle birlikte tüm yükleri getirir
+    getAllLoadsWithOffers: async (): Promise<Load[]> => {
+        try {
+            return await apiService.get<Load[]>('/loads/with-offers');
+        } catch (error) {
+            console.error('Get all loads with offers error:', error);
+            throw error;
+        }
+    },
+
+    // Gönderici istatistiklerini getirir
+    getSenderStatistics: async (
+        senderId: string,
+        startDate?: string,
+        endDate?: string
+    ): Promise<SenderStatisticsDto> => {
+        try {
+            const params: Record<string, any> = { senderId };
+            if (startDate) params.startDate = startDate;
+            if (endDate) params.endDate = endDate;
+
+            return await apiService.get<SenderStatisticsDto>(`/loads/sender-statistics/${senderId}`, params);
+        } catch (error) {
+            console.error(`Get sender statistics (ID: ${senderId}) error:`, error);
+            throw error;
+        }
+    },
+
+    // Belirli bir dönemde göndericinin yük sayısını getirir
+    countLoadsBySenderInPeriod: async (
+        senderId: string,
+        startDate: string,
+        endDate: string
+    ): Promise<number> => {
+        try {
+            return await apiService.get<number>(
+                `/loads/sender-statistics/${senderId}`,
+                { startDate, endDate, countOnly: true }
+            );
+        } catch (error) {
+            console.error(`Count loads by sender in period error:`, error);
+            throw error;
+        }
+    },
+
+    // Gönderici için ortalama ağırlık getirir
+    getAverageWeightBySender: async (senderId: string): Promise<number> => {
+        try {
+            return await apiService.get<number>(`/loads/sender-statistics/${senderId}/avg-weight`);
+        } catch (error) {
+            console.error(`Get average weight by sender (${senderId}) error:`, error);
+            throw error;
+        }
+    },
+
+    // Yük bilgilerini günceller
+    updateLoad: async (id: string, loadData: LoadUpdateRequest): Promise<Load> => {
+        try {
+            return await apiService.put<Load, LoadUpdateRequest>(`/loads/${id}`, loadData);
+        } catch (error) {
+            console.error(`Update load (ID: ${id}) error:`, error);
+            throw error;
+        }
+    },
+
+    // Yük durumunu günceller
+    updateLoadStatus: async (id: string, status: LoadStatus): Promise<Load> => {
+        try {
+            return await apiService.patch<Load>(`/loads/${id}/status`, { status });
+        } catch (error) {
+            console.error(`Update load status (ID: ${id}, status: ${status}) error:`, error);
+            throw error;
+        }
+    },
+
+    // Yük tamamlanma durumunu günceller
+    updateLoadCompletionStatus: async (id: string, isCompleted: boolean): Promise<Load> => {
+        try {
+            return await apiService.patch<Load>(`/loads/${id}/completion`, { isCompleted });
+        } catch (error) {
+            console.error(`Update load completion status (ID: ${id}, completed: ${isCompleted}) error:`, error);
+            throw error;
+        }
+    },
+
+    // Yükü siler
+    deleteLoad: async (id: string): Promise<void> => {
+        try {
+            await apiService.delete(`/loads/${id}`);
+        } catch (error) {
+            console.error(`Delete load (ID: ${id}) error:`, error);
+            throw error;
+        }
+    },
+
+    // Kullanıcının en son oluşturduğu yükleri getirir
+    getCurrentUserLoads: async (
+        page: number = 0,
+        size: number = 20,
+        status?: LoadStatus
+    ): Promise<PageResponse<Load>> => {
+        try {
+            const params: Record<string, any> = { page, size };
+            if (status) params.status = status;
+
+            return await apiService.get<PageResponse<Load>>('/loads/me', params);
+        } catch (error) {
+            console.error('Get current user loads error:', error);
+            throw error;
+        }
+    }
+};
+
+export default loadService;
