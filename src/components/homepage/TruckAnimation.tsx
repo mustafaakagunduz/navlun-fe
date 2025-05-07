@@ -20,63 +20,75 @@ const TruckAnimation = ({ setShowConfetti, setConfettiSize }: TruckAnimationProp
 
     // Kamyon animasyonunu başlat
     useEffect(() => {
-        const startTruckAnimation = async () => {
-            if (!animationContainerRef.current) return;
+        if (!animationContainerRef.current) return;
 
-            const containerWidth = animationContainerRef.current.offsetWidth;
+        const containerWidth = animationContainerRef.current.offsetWidth;
+        const targetOffset = 64;   // Çarpı ikonunun genişliği (px)
+        const truckOffset = 96;    // Kamyon ikonunun genişliği (px)
+        const destination = containerWidth - targetOffset - truckOffset + 10;
 
-            const targetOffset = 64;   // Çarpı ikonunun genişliği (px)
-            const truckOffset = 96;    // Kamyon ikonunun genişliği (px)
-            const destination = containerWidth - targetOffset - truckOffset + 10;
+        const startAnimation = async () => {
+            try {
+                // 1️⃣ Yol gri, kamyon hareket ediyor ve yol yeşile dönüyor (aynı anda başlatıyoruz)
+                await Promise.all([
+                    truckAnimationControls.start({
+                        x: destination,
+                        transition: { duration: 6, ease: "linear" }
+                    }),
+                    roadColorControls.start({
+                        backgroundColor: "#86efac",
+                        transition: { duration: 6, ease: "linear" }
+                    })
+                ]);
 
-            // 1️⃣ Yol gri, kamyon hareket ediyor ve yol yeşile dönüyor (aynı anda başlatıyoruz)
-            await Promise.all([
-                truckAnimationControls.start({
-                    x: destination,
-                    transition: { duration: 6, ease: "linear" }
-                }),
-                roadColorControls.start({
-                    backgroundColor: "#86efac",
-                    transition: { duration: 6, ease: "linear" }
-                })
-            ]);
+                // 2️⃣ Hedefe ulaşıldı -> Tik'e dönüş ve konfeti
+                setTruckReachedTarget(true);
+                if (animationContainerRef.current) {
+                    setConfettiSize({
+                        width: animationContainerRef.current.offsetWidth,
+                        height: window.innerHeight
+                    });
+                }
+                setShowConfetti(true);
 
-            // 2️⃣ Hedefe ulaşıldı -> Tik'e dönüş ve konfeti
-            setTruckReachedTarget(true);
-            setConfettiSize({
-                width: animationContainerRef.current.offsetWidth,
-                height: window.innerHeight
-            });
-            setShowConfetti(true);
+                // Konfeti 3 saniye göster
+                await new Promise(resolve => setTimeout(resolve, 3000));
+                setShowConfetti(false);
 
-            // Konfeti 3 saniye göster
-            await new Promise(resolve => setTimeout(resolve, 3000));
-            setShowConfetti(false);
+                // 3️⃣ Kamyon sağdan çıkıyor
+                await truckAnimationControls.start({
+                    x: containerWidth + 100,
+                    transition: { duration: 2, ease: "easeIn" }
+                });
 
-            // 3️⃣ Kamyon sağdan çıkıyor
-            await truckAnimationControls.start({
-                x: containerWidth + 100,
-                transition: { duration: 2, ease: "easeIn" }
-            });
+                // Yol tekrar gri oluyor
+                await roadColorControls.start({
+                    backgroundColor: "#e5e7eb",
+                    transition: { duration: 0.5 }
+                });
 
-            // Yol tekrar gri oluyor
-            await roadColorControls.start({
-                backgroundColor: "#e5e7eb",
-                transition: { duration: 0.5 }
-            });
+                // Tik tekrar çarpıya dönüyor
+                setTruckReachedTarget(false);
 
-            // Tik tekrar çarpıya dönüyor
-            setTruckReachedTarget(false);
+                // 4️⃣ Reset: Kamyon başa dönüyor
+                truckAnimationControls.set({ x: -100 });
 
-            // 4️⃣ Reset: Kamyon başa dönüyor
-            truckAnimationControls.set({ x: -100 });
-
-            // Döngü başa sarıyor
-            setAnimationCycle(prev => prev + 1);
+                // Döngü başa sarıyor
+                setAnimationCycle(prev => prev + 1);
+            } catch (error) {
+                console.error("Animation error:", error);
+            }
         };
 
-        startTruckAnimation();
-    }, [animationCycle]);
+        // Animasyonu başlat
+        startAnimation();
+
+        // Temizleme fonksiyonu
+        return () => {
+            truckAnimationControls.stop();
+            roadColorControls.stop();
+        };
+    }, [animationCycle, truckAnimationControls, roadColorControls, setShowConfetti, setConfettiSize]);
 
     return (
         <div

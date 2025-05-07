@@ -4,7 +4,8 @@
     "about": "Hakkımızda",
     "services": "Hizmetlerimiz",
     "contact": "İletişim",
-    "login": "Giriş Yap / Üye Ol"
+    "login": "Giriş Yap / Üye Ol",
+    "logout": "Çıkış Yap"
   },
   "hero": {
     "title": "Ekolojik Taşımacılık Çözümleri",

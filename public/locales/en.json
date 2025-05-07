@@ -4,7 +4,8 @@
     "about": "About",
     "services": "Services",
     "contact": "Contact",
-    "login": "Login / Register"
+    "login": "Login / Register",
+    "logout": "Logout"
   },
   "hero": {
     "title": "Ecological Transportation Solutions",
