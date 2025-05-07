@@ -91,12 +91,39 @@
     "pdpl": "PDPL",
     "copyright": "All rights reserved."
   },
+
   "auth": {
-    "loginTitle": "Giriş Paneli",
-    "login": "Giriş Yap",
-    "signup": "Üye Ol",
-    "email": "E-posta",
-    "password": "Şifre"
-  }
+    "login": "Login",
+    "signup": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "phone": "Phone",
+    "forgotPassword": "Forgot Password?",
+    "resetPassword": "Reset Password",
+    "sendResetLink": "Send Reset Link",
+    "backToLogin": "Back to Login",
+    "processing": "Processing...",
+    "loggingIn": "Logging in...",
+    "signingUp": "Signing up...",
+    "accountType": "Account Type",
+    "sender": "Sender",
+    "carrier": "Carrier",
+    "senderInfo": "Sender Information",
+    "carrierInfo": "Carrier Information",
+    "errors": {
+      "emailRequired": "Email is required",
+      "emailInvalid": "Please enter a valid email",
+      "passwordRequired": "Password is required",
+      "passwordLength": "Password must be at least 8 characters",
+      "confirmPasswordRequired": "Please confirm your password",
+      "passwordsNotMatch": "Passwords don't match",
+      "firstNameRequired": "First name is required",
+      "lastNameRequired": "Last name is required"
+    }
+
+}
 
 }

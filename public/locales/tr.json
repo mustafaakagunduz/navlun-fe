@@ -92,11 +92,37 @@
     "copyright": "Tüm hakları saklıdır."
   },
   "auth": {
-    "loginTitle": "Giriş Paneli",
-    "login": "Giriş Yap",
-    "signup": "Üye Ol",
+    "login": "Giriş",
+    "signup": "Kayıt Ol",
     "email": "E-posta",
-    "password": "Şifre"
+    "password": "Şifre",
+    "confirmPassword": "Şifre Tekrar",
+    "firstName": "Ad",
+    "lastName": "Soyad",
+    "phone": "Telefon",
+    "forgotPassword": "Şifremi Unuttum",
+    "resetPassword": "Şifre Sıfırlama",
+    "sendResetLink": "Sıfırlama Bağlantısı Gönder",
+    "backToLogin": "Giriş Sayfasına Dön",
+    "processing": "İşleniyor...",
+    "loggingIn": "Giriş Yapılıyor...",
+    "signingUp": "Kayıt Yapılıyor...",
+    "accountType": "Hesap Türü",
+    "sender": "Gönderici",
+    "carrier": "Taşıyıcı",
+    "senderInfo": "Gönderici Bilgileri",
+    "carrierInfo": "Taşıyıcı Bilgileri",
+    "errors": {
+      "emailRequired": "E-posta adresi gerekli",
+      "emailInvalid": "Geçerli bir e-posta adresi girin",
+      "passwordRequired": "Şifre gerekli",
+      "passwordLength": "Şifre en az 8 karakter olmalı",
+      "confirmPasswordRequired": "Şifre tekrarı gerekli",
+      "passwordsNotMatch": "Şifreler eşleşmiyor",
+      "firstNameRequired": "Ad gerekli",
+      "lastNameRequired": "Soyad gerekli"
+    }
   }
 
 }
+

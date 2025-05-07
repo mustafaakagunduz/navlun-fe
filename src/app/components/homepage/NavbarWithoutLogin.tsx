@@ -6,7 +6,7 @@ import { Leaf } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import LanguageSwitcher from "./LanguageSwitcher"
 import { useLanguage } from "@/app/context/LanguageContext"
-import LoginSignupForm from "@/app/components/auth/LoginSignupForm";
+import AuthForms from "@/app/components/auth/AuthForms";
 import { Dialog, DialogTrigger, DialogContent, DialogTitle } from "@/components/ui/dialog"
 
 
@@ -63,7 +63,7 @@ const NavbarWithoutLogin = () => {
                             <DialogTitle className="sr-only">
                                 {t("auth.loginTitle")}
                             </DialogTitle>
-                            <LoginSignupForm />
+                            <AuthForms />
                         </DialogContent>
                     </Dialog>
 
