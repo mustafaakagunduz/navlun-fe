@@ -2,12 +2,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import Header from "@/app/components/homepage/Header";
-import HeroSection from "@/app/components/homepage/HeroSection";
-import AboutSection from "@/app/components/homepage/AboutSection";
-import ServicesSection from "@/app/components/homepage/ServicesSection";
-import ContactSection from "@/app/components/homepage/ContactSection";
-import Footer from "@/app/components/homepage/Footer";
+import Header from "@/components/homepage/Header";
+import HeroSection from "@/components/homepage/HeroSection";
+import AboutSection from "@/components/homepage/AboutSection";
+import ServicesSection from "@/components/homepage/ServicesSection";
+import ContactSection from "@/components/homepage/ContactSection";
+import Footer from "@/components/homepage/Footer";
 import ReactConfetti from "react-confetti"
 
 export default function Home() {
