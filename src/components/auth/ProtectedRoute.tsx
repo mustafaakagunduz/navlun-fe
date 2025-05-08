@@ -21,11 +21,11 @@ export default function ProtectedRoute({ children, allowedRoles = [] }: Protecte
 
         // Kimlik doğrulama kontrolü
         if (!isAuthenticated) {
-            // Mevcut sayfanın URL'sini sakla
-            const returnUrl = encodeURIComponent(pathname);
-            router.push(`/auth/login?returnUrl=${returnUrl}`);
+
+            router.push('/');
             return;
         }
+
 
         // Rol kontrolü
         if (allowedRoles.length > 0 && user && !allowedRoles.includes(user.role)) {

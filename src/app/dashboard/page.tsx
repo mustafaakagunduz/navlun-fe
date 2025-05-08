@@ -15,7 +15,7 @@ export default function Dashboard() {
     // Giriş yapmamış kullanıcıları login sayfasına yönlendir
     useEffect(() => {
         if (!isLoading && !isAuthenticated) {
-            router.push('/auth/login');
+            router.push('/');
         }
     }, [isLoading, isAuthenticated, router]);
 

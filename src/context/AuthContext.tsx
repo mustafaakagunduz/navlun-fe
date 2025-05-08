@@ -173,7 +173,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             });
 
             // Redirect to login page
-            router.push('/auth/login');
+            router.push('/');
         }
     };
 
