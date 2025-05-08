@@ -7,7 +7,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Check, Loader2, X, AlertCircle } from "lucide-react"
+import { Check, Loader2, X, AlertCircle, Mail, Lock, User, Phone, Shield } from "lucide-react"
 import { useLanguage } from "@/context/LanguageContext"
 import { useAuth } from "@/context/AuthContext"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -80,7 +80,6 @@ const AuthForms = () => {
         const { name, value } = e.target
         setLoginData({ ...loginData, [name]: value })
 
-        // Clear field error when typing
         if (formErrors.login[name]) {
             setFormErrors({
                 ...formErrors,
@@ -97,7 +96,6 @@ const AuthForms = () => {
         const { name, value } = e.target
         setSignupData({ ...signupData, [name]: value })
 
-        // Clear field error when typing
         if (formErrors.signup[name]) {
             setFormErrors({
                 ...formErrors,
@@ -118,7 +116,6 @@ const AuthForms = () => {
     const handleResetEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setResetEmail(e.target.value)
 
-        // Clear field error when typing
         if (formErrors.reset.email) {
             setFormErrors({
                 ...formErrors,
@@ -130,7 +127,7 @@ const AuthForms = () => {
         }
     }
 
-    // Validate login form
+    // Form validation logic
     const validateLoginForm = () => {
         const errors: { [key: string]: string } = {}
 
@@ -152,7 +149,6 @@ const AuthForms = () => {
         return Object.keys(errors).length === 0
     }
 
-    // Validate signup form
     const validateSignupForm = () => {
         const errors: { [key: string]: string } = {}
 
@@ -190,7 +186,6 @@ const AuthForms = () => {
         return Object.keys(errors).length === 0
     }
 
-    // Validate reset form
     const validateResetForm = () => {
         const errors: { [key: string]: string } = {}
 
@@ -208,7 +203,7 @@ const AuthForms = () => {
         return Object.keys(errors).length === 0
     }
 
-    // Handle login submit
+    // Form submit handlers
     const handleLoginSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
@@ -223,7 +218,6 @@ const AuthForms = () => {
         }
     }
 
-    // Handle signup submit
     const handleSignupSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
@@ -241,7 +235,6 @@ const AuthForms = () => {
         }
     }
 
-    // Handle reset password submit
     const handleResetSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
@@ -269,321 +262,372 @@ const AuthForms = () => {
         clearError()
     }
 
-    // Style classes
-    const inputClass = "h-12 px-4 rounded-md border border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 transition-colors"
-    const buttonClass = "h-12 rounded-md font-medium bg-green-600 hover:bg-green-700 text-white transition-colors"
-    const tabClass = "rounded-md font-medium py-2.5 px-4 transition-colors data-[state=active]:bg-white data-[state=active]:shadow-sm"
-    const tabListClass = "bg-gray-100 p-1 rounded-lg mb-6"
-    const labelClass = "font-medium text-gray-700 mb-1 block"
+    // Custom styles with improved UI
+    const inputClass = "h-12 px-4 pl-10 rounded-lg border-0 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-green-500 transition-all shadow-sm"
+    const buttonClass = "h-12 rounded-lg font-medium bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0 w-full"
+    const tabClass = "rounded-lg font-medium py-3 px-5 transition-all data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-green-600 data-[state=active]:font-semibold"
+    const tabListClass = "bg-gray-100 p-1.5 rounded-xl mb-8 gap-2"
+    const labelClass = "font-medium text-gray-700 mb-1.5 block text-sm tracking-wide"
 
     return (
-        <div className="w-full max-w-md mx-auto">
-            {!isResetMode ? (
-                <Tabs defaultValue="login" className="w-full">
-                    <TabsList className={tabListClass}>
-                        <TabsTrigger value="login" onClick={() => clearError()} className={tabClass}>
-                            {t("auth.login")}
-                        </TabsTrigger>
-                        <TabsTrigger value="signup" onClick={() => clearError()} className={tabClass}>
-                            {t("auth.signup")}
-                        </TabsTrigger>
-                    </TabsList>
-
-                    {error && (
-                        <Alert variant="destructive" className="mb-4">
-                            <AlertCircle className="h-4 w-4" />
-                            <AlertDescription>{error}</AlertDescription>
-                        </Alert>
-                    )}
-
-                    <TabsContent value="login">
-                        <Card className="border-0 shadow-sm overflow-hidden rounded-lg">
-                            <CardContent className="p-6">
-                                <form onSubmit={handleLoginSubmit} className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="login-email" className={labelClass}>E-posta</Label>
-                                        <Input
-                                            id="login-email"
-                                            type="email"
-                                            name="email"
-                                            placeholder="user@example.com"
-                                            value={loginData.email}
-                                            onChange={handleLoginChange}
-                                            className={`${inputClass} ${formErrors.login.email ? "border-red-500" : ""}`}
-                                        />
-                                        {formErrors.login.email && (
-                                            <p className="text-sm text-red-500">{formErrors.login.email}</p>
-                                        )}
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between items-center">
-                                            <Label htmlFor="login-password" className={labelClass}>Şifre</Label>
-                                            <Button
-                                                type="button"
-                                                variant="link"
-                                                className="px-0 text-green-600 font-normal h-auto"
-                                                onClick={toggleResetMode}
-                                            >
-                                                Şifremi Unuttum
-                                            </Button>
-                                        </div>
-                                        <Input
-                                            id="login-password"
-                                            type="password"
-                                            name="password"
-                                            placeholder="••••••••"
-                                            value={loginData.password}
-                                            onChange={handleLoginChange}
-                                            className={`${inputClass} ${formErrors.login.password ? "border-red-500" : ""}`}
-                                        />
-                                        {formErrors.login.password && (
-                                            <p className="text-sm text-red-500">{formErrors.login.password}</p>
-                                        )}
-                                    </div>
-
-                                    <Button
-                                        type="submit"
-                                        className={buttonClass}
-                                        disabled={isLoading}
-                                    >
-                                        {isLoading ? (
-                                            <>
-                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                {t("auth.loggingIn")}
-                                            </>
-                                        ) : (
-                                            "Giriş"
-                                        )}
-                                    </Button>
-                                </form>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-
-                    <TabsContent value="signup">
-                        <Card className="border-0 shadow-sm overflow-hidden rounded-lg">
-                            <CardContent className="p-6">
-                                <form onSubmit={handleSignupSubmit} className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label className={labelClass}>Hesap Türü</Label>
-                                        <RadioGroup
-                                            defaultValue={signupData.role}
-                                            onValueChange={(value) => handleRoleChange(value as 'SENDER' | 'CARRIER')}
-                                            className="flex space-x-4"
-                                        >
-                                            <div className="flex items-center space-x-2">
-                                                <RadioGroupItem value="SENDER" id="sender" />
-                                                <Label htmlFor="sender" className="cursor-pointer">
-                                                    Gönderici
-                                                </Label>
-                                            </div>
-                                            <div className="flex items-center space-x-2">
-                                                <RadioGroupItem value="CARRIER" id="carrier" />
-                                                <Label htmlFor="carrier" className="cursor-pointer">
-                                                    Taşıyıcı
-                                                </Label>
-                                            </div>
-                                        </RadioGroup>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="firstName" className={labelClass}>Ad</Label>
-                                            <Input
-                                                id="firstName"
-                                                name="firstName"
-                                                placeholder="Ad"
-                                                value={signupData.firstName}
-                                                onChange={handleSignupChange}
-                                                className={`${inputClass} ${formErrors.signup.firstName ? "border-red-500" : ""}`}
-                                            />
-                                            {formErrors.signup.firstName && (
-                                                <p className="text-sm text-red-500">{formErrors.signup.firstName}</p>
-                                            )}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="lastName" className={labelClass}>Soyad</Label>
-                                            <Input
-                                                id="lastName"
-                                                name="lastName"
-                                                placeholder="Soyad"
-                                                value={signupData.lastName}
-                                                onChange={handleSignupChange}
-                                                className={`${inputClass} ${formErrors.signup.lastName ? "border-red-500" : ""}`}
-                                            />
-                                            {formErrors.signup.lastName && (
-                                                <p className="text-sm text-red-500">{formErrors.signup.lastName}</p>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="signup-email" className={labelClass}>E-posta</Label>
-                                        <Input
-                                            id="signup-email"
-                                            type="email"
-                                            name="email"
-                                            placeholder="user@example.com"
-                                            value={signupData.email}
-                                            onChange={handleSignupChange}
-                                            className={`${inputClass} ${formErrors.signup.email ? "border-red-500" : ""}`}
-                                        />
-                                        {formErrors.signup.email && (
-                                            <p className="text-sm text-red-500">{formErrors.signup.email}</p>
-                                        )}
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="phone" className={labelClass}>Telefon</Label>
-                                        <Input
-                                            id="phone"
-                                            name="phone"
-                                            placeholder="+90 (___) ___ __ __"
-                                            value={signupData.phone}
-                                            onChange={handleSignupChange}
-                                            className={inputClass}
-                                        />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="signup-password" className={labelClass}>Şifre</Label>
-                                        <Input
-                                            id="signup-password"
-                                            type="password"
-                                            name="password"
-                                            placeholder="••••••••"
-                                            value={signupData.password}
-                                            onChange={handleSignupChange}
-                                            className={`${inputClass} ${formErrors.signup.password ? "border-red-500" : ""}`}
-                                        />
-                                        {formErrors.signup.password && (
-                                            <p className="text-sm text-red-500">{formErrors.signup.password}</p>
-                                        )}
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="confirmPassword" className={labelClass}>Şifre Tekrar</Label>
-                                        <div className="relative">
-                                            <Input
-                                                id="confirmPassword"
-                                                type="password"
-                                                name="confirmPassword"
-                                                placeholder="••••••••"
-                                                value={signupData.confirmPassword}
-                                                onChange={handleSignupChange}
-                                                className={`${inputClass} ${formErrors.signup.confirmPassword ? "border-red-500" : ""}`}
-                                            />
-                                            {signupData.confirmPassword && (
-                                                <div className="absolute right-3 top-4">
-                                                    {passwordsMatch ? (
-                                                        <Check className="h-4 w-4 text-green-500" />
-                                                    ) : (
-                                                        <X className="h-4 w-4 text-red-500" />
-                                                    )}
-                                                </div>
-                                            )}
-                                        </div>
-                                        {formErrors.signup.confirmPassword && (
-                                            <p className="text-sm text-red-500">{formErrors.signup.confirmPassword}</p>
-                                        )}
-                                    </div>
-
-                                    <Button
-                                        type="submit"
-                                        className={buttonClass}
-                                        disabled={isLoading}
-                                    >
-                                        {isLoading ? (
-                                            <>
-                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                {t("auth.signingUp")}
-                                            </>
-                                        ) : (
-                                            "Kayıt Ol"
-                                        )}
-                                    </Button>
-                                </form>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-                </Tabs>
-            ) : (
-                <Card className="border-0 shadow-sm overflow-hidden rounded-lg">
-                    <CardContent className="p-6">
-                        <h2 className="text-xl font-bold mb-4">Şifre Sıfırlama</h2>
+        <div className="w-full max-w-md mx-auto perspective">
+            <div className={`transform transition-all duration-500 ${isResetMode ? 'rotate-y-180' : ''}`}>
+                {!isResetMode ? (
+                    <Tabs defaultValue="login" className="w-full">
+                        <TabsList className={tabListClass}>
+                            <TabsTrigger value="login" onClick={() => clearError()} className={tabClass}>
+                                {t("auth.login")}
+                            </TabsTrigger>
+                            <TabsTrigger value="signup" onClick={() => clearError()} className={tabClass}>
+                                {t("auth.signup")}
+                            </TabsTrigger>
+                        </TabsList>
 
                         {error && (
-                            <Alert variant="destructive" className="mb-4">
+                            <Alert variant="destructive" className="mb-6 bg-red-50 border border-red-200 text-red-800 rounded-lg">
                                 <AlertCircle className="h-4 w-4" />
                                 <AlertDescription>{error}</AlertDescription>
                             </Alert>
                         )}
 
-                        {resetSuccess ? (
-                            <div className="space-y-4">
-                                <Alert className="bg-green-50 border-green-500 mb-4">
-                                    <Check className="h-4 w-4 text-green-500" />
-                                    <AlertDescription>
-                                        {t("auth.resetLinkSent")}
-                                    </AlertDescription>
+                        <TabsContent value="login">
+                            <Card className="border-0 shadow-lg overflow-hidden rounded-xl bg-gradient-to-b from-white to-gray-50">
+                                <CardContent className="p-8">
+                                    <form onSubmit={handleLoginSubmit} className="space-y-5">
+                                        <div className="space-y-2.5">
+                                            <Label htmlFor="login-email" className={labelClass}>E-posta</Label>
+                                            <div className="relative">
+                                                <Mail className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+                                                <Input
+                                                    id="login-email"
+                                                    type="email"
+                                                    name="email"
+                                                    placeholder="user@example.com"
+                                                    value={loginData.email}
+                                                    onChange={handleLoginChange}
+                                                    className={`${inputClass} ${formErrors.login.email ? "border-red-300 bg-red-50 text-red-900" : ""}`}
+                                                />
+                                            </div>
+                                            {formErrors.login.email && (
+                                                <p className="text-sm text-red-500 mt-1 flex items-center">
+                                                    <AlertCircle className="h-3.5 w-3.5 mr-1" />
+                                                    {formErrors.login.email}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        <div className="space-y-2.5">
+                                            <div className="flex justify-between items-center">
+                                                <Label htmlFor="login-password" className={labelClass}>Şifre</Label>
+                                                <Button
+                                                    type="button"
+                                                    variant="link"
+                                                    className="px-0 text-green-600 font-normal h-auto"
+                                                    onClick={toggleResetMode}
+                                                >
+                                                    Şifremi Unuttum
+                                                </Button>
+                                            </div>
+                                            <div className="relative">
+                                                <Lock className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+                                                <Input
+                                                    id="login-password"
+                                                    type="password"
+                                                    name="password"
+                                                    placeholder="••••••••"
+                                                    value={loginData.password}
+                                                    onChange={handleLoginChange}
+                                                    className={`${inputClass} ${formErrors.login.password ? "border-red-300 bg-red-50 text-red-900" : ""}`}
+                                                />
+                                            </div>
+                                            {formErrors.login.password && (
+                                                <p className="text-sm text-red-500 mt-1 flex items-center">
+                                                    <AlertCircle className="h-3.5 w-3.5 mr-1" />
+                                                    {formErrors.login.password}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        <Button
+                                            type="submit"
+                                            className={`${buttonClass} mt-8`}
+                                            disabled={isLoading}
+                                        >
+                                            {isLoading ? (
+                                                <>
+                                                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                                    {t("auth.loggingIn")}
+                                                </>
+                                            ) : (
+                                                "Giriş"
+                                            )}
+                                        </Button>
+                                    </form>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+
+                        <TabsContent value="signup">
+                            <Card className="border-0 shadow-lg overflow-hidden rounded-xl bg-gradient-to-b from-white to-gray-50">
+                                <CardContent className="p-8">
+                                    <form onSubmit={handleSignupSubmit} className="space-y-5">
+                                        <div className="space-y-2.5">
+                                            <Label className={labelClass}>Hesap Türü</Label>
+                                            <RadioGroup
+                                                defaultValue={signupData.role}
+                                                onValueChange={(value) => handleRoleChange(value as 'SENDER' | 'CARRIER')}
+                                                className="flex space-x-4 bg-gray-50 p-3 rounded-lg"
+                                            >
+                                                <div className="flex items-center space-x-2 flex-1 bg-white rounded-md p-2 shadow-sm border border-gray-100">
+                                                    <RadioGroupItem value="SENDER" id="sender" />
+                                                    <Label htmlFor="sender" className="cursor-pointer font-medium">
+                                                        Gönderici
+                                                    </Label>
+                                                </div>
+                                                <div className="flex items-center space-x-2 flex-1 bg-white rounded-md p-2 shadow-sm border border-gray-100">
+                                                    <RadioGroupItem value="CARRIER" id="carrier" />
+                                                    <Label htmlFor="carrier" className="cursor-pointer font-medium">
+                                                        Taşıyıcı
+                                                    </Label>
+                                                </div>
+                                            </RadioGroup>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2.5">
+                                                <Label htmlFor="firstName" className={labelClass}>Ad</Label>
+                                                <div className="relative">
+                                                    <User className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+                                                    <Input
+                                                        id="firstName"
+                                                        name="firstName"
+                                                        placeholder="Ad"
+                                                        value={signupData.firstName}
+                                                        onChange={handleSignupChange}
+                                                        className={`${inputClass} ${formErrors.signup.firstName ? "border-red-300 bg-red-50 text-red-900" : ""}`}
+                                                    />
+                                                </div>
+                                                {formErrors.signup.firstName && (
+                                                    <p className="text-sm text-red-500 mt-1 flex items-center">
+                                                        <AlertCircle className="h-3.5 w-3.5 mr-1" />
+                                                        {formErrors.signup.firstName}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            <div className="space-y-2.5">
+                                                <Label htmlFor="lastName" className={labelClass}>Soyad</Label>
+                                                <div className="relative">
+                                                    <User className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+                                                    <Input
+                                                        id="lastName"
+                                                        name="lastName"
+                                                        placeholder="Soyad"
+                                                        value={signupData.lastName}
+                                                        onChange={handleSignupChange}
+                                                        className={`${inputClass} ${formErrors.signup.lastName ? "border-red-300 bg-red-50 text-red-900" : ""}`}
+                                                    />
+                                                </div>
+                                                {formErrors.signup.lastName && (
+                                                    <p className="text-sm text-red-500 mt-1 flex items-center">
+                                                        <AlertCircle className="h-3.5 w-3.5 mr-1" />
+                                                        {formErrors.signup.lastName}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2.5">
+                                            <Label htmlFor="signup-email" className={labelClass}>E-posta</Label>
+                                            <div className="relative">
+                                                <Mail className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+                                                <Input
+                                                    id="signup-email"
+                                                    type="email"
+                                                    name="email"
+                                                    placeholder="user@example.com"
+                                                    value={signupData.email}
+                                                    onChange={handleSignupChange}
+                                                    className={`${inputClass} ${formErrors.signup.email ? "border-red-300 bg-red-50 text-red-900" : ""}`}
+                                                />
+                                            </div>
+                                            {formErrors.signup.email && (
+                                                <p className="text-sm text-red-500 mt-1 flex items-center">
+                                                    <AlertCircle className="h-3.5 w-3.5 mr-1" />
+                                                    {formErrors.signup.email}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        <div className="space-y-2.5">
+                                            <Label htmlFor="phone" className={labelClass}>Telefon</Label>
+                                            <div className="relative">
+                                                <Phone className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+                                                <Input
+                                                    id="phone"
+                                                    name="phone"
+                                                    placeholder="+90 (___) ___ __ __"
+                                                    value={signupData.phone}
+                                                    onChange={handleSignupChange}
+                                                    className={inputClass}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2.5">
+                                            <Label htmlFor="signup-password" className={labelClass}>Şifre</Label>
+                                            <div className="relative">
+                                                <Lock className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+                                                <Input
+                                                    id="signup-password"
+                                                    type="password"
+                                                    name="password"
+                                                    placeholder="••••••••"
+                                                    value={signupData.password}
+                                                    onChange={handleSignupChange}
+                                                    className={`${inputClass} ${formErrors.signup.password ? "border-red-300 bg-red-50 text-red-900" : ""}`}
+                                                />
+                                            </div>
+                                            {formErrors.signup.password && (
+                                                <p className="text-sm text-red-500 mt-1 flex items-center">
+                                                    <AlertCircle className="h-3.5 w-3.5 mr-1" />
+                                                    {formErrors.signup.password}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        <div className="space-y-2.5">
+                                            <Label htmlFor="confirmPassword" className={labelClass}>Şifre Tekrar</Label>
+                                            <div className="relative">
+                                                <Shield className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+                                                <Input
+                                                    id="confirmPassword"
+                                                    type="password"
+                                                    name="confirmPassword"
+                                                    placeholder="••••••••"
+                                                    value={signupData.confirmPassword}
+                                                    onChange={handleSignupChange}
+                                                    className={`${inputClass} ${formErrors.signup.confirmPassword ? "border-red-300 bg-red-50 text-red-900" : ""}`}
+                                                />
+                                                {signupData.confirmPassword && (
+                                                    <div className="absolute right-3 top-3.5">
+                                                        {passwordsMatch ? (
+                                                            <Check className="h-5 w-5 text-green-500" />
+                                                        ) : (
+                                                            <X className="h-5 w-5 text-red-500" />
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {formErrors.signup.confirmPassword && (
+                                                <p className="text-sm text-red-500 mt-1 flex items-center">
+                                                    <AlertCircle className="h-3.5 w-3.5 mr-1" />
+                                                    {formErrors.signup.confirmPassword}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        <Button
+                                            type="submit"
+                                            className={`${buttonClass} mt-8`}
+                                            disabled={isLoading}
+                                        >
+                                            {isLoading ? (
+                                                <>
+                                                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                                    {t("auth.signingUp")}
+                                                </>
+                                            ) : (
+                                                "Kayıt Ol"
+                                            )}
+                                        </Button>
+                                    </form>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+                    </Tabs>
+                ) : (
+                    <Card className="border-0 shadow-lg overflow-hidden rounded-xl bg-gradient-to-b from-white to-gray-50">
+                        <CardContent className="p-8">
+                            <h2 className="text-2xl font-bold mb-6 text-green-700">Şifre Sıfırlama</h2>
+
+                            {error && (
+                                <Alert variant="destructive" className="mb-6 bg-red-50 border border-red-200 text-red-800 rounded-lg">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <AlertDescription>{error}</AlertDescription>
                                 </Alert>
-                                <p className="text-sm text-gray-600">
-                                    {t("auth.resetInstructions")}
-                                </p>
-                                <Button
-                                    type="button"
-                                    className={buttonClass}
-                                    onClick={toggleResetMode}
-                                >
-                                    Giriş Sayfasına Dön
-                                </Button>
-                            </div>
-                        ) : (
-                            <form onSubmit={handleResetSubmit} className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="reset-email" className={labelClass}>E-posta</Label>
-                                    <Input
-                                        id="reset-email"
-                                        type="email"
-                                        placeholder="user@example.com"
-                                        value={resetEmail}
-                                        onChange={handleResetEmailChange}
-                                        className={`${inputClass} ${formErrors.reset.email ? "border-red-500" : ""}`}
-                                    />
-                                    {formErrors.reset.email && (
-                                        <p className="text-sm text-red-500">{formErrors.reset.email}</p>
-                                    )}
+                            )}
+
+                            {resetSuccess ? (
+                                <div className="space-y-6">
+                                    <Alert className="bg-green-50 border-green-200 text-green-800 mb-6 rounded-lg">
+                                        <Check className="h-5 w-5 text-green-600" />
+                                        <AlertDescription className="font-medium">
+                                            {t("auth.resetLinkSent")}
+                                        </AlertDescription>
+                                    </Alert>
+                                    <p className="text-gray-600">
+                                        {t("auth.resetInstructions")}
+                                    </p>
+                                    <Button
+                                        type="button"
+                                        className={buttonClass}
+                                        onClick={toggleResetMode}
+                                    >
+                                        Giriş Sayfasına Dön
+                                    </Button>
                                 </div>
+                            ) : (
+                                <form onSubmit={handleResetSubmit} className="space-y-5">
+                                    <div className="space-y-2.5">
+                                        <Label htmlFor="reset-email" className={labelClass}>E-posta</Label>
+                                        <div className="relative">
+                                            <Mail className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+                                            <Input
+                                                id="reset-email"
+                                                type="email"
+                                                placeholder="user@example.com"
+                                                value={resetEmail}
+                                                onChange={handleResetEmailChange}
+                                                className={`${inputClass} ${formErrors.reset.email ? "border-red-300 bg-red-50 text-red-900" : ""}`}
+                                            />
+                                        </div>
+                                        {formErrors.reset.email && (
+                                            <p className="text-sm text-red-500 mt-1 flex items-center">
+                                                <AlertCircle className="h-3.5 w-3.5 mr-1" />
+                                                {formErrors.reset.email}
+                                            </p>
+                                        )}
+                                    </div>
 
-                                <Button
-                                    type="submit"
-                                    className={buttonClass}
-                                    disabled={isLoading}
-                                >
-                                    {isLoading ? (
-                                        <>
-                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            {t("auth.processing")}
-                                        </>
-                                    ) : (
-                                        "Sıfırlama Bağlantısı Gönder"
-                                    )}
-                                </Button>
+                                    <Button
+                                        type="submit"
+                                        className={`${buttonClass} mt-8`}
+                                        disabled={isLoading}
+                                    >
+                                        {isLoading ? (
+                                            <>
+                                                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                                {t("auth.processing")}
+                                            </>
+                                        ) : (
+                                            "Sıfırlama Bağlantısı Gönder"
+                                        )}
+                                    </Button>
 
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    className="w-full h-12 rounded-md font-medium border-gray-300 hover:bg-gray-50"
-                                    onClick={toggleResetMode}
-                                >
-                                    Giriş Sayfasına Dön
-                                </Button>
-                            </form>
-                        )}
-                    </CardContent>
-                </Card>
-            )}
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className="w-full h-12 rounded-lg font-medium border-gray-300 hover:bg-gray-50 mt-4 transition-all shadow-sm"
+                                        onClick={toggleResetMode}
+                                    >
+                                        Giriş Sayfasına Dön
+                                    </Button>
+                                </form>
+                            )}
+                        </CardContent>
+                    </Card>
+                )}
+            </div>
         </div>
     )
 }
