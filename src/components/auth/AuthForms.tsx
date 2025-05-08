@@ -45,7 +45,7 @@ const AuthForms = () => {
         role: 'SENDER'
     })
 
-    // Password reset state
+    // Password reset state..
     const [isResetMode, setIsResetMode] = useState(false)
     const [resetEmail, setResetEmail] = useState("")
     const [passwordsMatch, setPasswordsMatch] = useState(true)
