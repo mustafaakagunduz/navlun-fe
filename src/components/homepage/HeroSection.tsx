@@ -19,13 +19,13 @@ const HeroSection = ({ setShowConfetti, setConfettiSize }: HeroSectionProps) => 
             id="hero"
             className="w-full h-[calc(100vh-40px)] flex flex-col bg-green-50 overflow-hidden"
         >
-            {/* Kamyon Animasyonu - En üstte */}
+            {/* Kamyon Animasyonu
             <div className="w-full mt-6">
                 <TruckAnimation
                     setShowConfetti={setShowConfetti}
                     setConfettiSize={setConfettiSize}
                 />
-            </div>
+            </div>  - En üstte */}
 
             {/* Ana içerik - tam ortalanmış */}
             <div className="flex-1 flex items-center justify-center px-4">
