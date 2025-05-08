@@ -114,6 +114,8 @@
     "carrier": "Carrier",
     "senderInfo": "Sender Information",
     "carrierInfo": "Carrier Information",
+    "welcomeBack": "Welcome Back!",
+    "loginOrSignup": "Please login or sign up to continue.",
     "errors": {
       "emailRequired": "Email is required",
       "emailInvalid": "Please enter a valid email",

@@ -1,4 +1,3 @@
-// components/auth/AuthForms.tsx
 "use client"
 
 import { useState, useEffect } from "react"
@@ -41,11 +40,11 @@ const AuthForms = () => {
         email: "",
         password: "",
         confirmPassword: "",
-        phone: "",
+        phone: "+90 (___) ___ __ __",
         role: 'SENDER'
     })
 
-    // Password reset state..
+    // Password reset state
     const [isResetMode, setIsResetMode] = useState(false)
     const [resetEmail, setResetEmail] = useState("")
     const [passwordsMatch, setPasswordsMatch] = useState(true)
@@ -270,15 +269,22 @@ const AuthForms = () => {
         clearError()
     }
 
+    // Style classes
+    const inputClass = "h-12 px-4 rounded-md border border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 transition-colors"
+    const buttonClass = "h-12 rounded-md font-medium bg-green-600 hover:bg-green-700 text-white transition-colors"
+    const tabClass = "rounded-md font-medium py-2.5 px-4 transition-colors data-[state=active]:bg-white data-[state=active]:shadow-sm"
+    const tabListClass = "bg-gray-100 p-1 rounded-lg mb-6"
+    const labelClass = "font-medium text-gray-700 mb-1 block"
+
     return (
         <div className="w-full max-w-md mx-auto">
             {!isResetMode ? (
                 <Tabs defaultValue="login" className="w-full">
-                    <TabsList className="grid grid-cols-2 mb-6">
-                        <TabsTrigger value="login" onClick={() => clearError()}>
+                    <TabsList className={tabListClass}>
+                        <TabsTrigger value="login" onClick={() => clearError()} className={tabClass}>
                             {t("auth.login")}
                         </TabsTrigger>
-                        <TabsTrigger value="signup" onClick={() => clearError()}>
+                        <TabsTrigger value="signup" onClick={() => clearError()} className={tabClass}>
                             {t("auth.signup")}
                         </TabsTrigger>
                     </TabsList>
@@ -291,11 +297,11 @@ const AuthForms = () => {
                     )}
 
                     <TabsContent value="login">
-                        <Card>
-                            <CardContent className="pt-6">
+                        <Card className="border-0 shadow-sm overflow-hidden rounded-lg">
+                            <CardContent className="p-6">
                                 <form onSubmit={handleLoginSubmit} className="space-y-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="login-email">{t("auth.email")}</Label>
+                                        <Label htmlFor="login-email" className={labelClass}>E-posta</Label>
                                         <Input
                                             id="login-email"
                                             type="email"
@@ -303,7 +309,7 @@ const AuthForms = () => {
                                             placeholder="user@example.com"
                                             value={loginData.email}
                                             onChange={handleLoginChange}
-                                            className={formErrors.login.email ? "border-red-500" : ""}
+                                            className={`${inputClass} ${formErrors.login.email ? "border-red-500" : ""}`}
                                         />
                                         {formErrors.login.email && (
                                             <p className="text-sm text-red-500">{formErrors.login.email}</p>
@@ -312,14 +318,14 @@ const AuthForms = () => {
 
                                     <div className="space-y-2">
                                         <div className="flex justify-between items-center">
-                                            <Label htmlFor="login-password">{t("auth.password")}</Label>
+                                            <Label htmlFor="login-password" className={labelClass}>Şifre</Label>
                                             <Button
                                                 type="button"
                                                 variant="link"
-                                                className="px-0 text-green-600"
+                                                className="px-0 text-green-600 font-normal h-auto"
                                                 onClick={toggleResetMode}
                                             >
-                                                {t("auth.forgotPassword")}
+                                                Şifremi Unuttum
                                             </Button>
                                         </div>
                                         <Input
@@ -329,7 +335,7 @@ const AuthForms = () => {
                                             placeholder="••••••••"
                                             value={loginData.password}
                                             onChange={handleLoginChange}
-                                            className={formErrors.login.password ? "border-red-500" : ""}
+                                            className={`${inputClass} ${formErrors.login.password ? "border-red-500" : ""}`}
                                         />
                                         {formErrors.login.password && (
                                             <p className="text-sm text-red-500">{formErrors.login.password}</p>
@@ -338,7 +344,7 @@ const AuthForms = () => {
 
                                     <Button
                                         type="submit"
-                                        className="w-full bg-green-600 hover:bg-green-700"
+                                        className={buttonClass}
                                         disabled={isLoading}
                                     >
                                         {isLoading ? (
@@ -347,7 +353,7 @@ const AuthForms = () => {
                                                 {t("auth.loggingIn")}
                                             </>
                                         ) : (
-                                            t("auth.login")
+                                            "Giriş"
                                         )}
                                     </Button>
                                 </form>
@@ -356,26 +362,26 @@ const AuthForms = () => {
                     </TabsContent>
 
                     <TabsContent value="signup">
-                        <Card>
-                            <CardContent className="pt-6">
+                        <Card className="border-0 shadow-sm overflow-hidden rounded-lg">
+                            <CardContent className="p-6">
                                 <form onSubmit={handleSignupSubmit} className="space-y-4">
                                     <div className="space-y-2">
-                                        <Label>{t("auth.accountType")}</Label>
+                                        <Label className={labelClass}>Hesap Türü</Label>
                                         <RadioGroup
                                             defaultValue={signupData.role}
                                             onValueChange={(value) => handleRoleChange(value as 'SENDER' | 'CARRIER')}
-                                            className="flex space-x-2"
+                                            className="flex space-x-4"
                                         >
                                             <div className="flex items-center space-x-2">
                                                 <RadioGroupItem value="SENDER" id="sender" />
                                                 <Label htmlFor="sender" className="cursor-pointer">
-                                                    {t("auth.sender")}
+                                                    Gönderici
                                                 </Label>
                                             </div>
                                             <div className="flex items-center space-x-2">
                                                 <RadioGroupItem value="CARRIER" id="carrier" />
                                                 <Label htmlFor="carrier" className="cursor-pointer">
-                                                    {t("auth.carrier")}
+                                                    Taşıyıcı
                                                 </Label>
                                             </div>
                                         </RadioGroup>
@@ -383,28 +389,28 @@ const AuthForms = () => {
 
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-2">
-                                            <Label htmlFor="firstName">{t("auth.firstName")}</Label>
+                                            <Label htmlFor="firstName" className={labelClass}>Ad</Label>
                                             <Input
                                                 id="firstName"
                                                 name="firstName"
-                                                placeholder={t("auth.firstName")}
+                                                placeholder="Ad"
                                                 value={signupData.firstName}
                                                 onChange={handleSignupChange}
-                                                className={formErrors.signup.firstName ? "border-red-500" : ""}
+                                                className={`${inputClass} ${formErrors.signup.firstName ? "border-red-500" : ""}`}
                                             />
                                             {formErrors.signup.firstName && (
                                                 <p className="text-sm text-red-500">{formErrors.signup.firstName}</p>
                                             )}
                                         </div>
                                         <div className="space-y-2">
-                                            <Label htmlFor="lastName">{t("auth.lastName")}</Label>
+                                            <Label htmlFor="lastName" className={labelClass}>Soyad</Label>
                                             <Input
                                                 id="lastName"
                                                 name="lastName"
-                                                placeholder={t("auth.lastName")}
+                                                placeholder="Soyad"
                                                 value={signupData.lastName}
                                                 onChange={handleSignupChange}
-                                                className={formErrors.signup.lastName ? "border-red-500" : ""}
+                                                className={`${inputClass} ${formErrors.signup.lastName ? "border-red-500" : ""}`}
                                             />
                                             {formErrors.signup.lastName && (
                                                 <p className="text-sm text-red-500">{formErrors.signup.lastName}</p>
@@ -413,7 +419,7 @@ const AuthForms = () => {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label htmlFor="signup-email">{t("auth.email")}</Label>
+                                        <Label htmlFor="signup-email" className={labelClass}>E-posta</Label>
                                         <Input
                                             id="signup-email"
                                             type="email"
@@ -421,7 +427,7 @@ const AuthForms = () => {
                                             placeholder="user@example.com"
                                             value={signupData.email}
                                             onChange={handleSignupChange}
-                                            className={formErrors.signup.email ? "border-red-500" : ""}
+                                            className={`${inputClass} ${formErrors.signup.email ? "border-red-500" : ""}`}
                                         />
                                         {formErrors.signup.email && (
                                             <p className="text-sm text-red-500">{formErrors.signup.email}</p>
@@ -429,18 +435,19 @@ const AuthForms = () => {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label htmlFor="phone">{t("auth.phone")}</Label>
+                                        <Label htmlFor="phone" className={labelClass}>Telefon</Label>
                                         <Input
                                             id="phone"
                                             name="phone"
                                             placeholder="+90 (___) ___ __ __"
                                             value={signupData.phone}
                                             onChange={handleSignupChange}
+                                            className={inputClass}
                                         />
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label htmlFor="signup-password">{t("auth.password")}</Label>
+                                        <Label htmlFor="signup-password" className={labelClass}>Şifre</Label>
                                         <Input
                                             id="signup-password"
                                             type="password"
@@ -448,7 +455,7 @@ const AuthForms = () => {
                                             placeholder="••••••••"
                                             value={signupData.password}
                                             onChange={handleSignupChange}
-                                            className={formErrors.signup.password ? "border-red-500" : ""}
+                                            className={`${inputClass} ${formErrors.signup.password ? "border-red-500" : ""}`}
                                         />
                                         {formErrors.signup.password && (
                                             <p className="text-sm text-red-500">{formErrors.signup.password}</p>
@@ -456,7 +463,7 @@ const AuthForms = () => {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label htmlFor="confirmPassword">{t("auth.confirmPassword")}</Label>
+                                        <Label htmlFor="confirmPassword" className={labelClass}>Şifre Tekrar</Label>
                                         <div className="relative">
                                             <Input
                                                 id="confirmPassword"
@@ -465,10 +472,10 @@ const AuthForms = () => {
                                                 placeholder="••••••••"
                                                 value={signupData.confirmPassword}
                                                 onChange={handleSignupChange}
-                                                className={formErrors.signup.confirmPassword ? "border-red-500" : ""}
+                                                className={`${inputClass} ${formErrors.signup.confirmPassword ? "border-red-500" : ""}`}
                                             />
                                             {signupData.confirmPassword && (
-                                                <div className="absolute right-3 top-3">
+                                                <div className="absolute right-3 top-4">
                                                     {passwordsMatch ? (
                                                         <Check className="h-4 w-4 text-green-500" />
                                                     ) : (
@@ -484,7 +491,7 @@ const AuthForms = () => {
 
                                     <Button
                                         type="submit"
-                                        className="w-full bg-green-600 hover:bg-green-700"
+                                        className={buttonClass}
                                         disabled={isLoading}
                                     >
                                         {isLoading ? (
@@ -493,7 +500,7 @@ const AuthForms = () => {
                                                 {t("auth.signingUp")}
                                             </>
                                         ) : (
-                                            t("auth.signup")
+                                            "Kayıt Ol"
                                         )}
                                     </Button>
                                 </form>
@@ -502,9 +509,9 @@ const AuthForms = () => {
                     </TabsContent>
                 </Tabs>
             ) : (
-                <Card>
-                    <CardContent className="pt-6">
-                        <h2 className="text-xl font-bold mb-4">{t("auth.resetPassword")}</h2>
+                <Card className="border-0 shadow-sm overflow-hidden rounded-lg">
+                    <CardContent className="p-6">
+                        <h2 className="text-xl font-bold mb-4">Şifre Sıfırlama</h2>
 
                         {error && (
                             <Alert variant="destructive" className="mb-4">
@@ -526,23 +533,23 @@ const AuthForms = () => {
                                 </p>
                                 <Button
                                     type="button"
-                                    className="w-full mt-4 bg-green-600 hover:bg-green-700"
+                                    className={buttonClass}
                                     onClick={toggleResetMode}
                                 >
-                                    {t("auth.backToLogin")}
+                                    Giriş Sayfasına Dön
                                 </Button>
                             </div>
                         ) : (
                             <form onSubmit={handleResetSubmit} className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="reset-email">{t("auth.email")}</Label>
+                                    <Label htmlFor="reset-email" className={labelClass}>E-posta</Label>
                                     <Input
                                         id="reset-email"
                                         type="email"
                                         placeholder="user@example.com"
                                         value={resetEmail}
                                         onChange={handleResetEmailChange}
-                                        className={formErrors.reset.email ? "border-red-500" : ""}
+                                        className={`${inputClass} ${formErrors.reset.email ? "border-red-500" : ""}`}
                                     />
                                     {formErrors.reset.email && (
                                         <p className="text-sm text-red-500">{formErrors.reset.email}</p>
@@ -551,7 +558,7 @@ const AuthForms = () => {
 
                                 <Button
                                     type="submit"
-                                    className="w-full bg-green-600 hover:bg-green-700"
+                                    className={buttonClass}
                                     disabled={isLoading}
                                 >
                                     {isLoading ? (
@@ -560,17 +567,17 @@ const AuthForms = () => {
                                             {t("auth.processing")}
                                         </>
                                     ) : (
-                                        t("auth.sendResetLink")
+                                        "Sıfırlama Bağlantısı Gönder"
                                     )}
                                 </Button>
 
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    className="w-full"
+                                    className="w-full h-12 rounded-md font-medium border-gray-300 hover:bg-gray-50"
                                     onClick={toggleResetMode}
                                 >
-                                    {t("auth.backToLogin")}
+                                    Giriş Sayfasına Dön
                                 </Button>
                             </form>
                         )}

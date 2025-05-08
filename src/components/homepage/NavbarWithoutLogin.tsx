@@ -6,9 +6,6 @@ import { Leaf } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import LanguageSwitcher from "./LanguageSwitcher"
 import { useLanguage } from "@/context/LanguageContext"
-import AuthForms from "@/components/auth/AuthForms";
-import { Dialog, DialogTrigger, DialogContent, DialogTitle } from "@/components/ui/dialog"
-
 
 const NavbarWithoutLogin = () => {
     const [isScrolled, setIsScrolled] = useState<boolean>(false)
@@ -52,25 +49,14 @@ const NavbarWithoutLogin = () => {
                 </nav>
                 <div className="flex items-center gap-2">
                     <LanguageSwitcher />
-                    <Dialog>
-                        <DialogTrigger asChild>
-                            <Button className="bg-green-600 hover:bg-green-700">
-                                {t("navbar.login")}
-                            </Button>
-                        </DialogTrigger>
-
-                        <DialogContent className="max-w-md w-full">
-                            <DialogTitle className="sr-only">
-                                {t("auth.loginTitle")}
-                            </DialogTitle>
-                            <AuthForms />
-                        </DialogContent>
-                    </Dialog>
-
+                    <Link href="/login">
+                        <Button className="bg-green-600 hover:bg-green-700">
+                            {t("navbar.login")}
+                        </Button>
+                    </Link>
                 </div>
             </div>
         </header>
-
     )
 }
 

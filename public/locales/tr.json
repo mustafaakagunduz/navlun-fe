@@ -113,6 +113,8 @@
     "carrier": "Taşıyıcı",
     "senderInfo": "Gönderici Bilgileri",
     "carrierInfo": "Taşıyıcı Bilgileri",
+    "welcomeBack": "Hoşgeldiniz!",
+    "loginOrSignup": "Devam etmek için giriş yapın veya kayıt olun.",
     "errors": {
       "emailRequired": "E-posta adresi gerekli",
       "emailInvalid": "Geçerli bir e-posta adresi girin",
