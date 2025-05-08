@@ -34,7 +34,13 @@ axiosInstance.interceptors.response.use(
         const originalRequest = error.config;
 
         // 401 hatası ve token yenileme denememiş ise
-        if (error.response?.status === 401 && !originalRequest._retry && typeof window !== 'undefined') {
+        // Sadece oturum açılmış durumdayken 401 hata kodunda token yenilemeyi dene
+        if (error.response?.status === 401 && !originalRequest._retry &&
+            typeof window !== 'undefined' &&
+            localStorage.getItem('accessToken') && // Token varsa (oturum açılmışsa)
+            // Eğer /auth/login endpoint'ine istek yapılmıyorsa (login sırasındaki 401 hatası değilse)
+            !originalRequest.url.includes('/auth/login')) {
+
             originalRequest._retry = true;
 
             try {
@@ -44,7 +50,7 @@ axiosInstance.interceptors.response.use(
                     // Refresh token yoksa kullanıcıyı çıkış yaptır
                     localStorage.removeItem('accessToken');
                     localStorage.removeItem('refreshToken');
-                    window.location.href = '/auth/login';
+                    window.location.href = '/'; // Ana sayfaya yönlendir
                     return Promise.reject(error);
                 }
 
@@ -69,7 +75,7 @@ axiosInstance.interceptors.response.use(
                 // Token yenileme başarısız ise çıkış yap
                 localStorage.removeItem('accessToken');
                 localStorage.removeItem('refreshToken');
-                window.location.href = '/auth/login';
+                window.location.href = '/'; // Ana sayfaya yönlendir
                 return Promise.reject(refreshError);
             }
         }

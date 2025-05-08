@@ -32,12 +32,26 @@ const authService = {
      * @param email Kullanıcı e-posta adresi
      * @param password Kullanıcı şifresi
      */
+
     login: async (email: string, password: string): Promise<LoginResponse> => {
         try {
             return await apiService.post<LoginResponse>('/auth/login', { email, password });
-        } catch (error) {
+        } catch (error: any) {
             console.error('Login error:', error);
-            throw error;
+
+            // Eğer API'den gelen bir hata mesajı varsa kullan, yoksa genel hata mesajı kullan
+            if (error.response?.data?.message) {
+                throw error; // Original error with message from API
+            } else {
+                // Create a more appropriate error with a clear message
+                const enhancedError = new Error('Kullanıcı Adı veya Şifre hatalı');
+                (enhancedError as any).response = {
+                    data: {
+                        message: 'Kullanıcı Adı veya Şifre hatalı'
+                    }
+                };
+                throw enhancedError;
+            }
         }
     },
 

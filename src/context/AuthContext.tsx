@@ -119,8 +119,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 ...state,
                 isLoading: false,
                 isAuthenticated: false,
-                error: error.response?.data?.message || 'Login failed',
+                error: error.response?.data?.message || 'Kullanıcı Adı veya Şifre hatalı', // Default error message in Turkish
             });
+
+            // We don't redirect to login page on error since we're already on the login page
         }
     };
 
