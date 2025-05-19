@@ -92,7 +92,6 @@
     "pdpl": "PDPL",
     "copyright": "All rights reserved."
   },
-
   "auth": {
     "login": "Login",
     "signup": "Sign Up",
@@ -126,7 +125,82 @@
       "firstNameRequired": "First name is required",
       "lastNameRequired": "Last name is required"
     }
+  },
+  "dashboard": {
+      "layout": {
+        "admin": "Administrator",
+        "sender": "Sender",
+        "carrier": "Carrier",
+        "footerText": "All rights reserved."
+      },
+      "sidebar": {
+        "home": "Home",
+        "users": "Users",
+        "analytics": "Analytics",
+        "settings": "Settings",
+        "myLoads": "My Loads",
+        "offers": "Offers",
+        "profile": "My Profile",
+        "availableLoads": "Available Loads",
+        "schedule": "Schedule"
+      },
+      "page": {
+        "title": "Dashboard",
+        "loading": "Loading...",
+        "adminDashboard": "ADMIN DASHBOARD",
+        "senderDashboard": "SENDER DASHBOARD",
+        "carrierDashboard": "CARRIER DASHBOARD",
+        "greeting": "Hello"
+      },
+      "protectedRoute": {
+        "loading": "Loading...",
+        "accessDenied": "Access denied"
+      }
+    },
+  "adminPage": {
+      "title": "Admin Panel",
+      "welcome": "Welcome to the admin panel",
+      "description": "Here you can manage users, loads, and system settings.",
+      "userManagement": "User Management",
+      "loadManagement": "Load Management",
+      "systemSettings": "System Settings",
+      "statistics": "Statistics",
+      "totalUsers": "Total Users",
+      "activeSenders": "Active Senders",
+      "activeCarriers": "Active Carriers",
+      "totalLoads": "Total Loads",
+      "pendingLoads": "Pending Loads",
+      "completedLoads": "Completed Loads"
+    },
+  "senderPage": {
+      "title": "Sender Panel",
+      "welcome": "Welcome to your sender panel",
+      "description": "Manage your loads, review offers, and create new transportation requests.",
+      "myLoads": "My Loads",
+      "createNewLoad": "Create New Load",
+      "pendingOffers": "Pending Offers",
+      "activeShipments": "Active Shipments",
+      "loadHistory": "Load History",
+      "statistics": "Statistics",
+      "totalLoads": "Total Loads",
+      "completedLoads": "Completed Loads",
+      "pendingLoads": "Pending Loads",
+      "avgCarbonSaved": "Average Carbon Saved"
+    },
+  "carrierPage": {
+      "title": "Carrier Panel",
+      "welcome": "Welcome to your carrier panel",
+      "description": "View available loads, make offers, and track your active deliveries.",
+      "availableLoads": "Available Loads",
+      "myDeliveries": "My Deliveries",
+      "schedule": "Schedule",
+      "vehicleManagement": "Vehicle Management",
+      "statistics": "Statistics",
+      "activeDeliveries": "Active Deliveries",
+      "completedDeliveries": "Completed Deliveries",
+      "totalDistance": "Total Distance",
+      "totalEarnings": "Total Earnings"
+    }
 
 }
 
-}

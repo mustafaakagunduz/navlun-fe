@@ -1,4 +1,3 @@
-// src/app/dashboard/layout.tsx
 "use client"
 
 import { ReactNode } from 'react';
@@ -8,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import { useRouter } from 'next/navigation';
-import Sidebar from "@/app/dashboard/Sidebar";
+
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
     const { logout, user } = useAuth();
@@ -23,11 +22,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     const getRoleName = (role: string) => {
         switch(role) {
             case 'ADMIN':
-                return 'Yönetici';
+                return t("dashboard.layout.admin");
             case 'SENDER':
-                return 'Gönderici';
+                return t("dashboard.layout.sender");
             case 'CARRIER':
-                return 'Taşıyıcı';
+                return t("dashboard.layout.carrier");
             default:
                 return role;
         }
@@ -51,7 +50,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                         {user && (
                             <div className="flex items-center gap-2">
                                 <span className="text-sm font-medium hidden md:inline">
-                                    {user.firstName} {user.lastName}
+                                  {user.firstName} {user.lastName}
                                 </span>
                                 <span className={`text-xs font-medium px-2.5 py-0.5 rounded ${
                                     user.role === 'ADMIN'
@@ -60,7 +59,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                                             ? 'bg-blue-100 text-blue-800'
                                             : 'bg-purple-100 text-purple-800'
                                 }`}>
-                                    {getRoleName(user.role)}
+                                  {getRoleName(user.role)}
                                 </span>
                             </div>
                         )}
@@ -69,30 +68,22 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                             className="border-green-600 text-green-600 hover:bg-green-50"
                             onClick={handleLogout}
                         >
-                            {t("navbar.logout") || "Çıkış Yap"}
+                            {t("navbar.logout")}
                         </Button>
                     </div>
                 </div>
             </header>
 
-            {/* Main content area with sidebar */}
-            <div className="flex flex-1">
-                {/* Sidebar - burada dashboard'un her sayfasında görünecek */}
-                <Sidebar />
-
-                {/* Main content */}
-                <main className="flex-1 p-6 overflow-auto bg-gray-50">
-                    <div className="container mx-auto">
-                        {children}
-                    </div>
-                </main>
-            </div>
+            {/* Main content */}
+            <main className="flex-1">
+                {children}
+            </main>
 
             {/* Footer */}
             <footer className="bg-white border-t py-4">
                 <div className="container mx-auto px-4">
                     <p className="text-center text-sm text-gray-500">
-                        &copy; {new Date().getFullYear()} EkoTaşıma. Tüm hakları saklıdır.
+                        &copy; {new Date().getFullYear()} EkoTaşıma. {t("dashboard.layout.footerText")}
                     </p>
                 </div>
             </footer>

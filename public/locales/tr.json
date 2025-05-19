@@ -125,6 +125,81 @@
       "firstNameRequired": "Ad gerekli",
       "lastNameRequired": "Soyad gerekli"
     }
+  },
+  "dashboard": {
+    "layout": {
+      "admin": "Yönetici",
+      "sender": "Gönderici",
+      "carrier": "Taşıyıcı",
+      "footerText": "Tüm hakları saklıdır."
+    },
+    "sidebar": {
+      "home": "Ana Sayfa",
+      "users": "Kullanıcılar",
+      "analytics": "Analitik",
+      "settings": "Ayarlar",
+      "myLoads": "Yüklerim",
+      "offers": "Gelen Teklifler",
+      "profile": "Profilim",
+      "availableLoads": "Yeni Yükler",
+      "schedule": "Takvim"
+    },
+    "page": {
+      "title": "Dashboard",
+      "loading": "Yükleniyor...",
+      "adminDashboard": "BURASI ADMİN DASHBOARD",
+      "senderDashboard": "BURASI GÖNDERİCİ DASHBOARD",
+      "carrierDashboard": "BURASI TAŞIYICI DASHBOARD",
+      "greeting": "Merhaba"
+    },
+    "protectedRoute": {
+      "loading": "Yükleniyor...",
+      "accessDenied": "Erişim reddedildi"
+    }
+  },
+  "adminPage": {
+    "title": "Yönetici Paneli",
+    "welcome": "Yönetici paneline hoş geldiniz",
+    "description": "Burada kullanıcıları, yükleri ve sistem ayarlarını yönetebilirsiniz.",
+    "userManagement": "Kullanıcı Yönetimi",
+    "loadManagement": "Yük Yönetimi",
+    "systemSettings": "Sistem Ayarları",
+    "statistics": "İstatistikler",
+    "totalUsers": "Toplam Kullanıcı",
+    "activeSenders": "Aktif Göndericiler",
+    "activeCarriers": "Aktif Taşıyıcılar",
+    "totalLoads": "Toplam Yük",
+    "pendingLoads": "Bekleyen Yükler",
+    "completedLoads": "Tamamlanan Yükler"
+  },
+  "senderPage": {
+    "title": "Gönderici Paneli",
+    "welcome": "Gönderici panelinize hoş geldiniz",
+    "description": "Yüklerinizi yönetin, teklifleri inceleyin ve yeni taşıma talepleri oluşturun.",
+    "myLoads": "Yüklerim",
+    "createNewLoad": "Yeni Yük Ekle",
+    "pendingOffers": "Bekleyen Teklifler",
+    "activeShipments": "Aktif Taşımalar",
+    "loadHistory": "Yük Geçmişi",
+    "statistics": "İstatistikler",
+    "totalLoads": "Toplam Yük",
+    "completedLoads": "Tamamlanan Yükler",
+    "pendingLoads": "Bekleyen Yükler",
+    "avgCarbonSaved": "Ortalama Karbon Tasarrufu"
+  },
+  "carrierPage": {
+    "title": "Taşıyıcı Paneli",
+    "welcome": "Taşıyıcı panelinize hoş geldiniz",
+    "description": "Mevcut yükleri görüntüleyin, teklif verin ve aktif taşımalarınızı takip edin.",
+    "availableLoads": "Mevcut Yükler",
+    "myDeliveries": "Taşımalarım",
+    "schedule": "Program",
+    "vehicleManagement": "Araç Yönetimi",
+    "statistics": "İstatistikler",
+    "activeDeliveries": "Aktif Taşımalar",
+    "completedDeliveries": "Tamamlanan Taşımalar",
+    "totalDistance": "Toplam Mesafe",
+    "totalEarnings": "Toplam Kazanç"
   }
 
 }

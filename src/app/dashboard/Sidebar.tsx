@@ -1,4 +1,3 @@
-// src/app/dashboard/Sidebar.tsx
 "use client"
 
 import Link from "next/link";
@@ -15,32 +14,34 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Sidebar() {
     const pathname = usePathname();
     const { user } = useAuth();
+    const { t } = useLanguage();
 
     // Role-specific menu items
     const adminMenuItems = [
-        { href: "/dashboard/admin", label: "Ana Sayfa", icon: Home },
-        { href: "/dashboard/admin/users", label: "Kullanıcılar", icon: Users },
-        { href: "/dashboard/admin/analytics", label: "Analitik", icon: BarChart3 },
-        { href: "/dashboard/admin/settings", label: "Ayarlar", icon: Settings },
+        { href: "/dashboard", label: t("dashboard.sidebar.home"), icon: Home },
+        { href: "/dashboard/users", label: t("dashboard.sidebar.users"), icon: Users },
+        { href: "/dashboard/analytics", label: t("dashboard.sidebar.analytics"), icon: BarChart3 },
+        { href: "/dashboard/settings", label: t("dashboard.sidebar.settings"), icon: Settings },
     ];
 
     const senderMenuItems = [
-        { href: "/dashboard/sender", label: "Ana Sayfa", icon: Home },
-        { href: "/dashboard/sender/loads", label: "Yüklerim", icon: Package },
-        { href: "/dashboard/sender/offers", label: "Gelen Teklifler", icon: FileText },
-        { href: "/dashboard/sender/profile", label: "Profilim", icon: Users },
+        { href: "/dashboard", label: t("dashboard.sidebar.home"), icon: Home },
+        { href: "/dashboard/loads", label: t("dashboard.sidebar.myLoads"), icon: Package },
+        { href: "/dashboard/offers", label: t("dashboard.sidebar.offers"), icon: FileText },
+        { href: "/dashboard/profile", label: t("dashboard.sidebar.profile"), icon: Users },
     ];
 
     const carrierMenuItems = [
-        { href: "/dashboard/carrier", label: "Ana Sayfa", icon: Home },
-        { href: "/dashboard/carrier/available-loads", label: "Yeni Yükler", icon: Package },
-        { href: "/dashboard/carrier/my-loads", label: "Yüklerim", icon: Truck },
-        { href: "/dashboard/carrier/schedule", label: "Takvim", icon: Calendar },
-        { href: "/dashboard/carrier/profile", label: "Profilim", icon: Users },
+        { href: "/dashboard", label: t("dashboard.sidebar.home"), icon: Home },
+        { href: "/dashboard/available-loads", label: t("dashboard.sidebar.availableLoads"), icon: Package },
+        { href: "/dashboard/my-loads", label: t("dashboard.sidebar.myLoads"), icon: Truck },
+        { href: "/dashboard/schedule", label: t("dashboard.sidebar.schedule"), icon: Calendar },
+        { href: "/dashboard/profile", label: t("dashboard.sidebar.profile"), icon: Users },
     ];
 
     // Role-based menu selection
