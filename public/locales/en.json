@@ -87,11 +87,15 @@
     "description": "A platform that connects carriers and those who need transportation services, supporting ecological transportation.",
     "quickLinks": "Quick Links",
     "services": "Services",
-    "contact": "Contact",
+
     "privacyPolicy": "Privacy Policy",
     "termsOfUse": "Terms of Use",
     "pdpl": "PDPL",
-    "copyright": "All rights reserved."
+
+    "copyright": "All rights reserved",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "contact": "Contact Us"
   },
   "auth": {
     "login": "Login",
@@ -118,7 +122,14 @@
     "brokerInfo": "Broker Information",
     "welcomeBack": "Welcome Back!",
     "loginOrSignup": "Please login or sign up to continue.",
+    "resetLinkSent": "Password reset link sent!",
+    "resetInstructions": "Please check your email and follow the link to reset your password.",
+    "resetPasswordDescription": "Enter your email address and we'll send you a link to reset your password.",
+    "ecoFriendlyTransport": "Eco-Friendly Transportation",
+    "platformDescription": "Reduce your carbon footprint and contribute to sustainable logistics solutions with EkoTaşıma.",
+
     "errors": {
+      "resetFailed": "Password reset failed",
       "emailRequired": "Email is required",
       "emailInvalid": "Please enter a valid email",
       "passwordRequired": "Password is required",

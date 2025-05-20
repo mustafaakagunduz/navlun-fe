@@ -87,11 +87,16 @@
     "description": "Taşımacıları ve taşıma hizmetine ihtiyaç duyanları birleştiren, ekolojik taşımacılığı destekleyen platform.",
     "quickLinks": "Hızlı Erişim",
     "services": "Hizmetlerimiz",
-    "contact": "İletişim",
+
     "privacyPolicy": "Gizlilik Politikası",
     "termsOfUse": "Kullanım Koşulları",
     "pdpl": "KVKK",
-    "copyright": "Tüm hakları saklıdır."
+
+    "copyright": "Tüm hakları saklıdır",
+    "terms": "Kullanım Koşulları",
+    "privacy": "Gizlilik Politikası",
+    "contact": "İletişim"
+
   },
   "auth": {
     "login": "Giriş",
@@ -118,6 +123,11 @@
     "brokerInfo": "Aracı Bilgileri",
     "welcomeBack": "Hoşgeldiniz!",
     "loginOrSignup": "Devam etmek için giriş yapın veya kayıt olun.",
+    "resetLinkSent": "Şifre sıfırlama bağlantısı gönderildi!",
+    "resetInstructions": "Lütfen e-posta adresinizi kontrol edin ve şifrenizi sıfırlamak için gönderilen bağlantıyı takip edin.",
+    "resetPasswordDescription": "E-posta adresinizi girin, size şifre sıfırlama bağlantısı göndereceğiz.",
+    "ecoFriendlyTransport": "Çevre Dostu Taşımacılık",
+    "platformDescription": "EkoTaşıma ile karbon ayak izinizi azaltın ve sürdürülebilir lojistik çözümlerine katkıda bulunun.",
     "errors": {
       "emailRequired": "E-posta adresi gerekli",
       "emailInvalid": "Geçerli bir e-posta adresi girin",
@@ -126,7 +136,8 @@
       "confirmPasswordRequired": "Şifre tekrarı gerekli",
       "passwordsNotMatch": "Şifreler eşleşmiyor",
       "firstNameRequired": "Ad gerekli",
-      "lastNameRequired": "Soyad gerekli"
+      "lastNameRequired": "Soyad gerekli",
+      "resetFailed": "Şifre sıfırlama başarısız oldu"
     }
   },
   "dashboard": {
@@ -226,6 +237,7 @@
     "topCarriers": "En İyi Taşıyıcılar",
     "topSenders": "En İyi Göndericiler"
   }
+
 
 
 }
