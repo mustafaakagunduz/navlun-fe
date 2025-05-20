@@ -7,7 +7,7 @@ export type User = {
     email: string;
     firstName?: string;
     lastName?: string;
-    role: string;
+    role: 'ADMIN' | 'SENDER' | 'CARRIER' | 'BROKER'; // Role tipini union type olarak güncelledik
 };
 
 export type LoginResponse = {
@@ -23,7 +23,7 @@ export type SignupData = {
     firstName: string;
     lastName: string;
     phone?: string;
-    role: string;
+    role: 'ADMIN' | 'SENDER' | 'CARRIER' | 'BROKER'; // Role tipini union type olarak güncelledik
 };
 
 const authService = {

@@ -20,7 +20,7 @@ type SignupFormType = {
     password: string
     confirmPassword: string
     phone: string
-    role: 'SENDER' | 'CARRIER'
+    role: 'SENDER' | 'CARRIER' | 'BROKER' // BROKER rolü eklendi
 }
 
 const AuthForms = () => {
@@ -33,7 +33,7 @@ const AuthForms = () => {
         password: ""
     })
 
-    // Signup form state
+    // Signup form state - BROKER rolü için varsayılan değer güncellemesi
     const [signupData, setSignupData] = useState<SignupFormType>({
         firstName: "",
         lastName: "",
@@ -107,8 +107,8 @@ const AuthForms = () => {
         }
     }
 
-    // Handle role selection change
-    const handleRoleChange = (value: 'SENDER' | 'CARRIER') => {
+    // Handle role selection change - BROKER rolü için güncellendi
+    const handleRoleChange = (value: 'SENDER' | 'CARRIER' | 'BROKER') => {
         setSignupData({ ...signupData, role: value })
     }
 
@@ -295,7 +295,7 @@ const AuthForms = () => {
                                 <CardContent className="p-8">
                                     <form onSubmit={handleLoginSubmit} className="space-y-5">
                                         <div className="space-y-2.5">
-                                            <Label htmlFor="login-email" className={labelClass}>E-posta</Label>
+                                            <Label htmlFor="login-email" className={labelClass}>{t("auth.email")}</Label>
                                             <div className="relative">
                                                 <Mail className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
                                                 <Input
@@ -318,14 +318,14 @@ const AuthForms = () => {
 
                                         <div className="space-y-2.5">
                                             <div className="flex justify-between items-center">
-                                                <Label htmlFor="login-password" className={labelClass}>Şifre</Label>
+                                                <Label htmlFor="login-password" className={labelClass}>{t("auth.password")}</Label>
                                                 <Button
                                                     type="button"
                                                     variant="link"
                                                     className="px-0 text-green-600 font-normal h-auto"
                                                     onClick={toggleResetMode}
                                                 >
-                                                    Şifremi Unuttum
+                                                    {t("auth.forgotPassword")}
                                                 </Button>
                                             </div>
                                             <div className="relative">
@@ -359,7 +359,7 @@ const AuthForms = () => {
                                                     {t("auth.loggingIn")}
                                                 </>
                                             ) : (
-                                                "Giriş"
+                                                t("auth.login")
                                             )}
                                         </Button>
                                     </form>
@@ -372,22 +372,29 @@ const AuthForms = () => {
                                 <CardContent className="p-8">
                                     <form onSubmit={handleSignupSubmit} className="space-y-5">
                                         <div className="space-y-2.5">
-                                            <Label className={labelClass}>Hesap Türü</Label>
+                                            <Label className={labelClass}>{t("auth.accountType")}</Label>
                                             <RadioGroup
                                                 defaultValue={signupData.role}
-                                                onValueChange={(value) => handleRoleChange(value as 'SENDER' | 'CARRIER')}
-                                                className="flex space-x-4 bg-gray-50 p-3 rounded-lg"
+                                                onValueChange={(value) => handleRoleChange(value as 'SENDER' | 'CARRIER' | 'BROKER')}
+                                                className="flex space-x-3 bg-gray-50 p-3 rounded-lg"
                                             >
                                                 <div className="flex items-center space-x-2 flex-1 bg-white rounded-md p-2 shadow-sm border border-gray-100">
                                                     <RadioGroupItem value="SENDER" id="sender" />
                                                     <Label htmlFor="sender" className="cursor-pointer font-medium">
-                                                        Gönderici
+                                                        {t("auth.sender")}
                                                     </Label>
                                                 </div>
                                                 <div className="flex items-center space-x-2 flex-1 bg-white rounded-md p-2 shadow-sm border border-gray-100">
                                                     <RadioGroupItem value="CARRIER" id="carrier" />
                                                     <Label htmlFor="carrier" className="cursor-pointer font-medium">
-                                                        Taşıyıcı
+                                                        {t("auth.carrier")}
+                                                    </Label>
+                                                </div>
+                                                {/* Yeni eklenen broker seçeneği */}
+                                                <div className="flex items-center space-x-2 flex-1 bg-white rounded-md p-2 shadow-sm border border-gray-100">
+                                                    <RadioGroupItem value="BROKER" id="broker" />
+                                                    <Label htmlFor="broker" className="cursor-pointer font-medium">
+                                                        {t("auth.broker")}
                                                     </Label>
                                                 </div>
                                             </RadioGroup>
@@ -395,13 +402,13 @@ const AuthForms = () => {
 
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="space-y-2.5">
-                                                <Label htmlFor="firstName" className={labelClass}>Ad</Label>
+                                                <Label htmlFor="firstName" className={labelClass}>{t("auth.firstName")}</Label>
                                                 <div className="relative">
                                                     <User className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
                                                     <Input
                                                         id="firstName"
                                                         name="firstName"
-                                                        placeholder="Ad"
+                                                        placeholder={t("auth.firstName")}
                                                         value={signupData.firstName}
                                                         onChange={handleSignupChange}
                                                         className={`${inputClass} ${formErrors.signup.firstName ? "border-red-300 bg-red-50 text-red-900" : ""}`}
@@ -415,13 +422,13 @@ const AuthForms = () => {
                                                 )}
                                             </div>
                                             <div className="space-y-2.5">
-                                                <Label htmlFor="lastName" className={labelClass}>Soyad</Label>
+                                                <Label htmlFor="lastName" className={labelClass}>{t("auth.lastName")}</Label>
                                                 <div className="relative">
                                                     <User className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
                                                     <Input
                                                         id="lastName"
                                                         name="lastName"
-                                                        placeholder="Soyad"
+                                                        placeholder={t("auth.lastName")}
                                                         value={signupData.lastName}
                                                         onChange={handleSignupChange}
                                                         className={`${inputClass} ${formErrors.signup.lastName ? "border-red-300 bg-red-50 text-red-900" : ""}`}
@@ -437,7 +444,7 @@ const AuthForms = () => {
                                         </div>
 
                                         <div className="space-y-2.5">
-                                            <Label htmlFor="signup-email" className={labelClass}>E-posta</Label>
+                                            <Label htmlFor="signup-email" className={labelClass}>{t("auth.email")}</Label>
                                             <div className="relative">
                                                 <Mail className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
                                                 <Input
@@ -459,7 +466,7 @@ const AuthForms = () => {
                                         </div>
 
                                         <div className="space-y-2.5">
-                                            <Label htmlFor="phone" className={labelClass}>Telefon</Label>
+                                            <Label htmlFor="phone" className={labelClass}>{t("auth.phone")}</Label>
                                             <div className="relative">
                                                 <Phone className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
                                                 <Input
@@ -474,7 +481,7 @@ const AuthForms = () => {
                                         </div>
 
                                         <div className="space-y-2.5">
-                                            <Label htmlFor="signup-password" className={labelClass}>Şifre</Label>
+                                            <Label htmlFor="signup-password" className={labelClass}>{t("auth.password")}</Label>
                                             <div className="relative">
                                                 <Lock className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
                                                 <Input
@@ -496,7 +503,7 @@ const AuthForms = () => {
                                         </div>
 
                                         <div className="space-y-2.5">
-                                            <Label htmlFor="confirmPassword" className={labelClass}>Şifre Tekrar</Label>
+                                            <Label htmlFor="confirmPassword" className={labelClass}>{t("auth.confirmPassword")}</Label>
                                             <div className="relative">
                                                 <Shield className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
                                                 <Input
@@ -537,7 +544,7 @@ const AuthForms = () => {
                                                     {t("auth.signingUp")}
                                                 </>
                                             ) : (
-                                                "Kayıt Ol"
+                                                t("auth.signup")
                                             )}
                                         </Button>
                                     </form>
@@ -548,7 +555,7 @@ const AuthForms = () => {
                 ) : (
                     <Card className="border-0 shadow-lg overflow-hidden rounded-xl bg-gradient-to-b from-white to-gray-50">
                         <CardContent className="p-8">
-                            <h2 className="text-2xl font-bold mb-6 text-green-700">Şifre Sıfırlama</h2>
+                            <h2 className="text-2xl font-bold mb-6 text-green-700">{t("auth.resetPassword")}</h2>
 
                             {error && (
                                 <Alert variant="destructive" className="mb-6 bg-red-50 border border-red-200 text-red-800 rounded-lg">
@@ -573,13 +580,13 @@ const AuthForms = () => {
                                         className={buttonClass}
                                         onClick={toggleResetMode}
                                     >
-                                        Giriş Sayfasına Dön
+                                        {t("auth.backToLogin")}
                                     </Button>
                                 </div>
                             ) : (
                                 <form onSubmit={handleResetSubmit} className="space-y-5">
                                     <div className="space-y-2.5">
-                                        <Label htmlFor="reset-email" className={labelClass}>E-posta</Label>
+                                        <Label htmlFor="reset-email" className={labelClass}>{t("auth.email")}</Label>
                                         <div className="relative">
                                             <Mail className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
                                             <Input
@@ -610,7 +617,7 @@ const AuthForms = () => {
                                                 {t("auth.processing")}
                                             </>
                                         ) : (
-                                            "Sıfırlama Bağlantısı Gönder"
+                                            t("auth.sendResetLink")
                                         )}
                                     </Button>
 
@@ -620,7 +627,7 @@ const AuthForms = () => {
                                         className="w-full h-12 rounded-lg font-medium border-gray-300 hover:bg-gray-50 mt-4 transition-all shadow-sm"
                                         onClick={toggleResetMode}
                                     >
-                                        Giriş Sayfasına Dön
+                                        {t("auth.backToLogin")}
                                     </Button>
                                 </form>
                             )}

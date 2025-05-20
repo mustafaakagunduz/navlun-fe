@@ -12,6 +12,7 @@
     "description": "Taşımacıları ve taşıma hizmetine ihtiyaç duyanları birleştiriyoruz. Çevre dostu, verimli ve ekonomik taşımacılık için doğru adres.",
     "getService": "Taşıma Hizmeti Al",
     "joinAsCarrier": "Taşımacı Olarak Katıl",
+    "joinAsBroker": "Aracı Olarak Katıl",
     "safe": "%100 Güvenli",
     "ecofriendly": "Çevre Dostu",
     "sustainable": "Sürdürülebilir"
@@ -111,8 +112,10 @@
     "accountType": "Hesap Türü",
     "sender": "Gönderici",
     "carrier": "Taşıyıcı",
+    "broker": "Aracı",
     "senderInfo": "Gönderici Bilgileri",
     "carrierInfo": "Taşıyıcı Bilgileri",
+    "brokerInfo": "Aracı Bilgileri",
     "welcomeBack": "Hoşgeldiniz!",
     "loginOrSignup": "Devam etmek için giriş yapın veya kayıt olun.",
     "errors": {
@@ -131,6 +134,7 @@
       "admin": "Yönetici",
       "sender": "Gönderici",
       "carrier": "Taşıyıcı",
+      "broker": "Aracı",
       "footerText": "Tüm hakları saklıdır."
     },
     "sidebar": {
@@ -142,7 +146,10 @@
       "offers": "Gelen Teklifler",
       "profile": "Profilim",
       "availableLoads": "Yeni Yükler",
-      "schedule": "Takvim"
+      "schedule": "Takvim",
+      "deals": "Anlaşmalar",
+      "brokerages": "Aracılık İşlemleri",
+      "commissions": "Komisyonlar"
     },
     "page": {
       "title": "Dashboard",
@@ -150,6 +157,7 @@
       "adminDashboard": "BURASI ADMİN DASHBOARD",
       "senderDashboard": "BURASI GÖNDERİCİ DASHBOARD",
       "carrierDashboard": "BURASI TAŞIYICI DASHBOARD",
+      "brokerDashboard": "BURASI ARACI DASHBOARD",
       "greeting": "Merhaba"
     },
     "protectedRoute": {
@@ -200,7 +208,25 @@
     "completedDeliveries": "Tamamlanan Taşımalar",
     "totalDistance": "Toplam Mesafe",
     "totalEarnings": "Toplam Kazanç"
+  },
+  "brokerPage": {
+    "title": "Aracı Paneli",
+    "welcome": "Aracı panelinize hoş geldiniz",
+    "description": "Göndericiler ve taşıyıcılar arasında aracılık yapın, anlaşmaları yönetin ve komisyonlarınızı takip edin.",
+    "availableLoads": "Mevcut Yükler",
+    "activeDeals": "Aktif Anlaşmalar",
+    "pendingDeals": "Bekleyen Anlaşmalar",
+    "statistics": "İstatistikler",
+    "createNewDeal": "Yeni Anlaşma Oluştur",
+    "totalDeals": "Toplam Anlaşma",
+    "ecoFriendlyDeals": "Çevre Dostu Anlaşmalar",
+    "totalCommission": "Toplam Komisyon",
+    "pendingCommission": "Bekleyen Komisyon",
+    "dealHistory": "Anlaşma Geçmişi",
+    "topCarriers": "En İyi Taşıyıcılar",
+    "topSenders": "En İyi Göndericiler"
   }
+
 
 }
 

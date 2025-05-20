@@ -52,19 +52,38 @@ const HeroSection = ({ setShowConfetti, setConfettiSize }: HeroSectionProps) => 
 
                     {/* Butonlar */}
                     <motion.div
-                        className="flex flex-col sm:flex-row gap-3 justify-center mt-6"
+                        className="flex flex-wrap justify-center gap-3 mt-6"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.4 }}
                     >
+                        {/* Taşıma Hizmeti Al Butonu - Gönderici */}
                         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                            <Button className="bg-green-600 hover:bg-green-700">
+                            <Button
+                                variant="outline"
+                                className="border-blue-600 text-blue-600 hover:bg-blue-50 bg-white"
+                            >
                                 {t("hero.getService")}
                             </Button>
                         </motion.div>
+
+                        {/* Taşımacı Olarak Katıl Butonu */}
                         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                            <Button variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">
+                            <Button
+                                variant="outline"
+                                className="border-green-600 text-green-600 hover:bg-green-50 bg-white"
+                            >
                                 {t("hero.joinAsCarrier")}
+                            </Button>
+                        </motion.div>
+
+                        {/* Aracı Olarak Katıl Butonu */}
+                        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                            <Button
+                                variant="outline"
+                                className="border-amber-600 text-amber-600 hover:bg-amber-50 bg-white"
+                            >
+                                {t("hero.joinAsBroker")}
                             </Button>
                         </motion.div>
                     </motion.div>

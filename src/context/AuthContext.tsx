@@ -6,13 +6,13 @@ import { useRouter } from 'next/navigation';
 import authService from '@/services/authService';
 import apiService from '@/services/apiService';
 
-// User type definition
+// User type definition - role içerisine BROKER eklendi
 export type User = {
     id: string;
     email: string;
     firstName?: string;
     lastName?: string;
-    role: string;
+    role: 'ADMIN' | 'SENDER' | 'CARRIER' | 'BROKER'; // BROKER rolü eklendi
 };
 
 // Auth state type
@@ -112,7 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 error: null,
             });
 
-            // Redirect to dashboard
+            // Dashboard sayfasına yönlendirme
             router.push('/dashboard');
         } catch (error: any) {
             setState({
@@ -126,7 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    // Signup function
+    // Signup function - signup fonksiyonuna broker rolü otomatik olarak dahil olacak
     const signup = async (userData: any) => {
         setState({ ...state, isLoading: true, error: null });
 

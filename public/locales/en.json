@@ -12,6 +12,7 @@
     "description": "We connect carriers and those who need transport services. The right address for environmentally friendly, efficient and economical transportation.",
     "getService": "Get Transport Service",
     "joinAsCarrier": "Join As Carrier",
+    "joinAsBroker": "Join As Broker",
     "safe": "100% Safe",
     "ecofriendly": "Eco-Friendly",
     "sustainable": "Sustainable"
@@ -111,8 +112,10 @@
     "accountType": "Account Type",
     "sender": "Sender",
     "carrier": "Carrier",
+    "broker": "Broker",
     "senderInfo": "Sender Information",
     "carrierInfo": "Carrier Information",
+    "brokerInfo": "Broker Information",
     "welcomeBack": "Welcome Back!",
     "loginOrSignup": "Please login or sign up to continue.",
     "errors": {
@@ -131,6 +134,7 @@
         "admin": "Administrator",
         "sender": "Sender",
         "carrier": "Carrier",
+        "broker": "Broker",
         "footerText": "All rights reserved."
       },
       "sidebar": {
@@ -142,7 +146,10 @@
         "offers": "Offers",
         "profile": "My Profile",
         "availableLoads": "Available Loads",
-        "schedule": "Schedule"
+        "schedule": "Schedule",
+        "deals": "Deals",
+        "brokerages": "Brokerages",
+        "commissions": "Commissions"
       },
       "page": {
         "title": "Dashboard",
@@ -150,6 +157,7 @@
         "adminDashboard": "ADMIN DASHBOARD",
         "senderDashboard": "SENDER DASHBOARD",
         "carrierDashboard": "CARRIER DASHBOARD",
+        "brokerDashboard": "BROKER DASHBOARD",
         "greeting": "Hello"
       },
       "protectedRoute": {
@@ -200,7 +208,25 @@
       "completedDeliveries": "Completed Deliveries",
       "totalDistance": "Total Distance",
       "totalEarnings": "Total Earnings"
-    }
+    },
+  "brokerPage": {
+    "title": "Broker Panel",
+    "welcome": "Welcome to your broker panel",
+    "description": "Broker between senders and carriers, manage deals and track your commissions.",
+    "availableLoads": "Available Loads",
+    "activeDeals": "Active Deals",
+    "pendingDeals": "Pending Deals",
+    "statistics": "Statistics",
+    "createNewDeal": "Create New Deal",
+    "totalDeals": "Total Deals",
+    "ecoFriendlyDeals": "Eco-Friendly Deals",
+    "totalCommission": "Total Commission",
+    "pendingCommission": "Pending Commission",
+    "dealHistory": "Deal History",
+    "topCarriers": "Top Carriers",
+    "topSenders": "Top Senders"
+  }
+
 
 }
 

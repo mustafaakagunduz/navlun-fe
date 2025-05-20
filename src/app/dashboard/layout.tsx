@@ -27,8 +27,26 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 return t("dashboard.layout.sender");
             case 'CARRIER':
                 return t("dashboard.layout.carrier");
+            case 'BROKER':
+                return t("dashboard.layout.broker"); // Broker rolü için çeviri
             default:
                 return role;
+        }
+    };
+
+    // Role-specific color class
+    const getRoleColorClass = (role: string) => {
+        switch(role) {
+            case 'ADMIN':
+                return 'bg-green-100 text-green-800';
+            case 'SENDER':
+                return 'bg-blue-100 text-blue-800';
+            case 'CARRIER':
+                return 'bg-purple-100 text-purple-800';
+            case 'BROKER':
+                return 'bg-amber-100 text-amber-800'; // Broker rolü için renk sınıfı
+            default:
+                return 'bg-gray-100 text-gray-800';
         }
     };
 
@@ -52,13 +70,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                                 <span className="text-sm font-medium hidden md:inline">
                                   {user.firstName} {user.lastName}
                                 </span>
-                                <span className={`text-xs font-medium px-2.5 py-0.5 rounded ${
-                                    user.role === 'ADMIN'
-                                        ? 'bg-green-100 text-green-800'
-                                        : user.role === 'SENDER'
-                                            ? 'bg-blue-100 text-blue-800'
-                                            : 'bg-purple-100 text-purple-800'
-                                }`}>
+                                <span className={`text-xs font-medium px-2.5 py-0.5 rounded ${getRoleColorClass(user.role)}`}>
                                   {getRoleName(user.role)}
                                 </span>
                             </div>

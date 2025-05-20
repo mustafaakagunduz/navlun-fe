@@ -33,6 +33,22 @@ export default function Dashboard() {
         );
     }
 
+    // Role göre dashboard rengini belirle
+    const getDashboardColor = (role: string) => {
+        switch(role) {
+            case 'ADMIN':
+                return 'text-green-600';
+            case 'SENDER':
+                return 'text-blue-600';
+            case 'CARRIER':
+                return 'text-purple-600';
+            case 'BROKER':
+                return 'text-amber-600';
+            default:
+                return 'text-gray-600';
+        }
+    };
+
     return (
         <ProtectedRoute>
             <div className="flex h-[calc(100vh-4rem)]">
@@ -58,6 +74,10 @@ export default function Dashboard() {
 
                                         {user?.role === 'CARRIER' && (
                                             <h2 className="text-3xl font-bold text-purple-600">{t("dashboard.page.carrierDashboard")}</h2>
+                                        )}
+
+                                        {user?.role === 'BROKER' && (
+                                            <h2 className="text-3xl font-bold text-amber-600">{t("dashboard.page.brokerDashboard")}</h2>
                                         )}
 
                                         <p className="mt-6 text-gray-600">

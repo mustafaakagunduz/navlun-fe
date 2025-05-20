@@ -10,7 +10,10 @@ import {
     BarChart3,
     Users,
     Settings,
-    FileText
+    FileText,
+    DollarSign,
+    HandshakeIcon,
+    Building
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
@@ -44,12 +47,24 @@ export default function Sidebar() {
         { href: "/dashboard/profile", label: t("dashboard.sidebar.profile"), icon: Users },
     ];
 
+    // Yeni eklenen broker menü öğeleri
+    const brokerMenuItems = [
+        { href: "/dashboard", label: t("dashboard.sidebar.home"), icon: Home },
+        { href: "/dashboard/available-loads", label: t("dashboard.sidebar.availableLoads"), icon: Package },
+        { href: "/dashboard/deals", label: t("dashboard.sidebar.deals"), icon: HandshakeIcon },
+        { href: "/dashboard/brokerages", label: t("dashboard.sidebar.brokerages"), icon: Building },
+        { href: "/dashboard/commissions", label: t("dashboard.sidebar.commissions"), icon: DollarSign },
+        { href: "/dashboard/profile", label: t("dashboard.sidebar.profile"), icon: Users },
+    ];
+
     // Role-based menu selection
     let menuItems = senderMenuItems; // Default
     if (user?.role === 'ADMIN') {
         menuItems = adminMenuItems;
     } else if (user?.role === 'CARRIER') {
         menuItems = carrierMenuItems;
+    } else if (user?.role === 'BROKER') {
+        menuItems = brokerMenuItems; // Broker rolü için menü öğeleri
     }
 
     return (
