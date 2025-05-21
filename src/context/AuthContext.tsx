@@ -111,16 +111,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
             const response = await authService.login(email, password);
 
-            // Save tokens to local storage
+            // Başarılı giriş - Tokenleri local storage'a kaydet
             localStorage.setItem('accessToken', response.accessToken);
             localStorage.setItem('refreshToken', response.refreshToken);
 
-            // Get current user
+            // Güncel kullanıcı bilgisini al
             const user = await authService.getCurrentUser();
 
-            // Check if email is verified
+            // E-posta doğrulanmış mı kontrolü
             if (!user.emailVerified) {
-                // Email not verified, show error
+                // Email doğrulanmamış, hata göster
                 setState({
                     ...state,
                     isLoading: false,
@@ -131,12 +131,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     verificationEmail: email,
                 });
 
-                // Clear tokens
+                // Tokenleri temizle
                 localStorage.removeItem('accessToken');
                 localStorage.removeItem('refreshToken');
                 return;
             }
 
+            // E-posta doğrulanmışsa, kullanıcıyı oturum açmış olarak ayarla
             setState({
                 user,
                 isLoading: false,
@@ -147,7 +148,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 verificationEmail: null,
             });
 
-            // Redirect based on role
+            // Role göre yönlendirme
             if (user.role === 'ADMIN') {
                 router.push('/dashboard/admin');
             } else if (user.role === 'SENDER') {
