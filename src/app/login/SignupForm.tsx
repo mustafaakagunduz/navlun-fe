@@ -1,4 +1,3 @@
-// /components/auth/forms/SignupForm.tsx
 "use client"
 
 import React from "react"
@@ -31,16 +30,16 @@ const SignupForm = ({
                     }: SignupFormProps) => (
     <form onSubmit={handleSignupSubmit} className="space-y-6">
         <div className="space-y-2">
-            <Label className={styleClasses.label}>{t("auth.accountType")}</Label>
+            <Label className={styleClasses.label}>{t("auth.accountType") || "Hesap Türü"}</Label>
             <RadioGroup
                 defaultValue={signupData.role}
                 onValueChange={(value) => handleRoleChange(value as 'SENDER' | 'CARRIER' | 'BROKER')}
                 className="grid grid-cols-3 gap-3"
             >
                 {[
-                    { value: 'SENDER', label: t("auth.sender") },
-                    { value: 'CARRIER', label: t("auth.carrier") },
-                    { value: 'BROKER', label: t("auth.broker") }
+                    { value: 'SENDER', label: t("auth.sender") || "Gönderici" },
+                    { value: 'CARRIER', label: t("auth.carrier") || "Taşıyıcı" },
+                    { value: 'BROKER', label: t("auth.broker") || "Aracı" }
                 ].map(role => (
                     <div key={role.value} className="flex items-center gap-2 bg-white rounded-md p-3 shadow-sm border border-gray-200 hover:border-green-200 transition-colors">
                         <RadioGroupItem
@@ -63,22 +62,22 @@ const SignupForm = ({
             <FormInput
                 id="firstName"
                 name="firstName"
-                placeholder={t("auth.firstName")}
+                placeholder={t("auth.firstName") || "Ad"}
                 value={signupData.firstName}
                 onChange={handleSignupChange}
                 icon={<User className={styleClasses.icon} />}
-                label={t("auth.firstName")}
+                label={t("auth.firstName") || "Ad"}
                 error={formErrors.firstName}
             />
 
             <FormInput
                 id="lastName"
                 name="lastName"
-                placeholder={t("auth.lastName")}
+                placeholder={t("auth.lastName") || "Soyad"}
                 value={signupData.lastName}
                 onChange={handleSignupChange}
                 icon={<User className={styleClasses.icon} />}
-                label={t("auth.lastName")}
+                label={t("auth.lastName") || "Soyad"}
                 error={formErrors.lastName}
             />
         </div>
@@ -91,7 +90,7 @@ const SignupForm = ({
             value={signupData.email}
             onChange={handleSignupChange}
             icon={<Mail className={styleClasses.icon} />}
-            label={t("auth.email")}
+            label={t("auth.email") || "E-posta"}
             error={formErrors.email}
         />
 
@@ -102,7 +101,7 @@ const SignupForm = ({
             value={signupData.phone}
             onChange={handleSignupChange}
             icon={<Phone className={styleClasses.icon} />}
-            label={t("auth.phone")}
+            label={t("auth.phone") || "Telefon"}
         />
 
         <FormInput
@@ -113,7 +112,7 @@ const SignupForm = ({
             value={signupData.password}
             onChange={handleSignupChange}
             icon={<Lock className={styleClasses.icon} />}
-            label={t("auth.password")}
+            label={t("auth.password") || "Şifre"}
             error={formErrors.password}
         />
 
@@ -125,7 +124,7 @@ const SignupForm = ({
             value={signupData.confirmPassword}
             onChange={handleSignupChange}
             icon={<Shield className={styleClasses.icon} />}
-            label={t("auth.confirmPassword")}
+            label={t("auth.confirmPassword") || "Şifre Doğrulama"}
             error={formErrors.confirmPassword}
             rightIcon={
                 signupData.confirmPassword ? (
@@ -144,10 +143,10 @@ const SignupForm = ({
             {isLoading ? (
                 <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    {t("auth.signingUp")}
+                    {t("auth.signingUp") || "Kayıt olunuyor..."}
                 </>
             ) : (
-                t("auth.signup")
+                t("auth.signup") || "Kayıt Ol"
             )}
         </Button>
     </form>

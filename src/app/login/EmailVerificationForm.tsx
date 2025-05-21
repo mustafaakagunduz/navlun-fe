@@ -1,15 +1,14 @@
-"use client"
+"use client";
 
-import React, { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { useAuth } from "@/context/AuthContext"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, AlertCircle, Mail, Clock, RefreshCw, CheckCircle } from "lucide-react"
-import verificationService from "@/services/verificationService"
-import { styleClasses } from "./styles"
+import React, { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2, AlertCircle, Mail, Clock, RefreshCw, CheckCircle } from "lucide-react";
+import verificationService from "@/services/verificationService";
+import { styleClasses } from "./styles";
+import { useAuth } from "@/context/AuthContext";
 
 type EmailVerificationFormProps = {
     userId: string;
@@ -17,7 +16,7 @@ type EmailVerificationFormProps = {
     onVerificationSuccess: () => void;
     onCancel: () => void;
     t: (key: string) => string;
-}
+};
 
 const EmailVerificationForm = ({
                                    userId,
@@ -32,7 +31,6 @@ const EmailVerificationForm = ({
     const [success, setSuccess] = useState<boolean>(false);
     const [timeLeft, setTimeLeft] = useState<number>(300); // 5 dakika (300 saniye)
     const [isResending, setIsResending] = useState<boolean>(false);
-    const router = useRouter();
     const { login } = useAuth();
 
     // Zamanlayıcı
@@ -113,10 +111,10 @@ const EmailVerificationForm = ({
         <Card className="shadow-xl border border-gray-200 rounded-xl bg-white">
             <CardHeader>
                 <CardTitle className="text-xl font-semibold text-green-700">
-                    {t("auth.emailVerification.title")}
+                    {t("auth.emailVerification.title") || "E-posta Adresinizi Doğrulayın"}
                 </CardTitle>
                 <CardDescription>
-                    {t("auth.emailVerification.description")}
+                    {t("auth.emailVerification.description") || "E-posta adresinize gönderilen 6 haneli doğrulama kodunu girin."}
                 </CardDescription>
             </CardHeader>
 
@@ -136,10 +134,10 @@ const EmailVerificationForm = ({
                             </div>
                         </div>
                         <h3 className="text-xl font-bold text-green-700 mb-2">
-                            {t("auth.emailVerification.success")}
+                            {t("auth.emailVerification.success") || "E-posta Adresiniz Doğrulandı"}
                         </h3>
                         <p className="text-gray-600 mb-4">
-                            {t("auth.emailVerification.successMessage")}
+                            {t("auth.emailVerification.successMessage") || "Hesabınız başarıyla doğrulandı. Giriş sayfasına yönlendiriliyorsunuz."}
                         </p>
                     </div>
                 ) : (
@@ -153,8 +151,8 @@ const EmailVerificationForm = ({
                                 <div className="flex items-center">
                                     <Clock className="h-4 w-4 text-amber-500 mr-2" />
                                     <span className={`text-sm font-medium ${timeLeft < 60 ? 'text-red-500' : 'text-amber-500'}`}>
-                    {formatTime(timeLeft)}
-                  </span>
+                                        {formatTime(timeLeft)}
+                                    </span>
                                 </div>
                             </div>
 
@@ -182,10 +180,10 @@ const EmailVerificationForm = ({
                                 {isLoading ? (
                                     <>
                                         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                                        {t("auth.emailVerification.verifying")}
+                                        {t("auth.emailVerification.verifying") || "Doğrulanıyor..."}
                                     </>
                                 ) : (
-                                    t("auth.emailVerification.verify")
+                                    t("auth.emailVerification.verify") || "Doğrula"
                                 )}
                             </Button>
 
@@ -197,7 +195,7 @@ const EmailVerificationForm = ({
                                     onClick={onCancel}
                                     disabled={isLoading}
                                 >
-                                    {t("auth.emailVerification.cancel")}
+                                    {t("auth.emailVerification.cancel") || "İptal"}
                                 </Button>
 
                                 <Button
@@ -212,7 +210,7 @@ const EmailVerificationForm = ({
                                     ) : (
                                         <RefreshCw className="mr-1 h-3 w-3" />
                                     )}
-                                    {t("auth.emailVerification.resendCode")}
+                                    {t("auth.emailVerification.resendCode") || "Kodu Yeniden Gönder"}
                                 </Button>
                             </div>
                         </div>

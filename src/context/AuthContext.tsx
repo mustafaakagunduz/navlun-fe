@@ -1,19 +1,19 @@
-// src/contexts/AuthContext.tsx
+// src/context/AuthContext.tsx
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import authService from '@/services/authService';
-import apiService from '@/services/apiService';
+import verificationService from '@/services/verificationService';
 
-// User type definition - role içerisine BROKER eklendi
+// User type definition
 export type User = {
     id: string;
     email: string;
     firstName?: string;
     lastName?: string;
-    role: 'ADMIN' | 'SENDER' | 'CARRIER' | 'BROKER'; // BROKER rolü eklendi
-    emailVerified?: boolean; // E-posta doğrulama durumu eklendi
+    role: 'ADMIN' | 'SENDER' | 'CARRIER' | 'BROKER';
+    emailVerified?: boolean;
 };
 
 // Auth state type
@@ -22,9 +22,9 @@ type AuthState = {
     isLoading: boolean;
     isAuthenticated: boolean;
     error: string | null;
-    needsVerification: boolean; // E-posta doğrulama ihtiyacı
-    verificationUserId: string | null; // Doğrulama için kullanıcı ID'si
-    verificationEmail: string | null; // Doğrulama için e-posta adresi
+    needsVerification: boolean;
+    verificationUserId: string | null;
+    verificationEmail: string | null;
 };
 
 // Context content type
@@ -34,8 +34,8 @@ type AuthContextType = AuthState & {
     logout: () => Promise<void>;
     refreshToken: () => Promise<boolean>;
     clearError: () => void;
-    completeEmailVerification: () => void; // Doğrulama tamamlandığında çağrılacak
-    cancelEmailVerification: () => void; // Doğrulama iptal edildiğinde çağrılacak
+    completeEmailVerification: () => void;
+    cancelEmailVerification: () => void;
 };
 
 // Default values
@@ -111,21 +111,186 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
             const response = await authService.login(email, password);
 
-            // Check if user's email is verified
+            // Save tokens to local storage
+            localStorage.setItem('accessToken', response.accessToken);
+            localStorage.setItem('refreshToken', response.refreshToken);
+
+            // Get current user
             const user = await authService.getCurrentUser();
 
+            // Check if email is verified
             if (!user.emailVerified) {
-                // E-posta doğrulanmamış, hata göster
+                // Email not verified, show error
                 setState({
                     ...state,
                     isLoading: false,
                     isAuthenticated: false,
-                    error: 'auth.errors.accountNotVerified',
+                    error: 'E-posta adresiniz doğrulanmamış. Lütfen doğrulama kodu ile hesabınızı onaylayın.',
                     needsVerification: true,
                     verificationUserId: user.id,
                     verificationEmail: email,
                 });
 
-                // Tokenleri temizle
+                // Clear tokens
                 localStorage.removeItem('accessToken');
-                localStorage.removeItem('refreshToken
+                localStorage.removeItem('refreshToken');
+                return;
+            }
+
+            setState({
+                user,
+                isLoading: false,
+                isAuthenticated: true,
+                error: null,
+                needsVerification: false,
+                verificationUserId: null,
+                verificationEmail: null,
+            });
+
+            // Redirect based on role
+            if (user.role === 'ADMIN') {
+                router.push('/dashboard/admin');
+            } else if (user.role === 'SENDER') {
+                router.push('/dashboard/sender');
+            } else if (user.role === 'CARRIER') {
+                router.push('/dashboard/carrier');
+            } else if (user.role === 'BROKER') {
+                router.push('/dashboard/broker');
+            } else {
+                router.push('/dashboard');
+            }
+        } catch (error: any) {
+            console.error('Login error:', error);
+            setState({
+                ...state,
+                isLoading: false,
+                error: error.response?.data?.message || 'Giriş başarısız oldu. Lütfen e-posta ve şifrenizi kontrol edin.',
+            });
+        }
+    };
+
+    // Signup function
+    const signup = async (userData: any): Promise<User | null> => {
+        setState({ ...state, isLoading: true, error: null });
+
+        try {
+            const user = await authService.signup(userData);
+
+            // Set verification need
+            setState({
+                ...state,
+                isLoading: false,
+                needsVerification: true,
+                verificationUserId: user.id,
+                verificationEmail: userData.email,
+                error: null,
+            });
+
+            return user;
+        } catch (error: any) {
+            console.error('Signup error:', error);
+            setState({
+                ...state,
+                isLoading: false,
+                error: error.response?.data?.message || 'Kayıt işlemi sırasında bir hata oluştu.',
+            });
+            return null;
+        }
+    };
+
+    // Logout function
+    const logout = async () => {
+        setState({ ...state, isLoading: true });
+
+        try {
+            const refreshToken = localStorage.getItem('refreshToken');
+            if (refreshToken) {
+                await authService.logout(refreshToken);
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+        } finally {
+            // Clear local storage and reset state
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+
+            setState({
+                ...defaultState,
+                isLoading: false,
+            });
+
+            // Redirect to home
+            router.push('/');
+        }
+    };
+
+    // Refresh token function
+    const refreshToken = async (): Promise<boolean> => {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (!refreshToken) return false;
+
+        try {
+            const response = await authService.refreshToken(refreshToken);
+
+            // Save new tokens
+            localStorage.setItem('accessToken', response.accessToken);
+            localStorage.setItem('refreshToken', response.refreshToken);
+
+            return true;
+        } catch (error) {
+            console.error('Token refresh error:', error);
+            return false;
+        }
+    };
+
+    // Clear error function
+    const clearError = () => {
+        setState({ ...state, error: null });
+    };
+
+    // Email verification completed successfully
+    const completeEmailVerification = () => {
+        setState({
+            ...state,
+            needsVerification: false,
+            verificationUserId: null,
+            verificationEmail: null,
+        });
+    };
+
+    // Cancel email verification
+    const cancelEmailVerification = () => {
+        setState({
+            ...state,
+            needsVerification: false,
+            verificationUserId: null,
+            verificationEmail: null,
+        });
+    };
+
+    return (
+        <AuthContext.Provider
+            value={{
+                ...state,
+                login,
+                signup,
+                logout,
+                refreshToken,
+                clearError,
+                completeEmailVerification,
+                cancelEmailVerification,
+            }}
+        >
+            {children}
+        </AuthContext.Provider>
+    );
+}
+
+// Custom hook to use the auth context
+export function useAuth() {
+    const context = useContext(AuthContext);
+    if (context === undefined) {
+        throw new Error('useAuth must be used within an AuthProvider');
+    }
+    return context;
+}
