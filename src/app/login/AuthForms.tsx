@@ -16,10 +16,22 @@ import { FormErrorsType, LoginFormType, SignupFormType } from "./types"
 import LoginForm from "./LoginForm"
 import SignupForm from "./SignupForm"
 import ResetForm from "./ResetForm"
+import EmailVerificationForm from "./EmailVerificationForm"
 
 const AuthForms = () => {
     const { t } = useLanguage()
-    const { login, signup, error, clearError, isLoading } = useAuth()
+    const {
+        login,
+        signup,
+        error,
+        clearError,
+        isLoading,
+        needsVerification,
+        verificationUserId,
+        verificationEmail,
+        completeEmailVerification,
+        cancelEmailVerification
+    } = useAuth()
 
     // Form states
     const [activeTab, setActiveTab] = useState<"login" | "signup">("login")
@@ -189,7 +201,8 @@ const AuthForms = () => {
 
         try {
             const { confirmPassword, ...signupDataToSend } = signupData
-            await signup(signupDataToSend)
+            const result = await signup(signupDataToSend)
+            // Doğrulama sayfasına yönlendirilecek (AuthContext'te needsVerification true olacak)
         } catch (error) {
             // Error handled in AuthContext
         }
@@ -222,6 +235,31 @@ const AuthForms = () => {
     const handleTabChange = (value: string) => {
         setActiveTab(value as "login" | "signup")
         clearError()
+    }
+
+    // E-posta doğrulama tamamlandı
+    const handleVerificationSuccess = () => {
+        completeEmailVerification()
+    }
+
+    // E-posta doğrulama iptal edildi
+    const handleVerificationCancel = () => {
+        cancelEmailVerification()
+    }
+
+    // Doğrulama ihtiyacı varsa doğrulama formunu göster
+    if (needsVerification && verificationUserId && verificationEmail) {
+        return (
+            <div className="w-full max-w-md mx-auto">
+                <EmailVerificationForm
+                    userId={verificationUserId}
+                    email={verificationEmail}
+                    onVerificationSuccess={handleVerificationSuccess}
+                    onCancel={handleVerificationCancel}
+                    t={t}
+                />
+            </div>
+        );
     }
 
     // Main render
