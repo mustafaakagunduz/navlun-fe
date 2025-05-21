@@ -1,38 +1,21 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import {
-    Check,
-    Loader2,
-    X,
-    AlertCircle,
-    Mail,
-    Lock,
-    User,
-    Phone,
-    Shield,
-    ArrowLeft
-} from "lucide-react"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { AlertCircle } from "lucide-react"
 import { useLanguage } from "@/context/LanguageContext"
 import { useAuth } from "@/context/AuthContext"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import authService from "@/services/authService"
 
-type SignupFormType = {
-    firstName: string
-    lastName: string
-    email: string
-    password: string
-    confirmPassword: string
-    phone: string
-    role: 'SENDER' | 'CARRIER' | 'BROKER'
-}
+// Import types
+import { FormErrorsType, LoginFormType, SignupFormType } from "./types"
+
+// Import components
+import LoginForm from "./LoginForm"
+import SignupForm from "./SignupForm"
+import ResetForm from "./ResetForm"
 
 const AuthForms = () => {
     const { t } = useLanguage()
@@ -45,8 +28,13 @@ const AuthForms = () => {
     const [passwordsMatch, setPasswordsMatch] = useState(true)
 
     // Form data
-    const [loginData, setLoginData] = useState({ email: "", password: "" })
+    const [loginData, setLoginData] = useState<LoginFormType>({
+        email: "",
+        password: ""
+    })
+
     const [resetEmail, setResetEmail] = useState("")
+
     const [signupData, setSignupData] = useState<SignupFormType>({
         firstName: "",
         lastName: "",
@@ -59,9 +47,9 @@ const AuthForms = () => {
 
     // Error states
     const [formErrors, setFormErrors] = useState({
-        login: {} as Record<string, string>,
-        signup: {} as Record<string, string>,
-        reset: {} as Record<string, string>
+        login: {} as FormErrorsType,
+        signup: {} as FormErrorsType,
+        reset: {} as FormErrorsType
     })
 
     // Reset errors when switching tabs or modes
@@ -76,11 +64,9 @@ const AuthForms = () => {
         }
     }, [signupData.password, signupData.confirmPassword])
 
-
-
+    // Form change handlers
     const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
-        // Doğrudan güncelleme yapalım, setTimeout kullanmadan
         setLoginData(prev => ({ ...prev, [name]: value }))
 
         // Clear error for this field if exists
@@ -94,7 +80,6 @@ const AuthForms = () => {
 
     const handleSignupChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
-        // Doğrudan güncelleme yapalım
         setSignupData(prev => ({ ...prev, [name]: value }))
 
         // Clear error for this field if exists
@@ -105,9 +90,6 @@ const AuthForms = () => {
             }))
         }
     }
-
-
-
 
     const handleResetEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setResetEmail(e.target.value)
@@ -121,14 +103,13 @@ const AuthForms = () => {
         }
     }
 
-
     const handleRoleChange = (value: 'SENDER' | 'CARRIER' | 'BROKER') => {
         setSignupData(prev => ({ ...prev, role: value }))
     }
 
     // Form validations
     const validateLoginForm = () => {
-        const errors: Record<string, string> = {}
+        const errors: FormErrorsType = {}
 
         if (!loginData.email) {
             errors.email = t("auth.errors.emailRequired")
@@ -145,7 +126,7 @@ const AuthForms = () => {
     }
 
     const validateSignupForm = () => {
-        const errors: Record<string, string> = {}
+        const errors: FormErrorsType = {}
 
         if (!signupData.firstName) {
             errors.firstName = t("auth.errors.firstNameRequired")
@@ -178,7 +159,7 @@ const AuthForms = () => {
     }
 
     const validateResetForm = () => {
-        const errors: Record<string, string> = {}
+        const errors: FormErrorsType = {}
 
         if (!resetEmail) {
             errors.email = t("auth.errors.emailRequired")
@@ -243,330 +224,6 @@ const AuthForms = () => {
         clearError()
     }
 
-    // Style classes
-    const inputContainerClass = "relative"
-    const inputClass = "h-12 px-4 pl-10 rounded-lg border border-gray-200 bg-white focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-colors shadow-sm w-full placeholder:text-gray-400"
-    const inputErrorClass = "border-red-300 bg-red-50 text-red-900 focus:border-red-500 focus:ring-red-200"
-    const buttonClass = "h-12 rounded-lg font-medium bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white transition-all shadow-md hover:shadow-lg w-full"
-    const labelClass = "font-medium text-gray-700 mb-1.5 block text-sm"
-    const iconClass = "absolute left-3 top-3.5 h-5 w-5 text-gray-400"
-    const errorClass = "text-sm text-red-500 mt-1 flex items-center"
-    const errorIconClass = "h-3.5 w-3.5 mr-1"
-
-    // Input with icon and error handling component
-    // Find the FormInput component in your code (around line 225)
-// and replace it with this fixed version:
-
-    const FormInput = ({
-                           id,
-                           name,
-                           type = "text",
-                           placeholder,
-                           value,
-                           onChange,
-                           icon,
-                           label,
-                           error,
-                           rightIcon = null
-                       }: {
-        id: string
-        name: string
-        type?: string
-        placeholder: string
-        value: string
-        onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-        icon: React.ReactNode
-        label: string
-        error?: string
-        rightIcon?: React.ReactNode | null
-    }) => (
-        <div className="space-y-2">
-            <Label htmlFor={id} className={labelClass}>{label}</Label>
-            <div className={inputContainerClass}>
-                {icon}
-                <Input
-                    id={id}
-                    name={name}
-                    type={type}
-                    placeholder={placeholder}
-                    value={value}
-                    onChange={onChange}
-                    className={`${inputClass} ${error ? inputErrorClass : ""}`}
-                    autoComplete="on"
-                    spellCheck="false"
-                />
-                {rightIcon && (
-                    <div className="absolute right-3 top-3.5">
-                        {rightIcon}
-                    </div>
-                )}
-            </div>
-            {error && (
-                <p className={errorClass}>
-                    <AlertCircle className={errorIconClass} />
-                    {error}
-                </p>
-            )}
-        </div>
-    )
-
-    // Render login form
-    const renderLoginForm = () => (
-        <form onSubmit={handleLoginSubmit} className="space-y-6">
-            <FormInput
-                id="login-email"
-                name="email"
-                type="email"
-                placeholder="user@example.com"
-                value={loginData.email}
-                onChange={handleLoginChange}
-                icon={<Mail className={iconClass} />}
-                label={t("auth.email")}
-                error={formErrors.login.email}
-            />
-
-            <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                    <Label htmlFor="login-password" className={labelClass}>{t("auth.password")}</Label>
-                    <Button
-                        type="button"
-                        variant="link"
-                        className="px-0 text-green-600 font-normal h-auto"
-                        onClick={toggleResetMode}
-                    >
-                        {t("auth.forgotPassword")}
-                    </Button>
-                </div>
-
-                <div className={inputContainerClass}>
-                    <Lock className={iconClass} />
-                    <Input
-                        id="login-password"
-                        type="password"
-                        name="password"
-                        placeholder="••••••••"
-                        value={loginData.password}
-                        onChange={handleLoginChange}
-                        className={`${inputClass} ${formErrors.login.password ? inputErrorClass : ""}`}
-                    />
-                </div>
-
-                {formErrors.login.password && (
-                    <p className={errorClass}>
-                        <AlertCircle className={errorIconClass} />
-                        {formErrors.login.password}
-                    </p>
-                )}
-            </div>
-
-            <Button
-                type="submit"
-                className={`${buttonClass} mt-8`}
-                disabled={isLoading}
-            >
-                {isLoading ? (
-                    <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        {t("auth.loggingIn")}
-                    </>
-                ) : (
-                    t("auth.login")
-                )}
-            </Button>
-        </form>
-    )
-
-    // Render signup form
-    const renderSignupForm = () => (
-        <form onSubmit={handleSignupSubmit} className="space-y-6">
-            <div className="space-y-2">
-                <Label className={labelClass}>{t("auth.accountType")}</Label>
-                <RadioGroup
-                    defaultValue={signupData.role}
-                    onValueChange={(value) => handleRoleChange(value as 'SENDER' | 'CARRIER' | 'BROKER')}
-                    className="grid grid-cols-3 gap-3"
-                >
-                    {[
-                        { value: 'SENDER', label: t("auth.sender") },
-                        { value: 'CARRIER', label: t("auth.carrier") },
-                        { value: 'BROKER', label: t("auth.broker") }
-                    ].map(role => (
-                        <div key={role.value} className="flex items-center gap-2 bg-white rounded-md p-3 shadow-sm border border-gray-200 hover:border-green-200 transition-colors">
-                            <RadioGroupItem
-                                value={role.value}
-                                id={role.value.toLowerCase()}
-                                className="text-green-600"
-                            />
-                            <Label
-                                htmlFor={role.value.toLowerCase()}
-                                className="cursor-pointer font-medium text-sm"
-                            >
-                                {role.label}
-                            </Label>
-                        </div>
-                    ))}
-                </RadioGroup>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-                <FormInput
-                    id="firstName"
-                    name="firstName"
-                    placeholder={t("auth.firstName")}
-                    value={signupData.firstName}
-                    onChange={handleSignupChange}
-                    icon={<User className={iconClass} />}
-                    label={t("auth.firstName")}
-                    error={formErrors.signup.firstName}
-                />
-
-                <FormInput
-                    id="lastName"
-                    name="lastName"
-                    placeholder={t("auth.lastName")}
-                    value={signupData.lastName}
-                    onChange={handleSignupChange}
-                    icon={<User className={iconClass} />}
-                    label={t("auth.lastName")}
-                    error={formErrors.signup.lastName}
-                />
-            </div>
-
-            <FormInput
-                id="signup-email"
-                name="email"
-                type="email"
-                placeholder="user@example.com"
-                value={signupData.email}
-                onChange={handleSignupChange}
-                icon={<Mail className={iconClass} />}
-                label={t("auth.email")}
-                error={formErrors.signup.email}
-            />
-
-            <FormInput
-                id="phone"
-                name="phone"
-                placeholder="+90 (___) ___ __ __"
-                value={signupData.phone}
-                onChange={handleSignupChange}
-                icon={<Phone className={iconClass} />}
-                label={t("auth.phone")}
-            />
-
-            <FormInput
-                id="signup-password"
-                name="password"
-                type="password"
-                placeholder="••••••••"
-                value={signupData.password}
-                onChange={handleSignupChange}
-                icon={<Lock className={iconClass} />}
-                label={t("auth.password")}
-                error={formErrors.signup.password}
-            />
-
-            <FormInput
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                value={signupData.confirmPassword}
-                onChange={handleSignupChange}
-                icon={<Shield className={iconClass} />}
-                label={t("auth.confirmPassword")}
-                error={formErrors.signup.confirmPassword}
-                rightIcon={
-                    signupData.confirmPassword ? (
-                        passwordsMatch ?
-                            <Check className="h-5 w-5 text-green-500" /> :
-                            <X className="h-5 w-5 text-red-500" />
-                    ) : null
-                }
-            />
-
-            <Button
-                type="submit"
-                className={`${buttonClass} mt-8`}
-                disabled={isLoading}
-            >
-                {isLoading ? (
-                    <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        {t("auth.signingUp")}
-                    </>
-                ) : (
-                    t("auth.signup")
-                )}
-            </Button>
-        </form>
-    )
-
-    // Render password reset form
-    const renderResetForm = () => (
-        <>
-            {resetSuccess ? (
-                <div className="space-y-6">
-                    <Alert className="bg-green-50 border-green-200 text-green-800 rounded-lg">
-                        <Check className="h-5 w-5 text-green-600" />
-                        <AlertDescription className="font-medium">
-                            {t("auth.resetLinkSent")}
-                        </AlertDescription>
-                    </Alert>
-                    <p className="text-gray-600 mt-4">
-                        {t("auth.resetInstructions")}
-                    </p>
-                    <Button
-                        type="button"
-                        className={buttonClass}
-                        onClick={toggleResetMode}
-                    >
-                        {t("auth.backToLogin")}
-                    </Button>
-                </div>
-            ) : (
-                <form onSubmit={handleResetSubmit} className="space-y-6">
-                    <FormInput
-                        id="reset-email"
-                        name="email"
-                        type="email"
-                        placeholder="user@example.com"
-                        value={resetEmail}
-                        onChange={handleResetEmailChange}
-                        icon={<Mail className={iconClass} />}
-                        label={t("auth.email")}
-                        error={formErrors.reset.email}
-                    />
-
-                    <Button
-                        type="submit"
-                        className={`${buttonClass} mt-8`}
-                        disabled={isLoading}
-                    >
-                        {isLoading ? (
-                            <>
-                                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                                {t("auth.processing")}
-                            </>
-                        ) : (
-                            t("auth.sendResetLink")
-                        )}
-                    </Button>
-
-                    <Button
-                        type="button"
-                        variant="outline"
-                        className="w-full h-12 rounded-lg font-medium border-gray-300 hover:bg-gray-50 mt-4 transition-all shadow-sm"
-                        onClick={toggleResetMode}
-                    >
-                        <ArrowLeft className="mr-2 h-4 w-4" />
-                        {t("auth.backToLogin")}
-                    </Button>
-                </form>
-            )}
-        </>
-    )
-
     // Main render
     return (
         <div className="w-full max-w-md mx-auto">
@@ -602,7 +259,15 @@ const AuthForms = () => {
                         <TabsContent value="login" className="mt-0">
                             <Card className="border border-gray-200 shadow-xl rounded-xl bg-white overflow-hidden">
                                 <CardContent className="p-6 pt-6">
-                                    {renderLoginForm()}
+                                    <LoginForm
+                                        loginData={loginData}
+                                        formErrors={formErrors.login}
+                                        isLoading={isLoading}
+                                        handleLoginChange={handleLoginChange}
+                                        handleLoginSubmit={handleLoginSubmit}
+                                        toggleResetMode={toggleResetMode}
+                                        t={t}
+                                    />
                                 </CardContent>
                             </Card>
                         </TabsContent>
@@ -610,7 +275,16 @@ const AuthForms = () => {
                         <TabsContent value="signup" className="mt-0">
                             <Card className="border border-gray-200 shadow-xl rounded-xl bg-white overflow-hidden">
                                 <CardContent className="p-6 pt-6">
-                                    {renderSignupForm()}
+                                    <SignupForm
+                                        signupData={signupData}
+                                        formErrors={formErrors.signup}
+                                        isLoading={isLoading}
+                                        passwordsMatch={passwordsMatch}
+                                        handleSignupChange={handleSignupChange}
+                                        handleRoleChange={handleRoleChange}
+                                        handleSignupSubmit={handleSignupSubmit}
+                                        t={t}
+                                    />
                                 </CardContent>
                             </Card>
                         </TabsContent>
@@ -631,7 +305,16 @@ const AuthForms = () => {
                                 </Alert>
                             )}
 
-                            {renderResetForm()}
+                            <ResetForm
+                                resetEmail={resetEmail}
+                                formErrors={formErrors.reset}
+                                isLoading={isLoading}
+                                resetSuccess={resetSuccess}
+                                handleResetEmailChange={handleResetEmailChange}
+                                handleResetSubmit={handleResetSubmit}
+                                toggleResetMode={toggleResetMode}
+                                t={t}
+                            />
                         </CardContent>
                     </Card>
                 )}
