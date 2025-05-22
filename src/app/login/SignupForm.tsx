@@ -41,7 +41,7 @@ const SignupForm = ({
                     { value: 'CARRIER', label: t("auth.carrier") || "Taşıyıcı" },
                     { value: 'BROKER', label: t("auth.broker") || "Aracı" }
                 ].map(role => (
-                    <div key={role.value} className="flex items-center gap-2 bg-white rounded-md p-3 shadow-sm border border-gray-200 hover:border-green-200 transition-colors">
+                    <div key={role.value} className="flex items-center gap-2 bg-white rounded-md p-3 shadow-sm border border-gray-200 hover:border-green-200 transition-colors duration-200">
                         <RadioGroupItem
                             value={role.value}
                             id={role.value.toLowerCase()}
@@ -137,17 +137,24 @@ const SignupForm = ({
 
         <Button
             type="submit"
-            className={`${styleClasses.button} mt-8`}
+            className={`${styleClasses.button} mt-8 transform-none hover:transform-none active:transform-none focus:transform-none`}
             disabled={isLoading}
+            style={{
+                willChange: 'auto',
+                backfaceVisibility: 'hidden',
+                WebkitBackfaceVisibility: 'hidden'
+            }}
         >
-            {isLoading ? (
-                <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    {t("auth.signingUp") || "Kayıt olunuyor..."}
-                </>
-            ) : (
-                t("auth.signup") || "Kayıt Ol"
-            )}
+            <span className="flex items-center justify-center w-full">
+                {isLoading ? (
+                    <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        {t("auth.signingUp") || "Kayıt olunuyor..."}
+                    </>
+                ) : (
+                    t("auth.signup") || "Kayıt Ol"
+                )}
+            </span>
         </Button>
     </form>
 )

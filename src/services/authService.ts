@@ -27,21 +27,6 @@ export type SignupData = {
     role: 'ADMIN' | 'SENDER' | 'CARRIER' | 'BROKER';
 };
 
-export type VerifyEmailRequest = {
-    userId: string;
-    code: string;
-};
-
-export type ResendVerificationCodeRequest = {
-    userId: string;
-    email: string;
-};
-
-export type VerificationResponse = {
-    success: boolean;
-    message: string;
-};
-
 const authService = {
     /**
      * Kullanıcı girişi yapar
@@ -71,19 +56,12 @@ const authService = {
     },
 
     /**
-     * Yeni kullanıcı kaydı yapar
+     * Yeni kullanıcı kaydı yapar - Email doğrulaması kaldırıldı
      * @param userData Yeni kullanıcı bilgileri
      */
     signup: async (userData: SignupData): Promise<User> => {
         try {
             const response = await apiService.post<User>('/auth/signup', userData);
-
-            // E-posta doğrulama kodunu iste
-            await apiService.post('/auth/request-verification-code', {
-                userId: response.id,
-                email: userData.email
-            });
-
             return response;
         } catch (error) {
             console.error('Signup error:', error);
@@ -126,66 +104,6 @@ const authService = {
         } catch (error) {
             console.error('Get current user error:', error);
             throw error;
-        }
-    },
-
-    /**
-     * E-posta doğrulama kodu ister
-     * @param userId Kullanıcı ID
-     * @param email E-posta adresi
-     */
-    requestVerificationCode: async (userId: string, email: string): Promise<VerificationResponse> => {
-        try {
-            const response = await apiService.post<VerificationResponse>('/auth/request-verification-code', { userId, email });
-            return response;
-        } catch (error: any) {
-            console.error('Request verification code error:', error);
-            return {
-                success: false,
-                message: error.response?.data?.message || 'Doğrulama kodu isteme işlemi başarısız oldu.',
-            };
-        }
-    },
-
-    /**
-     * E-posta doğrulama kodunu doğrular
-     * @param userId Kullanıcı ID
-     * @param code Doğrulama kodu
-     */
-    verifyEmail: async (userId: string, code: string): Promise<VerificationResponse> => {
-        try {
-            const response = await apiService.post<VerificationResponse>('/auth/verify-email', { userId, code });
-            return {
-                success: true,
-                message: response.message || 'E-posta adresi başarıyla doğrulandı',
-            };
-        } catch (error: any) {
-            console.error('Email verification error:', error);
-            return {
-                success: false,
-                message: error.response?.data?.message || 'Doğrulama işlemi başarısız oldu.',
-            };
-        }
-    },
-
-    /**
-     * E-posta doğrulama kodunu yeniden gönderir
-     * @param userId Kullanıcı ID
-     * @param email E-posta adresi
-     */
-    resendVerificationCode: async (userId: string, email: string): Promise<VerificationResponse> => {
-        try {
-            const response = await apiService.post<VerificationResponse>('/auth/resend-verification-code', { userId, email });
-            return {
-                success: true,
-                message: response.message || 'Yeni doğrulama kodu e-posta adresinize gönderildi',
-            };
-        } catch (error: any) {
-            console.error('Resend verification code error:', error);
-            return {
-                success: false,
-                message: error.response?.data?.message || 'Yeni kod gönderilirken bir hata oluştu.',
-            };
         }
     },
 

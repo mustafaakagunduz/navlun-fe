@@ -38,7 +38,7 @@ const LoginForm = ({
                 <Button
                     type="button"
                     variant="link"
-                    className="px-0 text-green-600 font-normal h-auto"
+                    className="px-0 text-green-600 font-normal h-auto hover:text-green-700 transition-colors duration-200"
                     onClick={toggleResetMode}
                 >
                     {t("auth.forgotPassword")}
@@ -68,17 +68,24 @@ const LoginForm = ({
 
         <Button
             type="submit"
-            className={`${styleClasses.button} mt-8`}
+            className={`${styleClasses.button} mt-8 transform-none hover:transform-none active:transform-none focus:transform-none`}
             disabled={isLoading}
+            style={{
+                willChange: 'auto',
+                backfaceVisibility: 'hidden',
+                WebkitBackfaceVisibility: 'hidden'
+            }}
         >
-            {isLoading ? (
-                <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    {t("auth.loggingIn")}
-                </>
-            ) : (
-                t("auth.login")
-            )}
+            <span className="flex items-center justify-center w-full">
+                {isLoading ? (
+                    <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        {t("auth.loggingIn")}
+                    </>
+                ) : (
+                    t("auth.login")
+                )}
+            </span>
         </Button>
     </form>
 )

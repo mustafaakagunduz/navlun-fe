@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertCircle } from "lucide-react"
+import { AlertCircle, CheckCircle } from "lucide-react"
 import { useLanguage } from "@/context/LanguageContext"
 import { useAuth } from "@/context/AuthContext"
 import authService from "@/services/authService"
@@ -202,7 +202,7 @@ const AuthForms = () => {
         try {
             const { confirmPassword, ...signupDataToSend } = signupData
             const result = await signup(signupDataToSend)
-            // Doğrulama sayfasına yönlendirilecek (AuthContext'te needsVerification true olacak)
+            // Email doğrulama sayfasına yönlendirilecek (AuthContext'te needsVerification true olacak)
         } catch (error) {
             // Error handled in AuthContext
         }
@@ -237,14 +237,27 @@ const AuthForms = () => {
         clearError()
     }
 
-    // E-posta doğrulama tamamlandı
-    const handleVerificationSuccess = () => {
-        completeEmailVerification()
+    // E-posta doğrulama tamamlandı - otomatik login yap
+    const handleVerificationSuccess = async () => {
+        // Email doğrulama başarılı - otomatik login yap
+        if (verificationEmail && signupData.password) {
+            try {
+                await login(verificationEmail, signupData.password)
+            } catch (error) {
+                // Login başarısız olursa sadece verification'ı temizle ve login sekmesine geç
+                completeEmailVerification()
+                setActiveTab("login")
+            }
+        } else {
+            completeEmailVerification()
+            setActiveTab("login")
+        }
     }
 
     // E-posta doğrulama iptal edildi
     const handleVerificationCancel = () => {
         cancelEmailVerification()
+        setActiveTab("login")
     }
 
     // Doğrulama ihtiyacı varsa doğrulama formunu göster

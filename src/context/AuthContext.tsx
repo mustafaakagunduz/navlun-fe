@@ -4,7 +4,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import authService from '@/services/authService';
-import verificationService from '@/services/verificationService';
 
 // User type definition
 export type User = {
@@ -106,7 +105,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Login function
     const login = async (email: string, password: string) => {
-        setState({ ...state, isLoading: true, error: null });
+        setState(prev => ({ ...prev, isLoading: true, error: null }));
 
         try {
             const response = await authService.login(email, password);
@@ -118,26 +117,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // Güncel kullanıcı bilgisini al
             const user = await authService.getCurrentUser();
 
-            // E-posta doğrulanmış mı kontrolü
-            if (!user.emailVerified) {
-                // Email doğrulanmamış, hata göster
-                setState({
-                    ...state,
-                    isLoading: false,
-                    isAuthenticated: false,
-                    error: 'E-posta adresiniz doğrulanmamış. Lütfen doğrulama kodu ile hesabınızı onaylayın.',
-                    needsVerification: true,
-                    verificationUserId: user.id,
-                    verificationEmail: email,
-                });
-
-                // Tokenleri temizle
-                localStorage.removeItem('accessToken');
-                localStorage.removeItem('refreshToken');
-                return;
-            }
-
-            // E-posta doğrulanmışsa, kullanıcıyı oturum açmış olarak ayarla
             setState({
                 user,
                 isLoading: false,
@@ -162,46 +141,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
         } catch (error: any) {
             console.error('Login error:', error);
-            setState({
-                ...state,
+            setState(prev => ({
+                ...prev,
                 isLoading: false,
                 error: error.response?.data?.message || 'Giriş başarısız oldu. Lütfen e-posta ve şifrenizi kontrol edin.',
-            });
+            }));
         }
     };
 
     // Signup function
     const signup = async (userData: any): Promise<User | null> => {
-        setState({ ...state, isLoading: true, error: null });
+        setState(prev => ({ ...prev, isLoading: true, error: null }));
 
         try {
             const user = await authService.signup(userData);
 
-            // Set verification need
-            setState({
-                ...state,
+            // Email doğrulama gerekli - verification state'ini ayarla
+            setState(prev => ({
+                ...prev,
                 isLoading: false,
                 needsVerification: true,
                 verificationUserId: user.id,
                 verificationEmail: userData.email,
                 error: null,
-            });
+            }));
 
             return user;
         } catch (error: any) {
             console.error('Signup error:', error);
-            setState({
-                ...state,
+            setState(prev => ({
+                ...prev,
                 isLoading: false,
                 error: error.response?.data?.message || 'Kayıt işlemi sırasında bir hata oluştu.',
-            });
+            }));
             return null;
         }
     };
 
     // Logout function
     const logout = async () => {
-        setState({ ...state, isLoading: true });
+        setState(prev => ({ ...prev, isLoading: true }));
 
         try {
             const refreshToken = localStorage.getItem('refreshToken');
@@ -246,27 +225,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Clear error function
     const clearError = () => {
-        setState({ ...state, error: null });
+        setState(prev => ({ ...prev, error: null }));
     };
 
     // Email verification completed successfully
     const completeEmailVerification = () => {
-        setState({
-            ...state,
+        setState(prev => ({
+            ...prev,
             needsVerification: false,
             verificationUserId: null,
             verificationEmail: null,
-        });
+        }));
     };
 
     // Cancel email verification
     const cancelEmailVerification = () => {
-        setState({
-            ...state,
+        setState(prev => ({
+            ...prev,
             needsVerification: false,
             verificationUserId: null,
             verificationEmail: null,
-        });
+        }));
     };
 
     return (
