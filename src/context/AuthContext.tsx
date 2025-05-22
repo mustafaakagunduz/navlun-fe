@@ -24,6 +24,7 @@ type AuthState = {
     needsVerification: boolean;
     verificationUserId: string | null;
     verificationEmail: string | null;
+    verificationPassword: string | null; // Verification sonrası otomatik login için
 };
 
 // Context content type
@@ -46,6 +47,7 @@ const defaultState: AuthState = {
     needsVerification: false,
     verificationUserId: null,
     verificationEmail: null,
+    verificationPassword: null,
 };
 
 // Create Auth Context
@@ -55,6 +57,22 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [state, setState] = useState<AuthState>(defaultState);
     const router = useRouter();
+
+    // Role'e göre dashboard URL'ini döndür
+    const getDashboardUrl = (role: string): string => {
+        switch (role) {
+            case 'ADMIN':
+                return '/dashboard/admin';
+            case 'SENDER':
+                return '/dashboard/sender';
+            case 'CARRIER':
+                return '/dashboard/carrier';
+            case 'BROKER':
+                return '/dashboard/broker';
+            default:
+                return '/dashboard';
+        }
+    };
 
     // Verify token and get user information
     useEffect(() => {
@@ -80,6 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     needsVerification: false,
                     verificationUserId: null,
                     verificationEmail: null,
+                    verificationPassword: null,
                 });
             } catch (error) {
                 console.error('Auth verification failed:', error);
@@ -125,20 +144,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 needsVerification: false,
                 verificationUserId: null,
                 verificationEmail: null,
+                verificationPassword: null,
             });
 
             // Role göre yönlendirme
-            if (user.role === 'ADMIN') {
-                router.push('/dashboard/admin');
-            } else if (user.role === 'SENDER') {
-                router.push('/dashboard/sender');
-            } else if (user.role === 'CARRIER') {
-                router.push('/dashboard/carrier');
-            } else if (user.role === 'BROKER') {
-                router.push('/dashboard/broker');
-            } else {
-                router.push('/dashboard');
-            }
+            const dashboardUrl = getDashboardUrl(user.role);
+            router.push(dashboardUrl);
+
         } catch (error: any) {
             console.error('Login error:', error);
             setState(prev => ({
@@ -156,13 +168,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
             const user = await authService.signup(userData);
 
-            // Email doğrulama gerekli - verification state'ini ayarla
+            // Email doğrulama gerekli - verification state'ini ayarla ve şifreyi sakla
             setState(prev => ({
                 ...prev,
                 isLoading: false,
                 needsVerification: true,
                 verificationUserId: user.id,
                 verificationEmail: userData.email,
+                verificationPassword: userData.password, // Otomatik login için şifreyi sakla
                 error: null,
             }));
 
@@ -229,13 +242,67 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     // Email verification completed successfully
-    const completeEmailVerification = () => {
-        setState(prev => ({
-            ...prev,
-            needsVerification: false,
-            verificationUserId: null,
-            verificationEmail: null,
-        }));
+    const completeEmailVerification = async () => {
+        // Email doğrulama başarılı - otomatik login yap
+        if (state.verificationEmail && state.verificationPassword) {
+            try {
+                setState(prev => ({ ...prev, isLoading: true }));
+
+                // Otomatik login yap
+                const response = await authService.login(state.verificationEmail, state.verificationPassword);
+
+                // Başarılı giriş - Tokenleri local storage'a kaydet
+                localStorage.setItem('accessToken', response.accessToken);
+                localStorage.setItem('refreshToken', response.refreshToken);
+
+                // Güncel kullanıcı bilgisini al
+                const user = await authService.getCurrentUser();
+
+                setState({
+                    user,
+                    isLoading: false,
+                    isAuthenticated: true,
+                    error: null,
+                    needsVerification: false,
+                    verificationUserId: null,
+                    verificationEmail: null,
+                    verificationPassword: null,
+                });
+
+                // Role göre yönlendirme
+                const dashboardUrl = getDashboardUrl(user.role);
+                router.push(dashboardUrl);
+
+            } catch (error) {
+                console.error('Auto-login after verification failed:', error);
+
+                // Login başarısız olursa sadece verification'ı temizle
+                setState(prev => ({
+                    ...prev,
+                    isLoading: false,
+                    needsVerification: false,
+                    verificationUserId: null,
+                    verificationEmail: null,
+                    verificationPassword: null,
+                    error: 'Email doğrulandı ancak otomatik giriş başarısız. Lütfen manuel giriş yapın.',
+                }));
+
+                // Manuel giriş için login sayfasına yönlendir
+                router.push('/auth/login');
+            }
+        } else {
+            // Email ve password bilgisi yoksa sadece verification state'ini temizle
+            setState(prev => ({
+                ...prev,
+                needsVerification: false,
+                verificationUserId: null,
+                verificationEmail: null,
+                verificationPassword: null,
+            }));
+
+            // Manuel giriş için login sayfasına yönlendir
+            router.push('/auth/login');
+        }
     };
 
     // Cancel email verification
@@ -245,6 +312,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             needsVerification: false,
             verificationUserId: null,
             verificationEmail: null,
+            verificationPassword: null,
         }));
     };
 

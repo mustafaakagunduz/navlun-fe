@@ -239,19 +239,9 @@ const AuthForms = () => {
 
     // E-posta doğrulama tamamlandı - otomatik login yap
     const handleVerificationSuccess = async () => {
-        // Email doğrulama başarılı - otomatik login yap
-        if (verificationEmail && signupData.password) {
-            try {
-                await login(verificationEmail, signupData.password)
-            } catch (error) {
-                // Login başarısız olursa sadece verification'ı temizle ve login sekmesine geç
-                completeEmailVerification()
-                setActiveTab("login")
-            }
-        } else {
-            completeEmailVerification()
-            setActiveTab("login")
-        }
+        // AuthContext'teki completeEmailVerification fonksiyonu
+        // otomatik login yapacak ve role göre yönlendirecek
+        completeEmailVerification();
     }
 
     // E-posta doğrulama iptal edildi
