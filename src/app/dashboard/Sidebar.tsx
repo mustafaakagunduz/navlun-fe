@@ -36,7 +36,7 @@ export default function Sidebar() {
         { href: "/dashboard", label: t("dashboard.sidebar.home"), icon: Home },
         { href: "/dashboard/loads", label: t("dashboard.sidebar.myLoads"), icon: Package },
         { href: "/dashboard/offers", label: t("dashboard.sidebar.offers"), icon: FileText },
-        { href: "/dashboard/profile", label: t("dashboard.sidebar.profile"), icon: Users },
+        { href: "/dashboard/sender-profile", label: t("dashboard.sidebar.profile"), icon: Users },
     ];
 
     const carrierMenuItems = [
@@ -44,7 +44,7 @@ export default function Sidebar() {
         { href: "/dashboard/available-loads", label: t("dashboard.sidebar.availableLoads"), icon: Package },
         { href: "/dashboard/my-loads", label: t("dashboard.sidebar.myLoads"), icon: Truck },
         { href: "/dashboard/schedule", label: t("dashboard.sidebar.schedule"), icon: Calendar },
-        { href: "/dashboard/profile", label: t("dashboard.sidebar.profile"), icon: Users },
+        { href: "/dashboard/carrier-profile", label: t("dashboard.sidebar.profile"), icon: Users },
     ];
 
     // Yeni eklenen broker menü öğeleri
@@ -54,7 +54,7 @@ export default function Sidebar() {
         { href: "/dashboard/deals", label: t("dashboard.sidebar.deals"), icon: HandshakeIcon },
         { href: "/dashboard/brokerages", label: t("dashboard.sidebar.brokerages"), icon: Building },
         { href: "/dashboard/commissions", label: t("dashboard.sidebar.commissions"), icon: DollarSign },
-        { href: "/dashboard/profile", label: t("dashboard.sidebar.profile"), icon: Users },
+        { href: "/dashboard/broker-profile", label: t("dashboard.sidebar.profile"), icon: Users },
     ];
 
     // Role-based menu selection
