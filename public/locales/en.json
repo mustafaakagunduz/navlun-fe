@@ -97,7 +97,6 @@
     "privacy": "Privacy Policy",
     "contact": "Contact Us"
   },
-
   "dashboard": {
       "layout": {
         "admin": "Administrator",
@@ -225,24 +224,7 @@
     "resetPasswordDescription": "Enter your email address and we'll send you a link to reset your password.",
     "ecoFriendlyTransport": "Eco-Friendly Transportation",
     "platformDescription": "Reduce your carbon footprint and contribute to sustainable logistics solutions with EkoTaşıma.",
-    "emailVerification": {
-      "title": "Email Verification",
-      "description": "Please enter the 6-digit verification code sent to your email address.",
-      "verify": "Verify",
-      "verifying": "Verifying...",
-      "success": "Successfully Verified!",
-      "successMessage": "Your email has been verified, redirecting you...",
-      "resendCode": "Resend Code",
-      "cancel": "Cancel",
-      "codeExpired": "Verification code has expired. Please request a new code.",
-      "incorrectCode": "Incorrect verification code. Please try again.",
-      "verificationFailed": "Verification failed. Please try again.",
-      "resendSuccess": "A new verification code has been sent.",
-      "resendFailed": "Failed to send code. Please try again.",
-      "timeLimitMessage": "Code valid for",
-      "timeExpired": "Code expired",
-      "enterSixDigits": "Please enter the 6-digit code"
-    },
+
     "errors": {
       "resetFailed": "Password reset failed",
       "emailRequired": "Email is required",
@@ -255,7 +237,35 @@
       "lastNameRequired": "Last name is required",
       "verificationRequired": "Email verification required",
       "accountNotVerified": "Your account is not verified. Please use the verification code sent to your email."
+    },
+    "emailVerification": {
+      "title": "Verify Your Email Address",
+      "description": "Please enter the 6-digit verification code sent to your email address.",
+      "enterSixDigits": "Please enter the 6-digit code",
+      "verify": "Verify",
+      "verifying": "Verifying...",
+      "cancel": "Cancel",
+      "resendCode": "Resend Code",
+      "success": "Your Email Address Has Been Successfully Verified!",
+      "successMessage": "Your email has been verified, redirecting you...",
+      "loginSuccess": "Logging in...",
+      "redirectingMessage": "Redirecting you to the dashboard...",
+      "incorrectCode": "Incorrect verification code. Please try again.",
+      "verificationFailed": "Verification failed. Please try again.",
+      "codeExpired": "Verification code has expired. Please request a new code.",
+      "resendSuccess": "A new verification code has been sent.",
+      "resendFailed": "An error occurred while sending a new code. Please try again.",
+      "timeLimitMessage": "Code valid for",
+      "timeExpired": "Code expired",
+      "tips": {
+        "title": "Tips for receiving the verification code:",
+        "sentWithin": "The email is sent within <strong>a few minutes</strong>",
+        "checkSpam": "Be sure to check your <strong>spam/junk</strong> folder",
+        "ensureCorrect": "Ensure you've entered your email address correctly",
+        "refreshInbox": "Refresh your inbox"
+      }
     }
+
 
   }
 

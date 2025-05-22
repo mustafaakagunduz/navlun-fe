@@ -1,4 +1,3 @@
-// src/context/AuthContext.tsx
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
@@ -24,7 +23,7 @@ type AuthState = {
     needsVerification: boolean;
     verificationUserId: string | null;
     verificationEmail: string | null;
-    verificationPassword: string | null; // Verification sonrası otomatik login için
+    verificationPassword: string | null;
 };
 
 // Context content type
@@ -34,11 +33,10 @@ type AuthContextType = AuthState & {
     logout: () => Promise<void>;
     refreshToken: () => Promise<boolean>;
     clearError: () => void;
-    completeEmailVerification: () => void;
+    completeEmailVerification: () => Promise<void>;
     cancelEmailVerification: () => void;
 };
 
-// Default values
 const defaultState: AuthState = {
     user: null,
     isLoading: true,
@@ -50,15 +48,12 @@ const defaultState: AuthState = {
     verificationPassword: null,
 };
 
-// Create Auth Context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Auth Provider component
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [state, setState] = useState<AuthState>(defaultState);
     const router = useRouter();
 
-    // Role'e göre dashboard URL'ini döndür
     const getDashboardUrl = (role: string): string => {
         switch (role) {
             case 'ADMIN':
@@ -74,20 +69,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    // Verify token and get user information
     useEffect(() => {
         const verifyToken = async () => {
             try {
                 const token = localStorage.getItem('accessToken');
                 if (!token) {
-                    setState({
-                        ...defaultState,
-                        isLoading: false,
-                    });
+                    setState({ ...defaultState, isLoading: false });
                     return;
                 }
 
-                // Get user profile info
                 const user = await authService.getCurrentUser();
 
                 setState({
@@ -101,20 +91,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     verificationPassword: null,
                 });
             } catch (error) {
-                console.error('Auth verification failed:', error);
-
-                // Try to refresh the token
                 const refreshed = await refreshToken();
-
-                // If refresh failed, clear local storage and update state
                 if (!refreshed) {
                     localStorage.removeItem('accessToken');
                     localStorage.removeItem('refreshToken');
-
-                    setState({
-                        ...defaultState,
-                        isLoading: false,
-                    });
+                    setState({ ...defaultState, isLoading: false });
                 }
             }
         };
@@ -122,18 +103,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         verifyToken();
     }, []);
 
-    // Login function
     const login = async (email: string, password: string) => {
         setState(prev => ({ ...prev, isLoading: true, error: null }));
 
         try {
             const response = await authService.login(email, password);
 
-            // Başarılı giriş - Tokenleri local storage'a kaydet
             localStorage.setItem('accessToken', response.accessToken);
             localStorage.setItem('refreshToken', response.refreshToken);
 
-            // Güncel kullanıcı bilgisini al
             const user = await authService.getCurrentUser();
 
             setState({
@@ -147,165 +125,112 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 verificationPassword: null,
             });
 
-            // Role göre yönlendirme
             const dashboardUrl = getDashboardUrl(user.role);
             router.push(dashboardUrl);
 
         } catch (error: any) {
-            console.error('Login error:', error);
             setState(prev => ({
                 ...prev,
                 isLoading: false,
-                error: error.response?.data?.message || 'Giriş başarısız oldu. Lütfen e-posta ve şifrenizi kontrol edin.',
+                error: error.response?.data?.message || 'Giriş başarısız oldu.',
             }));
         }
     };
 
-    // Signup function
     const signup = async (userData: any): Promise<User | null> => {
         setState(prev => ({ ...prev, isLoading: true, error: null }));
 
         try {
             const user = await authService.signup(userData);
 
-            // Email doğrulama gerekli - verification state'ini ayarla ve şifreyi sakla
             setState(prev => ({
                 ...prev,
                 isLoading: false,
                 needsVerification: true,
                 verificationUserId: user.id,
                 verificationEmail: userData.email,
-                verificationPassword: userData.password, // Otomatik login için şifreyi sakla
+                verificationPassword: userData.password,
                 error: null,
             }));
 
             return user;
         } catch (error: any) {
-            console.error('Signup error:', error);
             setState(prev => ({
                 ...prev,
                 isLoading: false,
-                error: error.response?.data?.message || 'Kayıt işlemi sırasında bir hata oluştu.',
+                error: error.response?.data?.message || 'Kayıt sırasında hata oluştu.',
             }));
             return null;
         }
     };
 
-    // Logout function
     const logout = async () => {
         setState(prev => ({ ...prev, isLoading: true }));
-
         try {
             const refreshToken = localStorage.getItem('refreshToken');
-            if (refreshToken) {
-                await authService.logout(refreshToken);
-            }
-        } catch (error) {
-            console.error('Logout error:', error);
+            if (refreshToken) await authService.logout(refreshToken);
         } finally {
-            // Clear local storage and reset state
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
-
-            setState({
-                ...defaultState,
-                isLoading: false,
-            });
-
-            // Redirect to home
+            localStorage.clear();
+            setState({ ...defaultState, isLoading: false });
             router.push('/');
         }
     };
 
-    // Refresh token function
     const refreshToken = async (): Promise<boolean> => {
         const refreshToken = localStorage.getItem('refreshToken');
         if (!refreshToken) return false;
 
         try {
             const response = await authService.refreshToken(refreshToken);
-
-            // Save new tokens
             localStorage.setItem('accessToken', response.accessToken);
             localStorage.setItem('refreshToken', response.refreshToken);
-
             return true;
-        } catch (error) {
-            console.error('Token refresh error:', error);
+        } catch {
             return false;
         }
     };
 
-    // Clear error function
-    const clearError = () => {
-        setState(prev => ({ ...prev, error: null }));
-    };
+    const clearError = () => setState(prev => ({ ...prev, error: null }));
 
-    // Email verification completed successfully
     const completeEmailVerification = async () => {
-        // Email doğrulama başarılı - otomatik login yap
-        if (state.verificationEmail && state.verificationPassword) {
-            try {
-                setState(prev => ({ ...prev, isLoading: true }));
+        setState(prev => ({ ...prev, isLoading: true }));
+        try {
+            if (state.verificationEmail && state.verificationPassword) {
+                const loginRes = await authService.login(state.verificationEmail, state.verificationPassword);
+                localStorage.setItem('accessToken', loginRes.accessToken);
+                localStorage.setItem('refreshToken', loginRes.refreshToken);
 
-                // Otomatik login yap
-                const response = await authService.login(state.verificationEmail, state.verificationPassword);
-
-                // Başarılı giriş - Tokenleri local storage'a kaydet
-                localStorage.setItem('accessToken', response.accessToken);
-                localStorage.setItem('refreshToken', response.refreshToken);
-
-                // Güncel kullanıcı bilgisini al
                 const user = await authService.getCurrentUser();
 
                 setState({
                     user,
                     isLoading: false,
                     isAuthenticated: true,
-                    error: null,
                     needsVerification: false,
                     verificationUserId: null,
                     verificationEmail: null,
                     verificationPassword: null,
+                    error: null,
                 });
 
-                // Role göre yönlendirme
-                const dashboardUrl = getDashboardUrl(user.role);
-                router.push(dashboardUrl);
-
-            } catch (error) {
-                console.error('Auto-login after verification failed:', error);
-
-                // Login başarısız olursa sadece verification'ı temizle
-                setState(prev => ({
-                    ...prev,
-                    isLoading: false,
-                    needsVerification: false,
-                    verificationUserId: null,
-                    verificationEmail: null,
-                    verificationPassword: null,
-                    error: 'Email doğrulandı ancak otomatik giriş başarısız. Lütfen manuel giriş yapın.',
-                }));
-
-                // Manuel giriş için login sayfasına yönlendir
-                router.push('/auth/login');
+                router.push(getDashboardUrl(user.role));
+            } else {
+                throw new Error("Login credentials missing");
             }
-        } else {
-            // Email ve password bilgisi yoksa sadece verification state'ini temizle
-            setState(prev => ({
-                ...prev,
+        } catch {
+            setState({
+                ...state,
+                isLoading: false,
                 needsVerification: false,
                 verificationUserId: null,
                 verificationEmail: null,
                 verificationPassword: null,
-            }));
-
-            // Manuel giriş için login sayfasına yönlendir
-            router.push('/auth/login');
+                error: "Doğrulama başarılı ancak otomatik giriş yapılamadı. Lütfen giriş yapın.",
+            });
+            router.push('/login');
         }
     };
 
-    // Cancel email verification
     const cancelEmailVerification = () => {
         setState(prev => ({
             ...prev,
@@ -314,6 +239,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             verificationEmail: null,
             verificationPassword: null,
         }));
+        router.push('/login');
     };
 
     return (
@@ -334,10 +260,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
 }
 
-// Custom hook to use the auth context
 export function useAuth() {
     const context = useContext(AuthContext);
-    if (context === undefined) {
+    if (!context) {
         throw new Error('useAuth must be used within an AuthProvider');
     }
     return context;

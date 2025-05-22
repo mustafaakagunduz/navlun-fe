@@ -9,7 +9,6 @@ import { Loader2, AlertCircle, Mail, Clock, RefreshCw, CheckCircle, KeyRound } f
 import verificationService from "@/services/verificationService";
 import { styleClasses } from "./styles";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
 
 type EmailVerificationFormProps = {
     userId: string;
@@ -30,10 +29,9 @@ const EmailVerificationForm = ({
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<boolean>(false);
-    const [timeLeft, setTimeLeft] = useState<number>(300); // 5 dakika (300 saniye)
+    const [timeLeft, setTimeLeft] = useState<number>(300); // 5 dakika
     const [isResending, setIsResending] = useState<boolean>(false);
-    const { login } = useAuth();
-    const router = useRouter();
+    const [isProcessing, setIsProcessing] = useState<boolean>(false); // Çoklu istek önleme
 
     // 6 adet input ref'i
     const inputRefs = useRef<(HTMLInputElement | null)[]>(Array(6).fill(null));
@@ -55,43 +53,33 @@ const EmailVerificationForm = ({
         }
     }, []);
 
-    // 6 hane girildiğinde otomatik doğrulama
+    // 6 hane girildiğinde otomatik doğrulama - sadece bir kez çalışacak
     useEffect(() => {
-        if (verificationCode.length === 6 && !isLoading && !success) {
+        if (verificationCode.length === 6 && !isLoading && !success && !isProcessing) {
             handleAutoSubmit();
         }
-    }, [verificationCode, isLoading, success]);
+    }, [verificationCode, isLoading, success, isProcessing]);
 
-    // Süreyi biçimlendir (dakika:saniye)
+    // Süreyi biçimlendir
     const formatTime = (seconds: number): string => {
         const minutes = Math.floor(seconds / 60);
         const remainingSeconds = seconds % 60;
         return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
     };
 
-    // Role'e göre dashboard URL'ini döndür
-    const getDashboardUrl = (role: string): string => {
-        switch (role) {
-            case 'ADMIN':
-                return '/dashboard/admin';
-            case 'SENDER':
-                return '/dashboard/sender';
-            case 'CARRIER':
-                return '/dashboard/carrier';
-            case 'BROKER':
-                return '/dashboard/broker';
-            default:
-                return '/dashboard';
-        }
-    };
-
     // Input değişiklik handler'ı
     const handleInputChange = (index: number, value: string) => {
+        // Sadece sayı girişine izin ver
         if (value.length <= 1 && /^\d*$/.test(value)) {
             const newCode = verificationCode.split('');
             newCode[index] = value;
             const updatedCode = newCode.join('');
             setVerificationCode(updatedCode);
+
+            // Hata varsa temizle
+            if (error) {
+                setError(null);
+            }
 
             // Sonraki input'a geç
             if (value && index < 5 && inputRefs.current[index + 1]) {
@@ -104,7 +92,6 @@ const EmailVerificationForm = ({
     const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Backspace') {
             if (!verificationCode[index] && index > 0) {
-                // Mevcut alan boşsa ve backspace basıldıysa önceki alana geç
                 inputRefs.current[index - 1]?.focus();
             }
         }
@@ -115,10 +102,8 @@ const EmailVerificationForm = ({
         e.preventDefault();
         const pastedData = e.clipboardData.getData('text').trim();
 
-        // 6 haneli kod kontrolü
         if (/^\d{6}$/.test(pastedData)) {
             setVerificationCode(pastedData);
-            // Son input'a focus
             if (inputRefs.current[5]) {
                 inputRefs.current[5].focus();
             }
@@ -127,43 +112,50 @@ const EmailVerificationForm = ({
 
     // Otomatik doğrulama (6 hane girildiğinde)
     const handleAutoSubmit = async () => {
-        if (verificationCode.length !== 6) return;
+        if (verificationCode.length !== 6 || isProcessing) return;
 
+        setIsProcessing(true);
         setIsLoading(true);
         setError(null);
 
         try {
+            console.log('Verifying email with code:', verificationCode);
             const response = await verificationService.verifyEmail(userId, verificationCode);
 
             if (response.success) {
+                console.log('Email verification successful');
                 setSuccess(true);
 
-                // AuthContext'teki completeEmailVerification fonksiyonunu çağır
-                // Bu fonksiyon otomatik login yapacak ve role göre yönlendirecek
+                // Biraz bekle, sonra otomatik login yap
                 setTimeout(() => {
                     onVerificationSuccess();
                 }, 1500);
             } else {
+                console.log('Email verification failed:', response.message);
                 setError(response.message || t("auth.emailVerification.incorrectCode"));
+                setIsLoading(false);
+                setIsProcessing(false);
             }
         } catch (error: any) {
             console.error('Verification error:', error);
-            setError(t("auth.emailVerification.verificationFailed") || "Doğrulama işlemi başarısız oldu. Lütfen tekrar deneyin.");
-        } finally {
-            if (!success) {
-                setIsLoading(false);
-            }
+            setError(error.response?.data?.message || t("auth.emailVerification.verificationFailed"));
+            setIsLoading(false);
+            setIsProcessing(false);
         }
     };
 
     // Manuel form gönderimi
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        await handleAutoSubmit();
+        if (!isProcessing) {
+            await handleAutoSubmit();
+        }
     };
 
     // Yeni kod iste
     const handleResendCode = async () => {
+        if (isResending) return;
+
         setIsResending(true);
         setError(null);
 
@@ -171,11 +163,8 @@ const EmailVerificationForm = ({
             const response = await verificationService.resendVerificationCode(userId, email);
 
             if (response.success) {
-                // Süreyi yeniden başlat
                 setTimeLeft(300);
-                // Kodu temizle
                 setVerificationCode('');
-                // İlk input'a focus
                 if (inputRefs.current[0]) {
                     inputRefs.current[0].focus();
                 }
@@ -183,7 +172,7 @@ const EmailVerificationForm = ({
                 setError(response.message || t("auth.emailVerification.resendFailed"));
             }
         } catch (error) {
-            setError(t("auth.emailVerification.resendFailed") || "Yeni kod gönderilirken bir hata oluştu. Lütfen tekrar deneyin.");
+            setError(t("auth.emailVerification.resendFailed"));
         } finally {
             setIsResending(false);
         }
@@ -213,11 +202,10 @@ const EmailVerificationForm = ({
 
                 {success ? (
                     <div className="text-center py-6">
-                        {/* Başarı mesajı */}
                         <Alert className="mb-6 bg-green-50 border border-green-200 text-green-800 rounded-lg">
                             <CheckCircle className="h-4 w-4 text-green-600" />
                             <AlertDescription className="font-medium">
-                                {t("auth.emailVerification.success") || "E-posta Adresiniz Başarıyla Doğrulandı!"}
+                                {t("auth.emailVerification.success") || "E-posta Başarıyla Doğrulandı!"}
                             </AlertDescription>
                         </Alert>
 
@@ -227,13 +215,12 @@ const EmailVerificationForm = ({
                             </div>
                         </div>
                         <h3 className="text-xl font-bold text-green-700 mb-2">
-                            {t("auth.emailVerification.loginSuccess") || "Giriş Yapılıyor..."}
+                            {t("auth.emailVerification.successMessage") || "Giriş yapılıyor..."}
                         </h3>
                         <p className="text-gray-600 mb-4">
-                            {t("auth.emailVerification.redirectingMessage") || "Dashboard'a yönlendiriliyorsunuz..."}
+                            Dashboard'a yönlendiriliyorsunuz...
                         </p>
 
-                        {/* Loading indicator */}
                         <div className="flex justify-center">
                             <Loader2 className="h-6 w-6 text-green-600 animate-spin" />
                         </div>
@@ -267,7 +254,9 @@ const EmailVerificationForm = ({
                                         onChange={(e) => handleInputChange(index, e.target.value)}
                                         onKeyDown={(e) => handleKeyDown(index, e)}
                                         onPaste={index === 0 ? handlePaste : undefined}
-                                        className="w-12 h-14 text-center text-xl font-bold rounded-lg border-2 border-gray-300 focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-colors"
+                                        className={`w-12 h-14 text-center text-xl font-bold rounded-lg border-2 transition-colors
+                                            ${error ? 'border-red-300 bg-red-50' : 'border-gray-300 focus:border-green-500 focus:ring-2 focus:ring-green-200'}
+                                        `}
                                         maxLength={1}
                                         inputMode="numeric"
                                         pattern="[0-9]*"
@@ -276,35 +265,13 @@ const EmailVerificationForm = ({
                                     />
                                 ))}
                             </div>
-
-                            {/* Email ipuçları */}
-                            <div className="text-gray-600 text-sm bg-gray-50 p-4 rounded-lg">
-                                <p className="font-medium mb-2">
-                                    {t("auth.emailVerification.tips.title") || "Doğrulama kodunu almakla ilgili ipuçları:"}
-                                </p>
-                                <ul className="list-disc pl-5 space-y-1">
-                                    <li dangerouslySetInnerHTML={{
-                                        __html: t("auth.emailVerification.tips.sentWithin") || "E-posta <strong>birkaç dakika</strong> içinde gönderilir"
-                                    }} />
-                                    <li dangerouslySetInnerHTML={{
-                                        __html: t("auth.emailVerification.tips.checkSpam") || "<strong>Spam/önemsiz</strong> klasörünüzü mutlaka kontrol edin"
-                                    }} />
-                                    <li dangerouslySetInnerHTML={{
-                                        __html: t("auth.emailVerification.tips.ensureCorrect") || "E-posta adresinizi doğru girdiğinizden emin olun"
-                                    }} />
-                                    <li dangerouslySetInnerHTML={{
-                                        __html: t("auth.emailVerification.tips.refreshInbox") || "Gelen kutunuzu yenileyin"
-                                    }} />
-                                </ul>
-                            </div>
                         </div>
 
                         <div className="flex flex-col space-y-3">
-                            {/* Manuel doğrulama butonu (gerekirse) */}
                             <Button
                                 type="submit"
                                 className={`${styleClasses.button} h-12`}
-                                disabled={isLoading || success || verificationCode.length !== 6 || timeLeft === 0}
+                                disabled={isLoading || success || verificationCode.length !== 6 || timeLeft === 0 || isProcessing}
                             >
                                 {isLoading ? (
                                     <>
@@ -322,7 +289,7 @@ const EmailVerificationForm = ({
                                     variant="link"
                                     className="text-gray-500 hover:text-gray-700 text-sm p-0 h-auto"
                                     onClick={onCancel}
-                                    disabled={isLoading}
+                                    disabled={isLoading || isProcessing}
                                 >
                                     {t("auth.emailVerification.cancel") || "İptal"}
                                 </Button>
@@ -332,7 +299,7 @@ const EmailVerificationForm = ({
                                     variant="link"
                                     className="text-green-600 hover:text-green-700 text-sm p-0 h-auto flex items-center"
                                     onClick={handleResendCode}
-                                    disabled={isResending || timeLeft > 0}
+                                    disabled={isResending || timeLeft > 0 || isProcessing}
                                 >
                                     {isResending ? (
                                         <Loader2 className="mr-1 h-3 w-3 animate-spin" />
