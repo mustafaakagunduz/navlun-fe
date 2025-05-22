@@ -10,6 +10,8 @@ export type SenderProfile = {
     productionTypes: string[];
     certificates: string[];
     billingInfo?: string;
+    phone?: string;
+    email?: string;
     totalShipments: number;
     ecoFriendlyShipments: number;
     createdAt?: string;
@@ -23,6 +25,8 @@ export type SenderProfileRequest = {
     productionTypes: string[];
     certificates: string[];
     billingInfo?: string;
+    phone?: string;
+    email?: string;
 };
 
 export type SenderProfileUpdateRequest = {
@@ -31,6 +35,8 @@ export type SenderProfileUpdateRequest = {
     productionTypes?: string[];
     certificates?: string[];
     billingInfo?: string;
+    phone?: string;
+    email?: string;
 };
 
 export type PageResponse<T> = {

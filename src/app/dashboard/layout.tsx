@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import { useRouter } from 'next/navigation';
-
+import Sidebar from "./Sidebar";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
     const { logout, user } = useAuth();
@@ -28,13 +28,12 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             case 'CARRIER':
                 return t("dashboard.layout.carrier");
             case 'BROKER':
-                return t("dashboard.layout.broker"); // Broker rolü için çeviri
+                return t("dashboard.layout.broker");
             default:
                 return role;
         }
     };
 
-    // Role-specific color class
     const getRoleColorClass = (role: string) => {
         switch(role) {
             case 'ADMIN':
@@ -44,7 +43,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             case 'CARRIER':
                 return 'bg-purple-100 text-purple-800';
             case 'BROKER':
-                return 'bg-amber-100 text-amber-800'; // Broker rolü için renk sınıfı
+                return 'bg-amber-100 text-amber-800';
             default:
                 return 'bg-gray-100 text-gray-800';
         }
@@ -86,10 +85,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 </div>
             </header>
 
-            {/* Main content */}
-            <main className="flex-1">
-                {children}
-            </main>
+            {/* Main content with sidebar */}
+            <div className="flex flex-1">
+                <Sidebar />
+                <main className="flex-1 overflow-auto bg-gray-50">
+                    {children}
+                </main>
+            </div>
 
             {/* Footer */}
             <footer className="bg-white border-t py-4">

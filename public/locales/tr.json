@@ -149,20 +149,42 @@
     "pendingLoads": "Bekleyen Yükler",
     "completedLoads": "Tamamlanan Yükler"
   },
-  "senderPage": {
-    "title": "Gönderici Paneli",
-    "welcome": "Gönderici panelinize hoş geldiniz",
-    "description": "Yüklerinizi yönetin, teklifleri inceleyin ve yeni taşıma talepleri oluşturun.",
-    "myLoads": "Yüklerim",
-    "createNewLoad": "Yeni Yük Ekle",
-    "pendingOffers": "Bekleyen Teklifler",
-    "activeShipments": "Aktif Taşımalar",
-    "loadHistory": "Yük Geçmişi",
-    "statistics": "İstatistikler",
-    "totalLoads": "Toplam Yük",
-    "completedLoads": "Tamamlanan Yükler",
-    "pendingLoads": "Bekleyen Yükler",
-    "avgCarbonSaved": "Ortalama Karbon Tasarrufu"
+  "senderProfile": {
+    "title": "Gönderici Profilim",
+    "save": "Profili Kaydet",
+    "saving": "Kaydediliyor...",
+    "loading": "Profil yükleniyor...",
+    "saved": "Profil başarıyla kaydedildi!",
+    "error": "Profil kaydedilirken hata oluştu",
+    "userNotFound": "Kullanıcı bilgileri bulunamadı",
+    "userType": {
+      "title": "Kullanıcı Tipi",
+      "individual": "Bireysel",
+      "company": "Firma"
+    },
+    "companyInfo": {
+      "title": "Firma Bilgileri",
+      "companyName": "Firma Adı",
+      "companyNamePlaceholder": "Firma adınızı girin",
+      "companyNameRequired": "Firma Adı *",
+      "productionTypes": "Üretim Türleri",
+      "productionTypesPlaceholder": "Üretim türü seçin",
+      "certificates": "Sertifikalar",
+      "certificatesPlaceholder": "Sertifika seçin",
+      "certificateFiles": "Sertifika Dosyaları",
+      "selectFile": "Dosya Seç"
+    },
+    "contactInfo": {
+      "title": "İletişim Bilgileri",
+      "phone": "Telefon",
+      "phonePlaceholder": "Telefon numaranızı girin",
+      "email": "E-posta",
+      "emailPlaceholder": "E-posta adresinizi girin"
+    },
+    "billingInfo": {
+      "title": "Fatura Bilgisi (Opsiyonel)",
+      "placeholder": "Fatura bilgilerinizi girin"
+    }
   },
   "carrierPage": {
     "title": "Taşıyıcı Paneli",

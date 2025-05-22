@@ -10,6 +10,7 @@ export type User = {
     email: string;
     firstName?: string;
     lastName?: string;
+    phone?: string;
     role: 'ADMIN' | 'SENDER' | 'CARRIER' | 'BROKER';
     emailVerified?: boolean;
 };

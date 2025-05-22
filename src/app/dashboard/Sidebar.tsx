@@ -25,36 +25,34 @@ export default function Sidebar() {
     const { t } = useLanguage();
 
     // Role-specific menu items
-    const adminMenuItems = [
-        { href: "/dashboard", label: t("dashboard.sidebar.home"), icon: Home },
-        { href: "/dashboard/users", label: t("dashboard.sidebar.users"), icon: Users },
-        { href: "/dashboard/analytics", label: t("dashboard.sidebar.analytics"), icon: BarChart3 },
-        { href: "/dashboard/settings", label: t("dashboard.sidebar.settings"), icon: Settings },
-    ];
-
     const senderMenuItems = [
         { href: "/dashboard", label: t("dashboard.sidebar.home"), icon: Home },
-        { href: "/dashboard/loads", label: t("dashboard.sidebar.myLoads"), icon: Package },
-        { href: "/dashboard/offers", label: t("dashboard.sidebar.offers"), icon: FileText },
-        { href: "/dashboard/sender-profile", label: t("dashboard.sidebar.profile"), icon: Users },
+        { href: "/dashboard/sender/loads", label: t("dashboard.sidebar.myLoads"), icon: Package },
+        { href: "/dashboard/sender/offers", label: t("dashboard.sidebar.offers"), icon: FileText },
+        { href: "/dashboard/sender/sender-profile", label: t("dashboard.sidebar.profile"), icon: Users },
     ];
 
     const carrierMenuItems = [
         { href: "/dashboard", label: t("dashboard.sidebar.home"), icon: Home },
-        { href: "/dashboard/available-loads", label: t("dashboard.sidebar.availableLoads"), icon: Package },
-        { href: "/dashboard/my-loads", label: t("dashboard.sidebar.myLoads"), icon: Truck },
-        { href: "/dashboard/schedule", label: t("dashboard.sidebar.schedule"), icon: Calendar },
-        { href: "/dashboard/carrier-profile", label: t("dashboard.sidebar.profile"), icon: Users },
+        { href: "/dashboard/carrier/available-loads", label: t("dashboard.sidebar.availableLoads"), icon: Package },
+        { href: "/dashboard/carrier/my-loads", label: t("dashboard.sidebar.myLoads"), icon: Truck },
+        { href: "/dashboard/carrier/schedule", label: t("dashboard.sidebar.schedule"), icon: Calendar },
+        { href: "/dashboard/carrier/profile", label: t("dashboard.sidebar.profile"), icon: Users },
     ];
 
-    // Yeni eklenen broker menü öğeleri
     const brokerMenuItems = [
         { href: "/dashboard", label: t("dashboard.sidebar.home"), icon: Home },
-        { href: "/dashboard/available-loads", label: t("dashboard.sidebar.availableLoads"), icon: Package },
-        { href: "/dashboard/deals", label: t("dashboard.sidebar.deals"), icon: HandshakeIcon },
-        { href: "/dashboard/brokerages", label: t("dashboard.sidebar.brokerages"), icon: Building },
-        { href: "/dashboard/commissions", label: t("dashboard.sidebar.commissions"), icon: DollarSign },
-        { href: "/dashboard/broker-profile", label: t("dashboard.sidebar.profile"), icon: Users },
+        { href: "/dashboard/broker/available-loads", label: t("dashboard.sidebar.availableLoads"), icon: Package },
+        { href: "/dashboard/broker/deals", label: t("dashboard.sidebar.deals"), icon: HandshakeIcon },
+        { href: "/dashboard/broker/commissions", label: t("dashboard.sidebar.commissions"), icon: DollarSign },
+        { href: "/dashboard/broker/profile", label: t("dashboard.sidebar.profile"), icon: Users },
+    ];
+
+    const adminMenuItems = [
+        { href: "/dashboard", label: t("dashboard.sidebar.home"), icon: Home },
+        { href: "/dashboard/admin/users", label: t("dashboard.sidebar.users"), icon: Users },
+        { href: "/dashboard/admin/analytics", label: t("dashboard.sidebar.analytics"), icon: BarChart3 },
+        { href: "/dashboard/admin/settings", label: t("dashboard.sidebar.settings"), icon: Settings },
     ];
 
     // Role-based menu selection

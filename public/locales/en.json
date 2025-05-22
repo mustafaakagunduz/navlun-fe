@@ -148,21 +148,43 @@
       "pendingLoads": "Pending Loads",
       "completedLoads": "Completed Loads"
     },
-  "senderPage": {
-      "title": "Sender Panel",
-      "welcome": "Welcome to your sender panel",
-      "description": "Manage your loads, review offers, and create new transportation requests.",
-      "myLoads": "My Loads",
-      "createNewLoad": "Create New Load",
-      "pendingOffers": "Pending Offers",
-      "activeShipments": "Active Shipments",
-      "loadHistory": "Load History",
-      "statistics": "Statistics",
-      "totalLoads": "Total Loads",
-      "completedLoads": "Completed Loads",
-      "pendingLoads": "Pending Loads",
-      "avgCarbonSaved": "Average Carbon Saved"
+  "senderProfile": {
+    "title": "My Sender Profile",
+    "save": "Save Profile",
+    "saving": "Saving...",
+    "loading": "Loading profile...",
+    "saved": "Profile saved successfully!",
+    "error": "Error saving profile",
+    "userNotFound": "User information not found",
+    "userType": {
+      "title": "User Type",
+      "individual": "Individual",
+      "company": "Company"
     },
+    "companyInfo": {
+      "title": "Company Information",
+      "companyName": "Company Name",
+      "companyNamePlaceholder": "Enter your company name",
+      "companyNameRequired": "Company Name *",
+      "productionTypes": "Production Types",
+      "productionTypesPlaceholder": "Select production type",
+      "certificates": "Certificates",
+      "certificatesPlaceholder": "Select certificate",
+      "certificateFiles": "Certificate Files",
+      "selectFile": "Select File"
+    },
+    "contactInfo": {
+      "title": "Contact Information",
+      "phone": "Phone",
+      "phonePlaceholder": "Enter your phone number",
+      "email": "Email",
+      "emailPlaceholder": "Enter your email address"
+    },
+    "billingInfo": {
+      "title": "Billing Information (Optional)",
+      "placeholder": "Enter your billing information"
+    }
+  },
   "carrierPage": {
       "title": "Carrier Panel",
       "welcome": "Welcome to your carrier panel",

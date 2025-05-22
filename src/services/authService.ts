@@ -9,6 +9,7 @@ export type User = {
     lastName?: string;
     role: 'ADMIN' | 'SENDER' | 'CARRIER' | 'BROKER';
     emailVerified?: boolean;
+    phone?: string;
 };
 
 export type LoginResponse = {

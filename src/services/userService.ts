@@ -12,6 +12,7 @@ export type User = {
     emailVerified?: boolean;
     createdAt?: string;
     updatedAt?: string;
+
 };
 
 export type UserCreateRequest = {
