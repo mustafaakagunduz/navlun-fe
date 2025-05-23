@@ -10,10 +10,10 @@ export type SenderProfile = {
     productionTypes: string[];
     certificates: string[];
     billingInfo?: string;
-    phone?: string;
-    email?: string;
     totalShipments: number;
     ecoFriendlyShipments: number;
+    phone?: string;  // EKLE - User tablosundan gelecek
+    email?: string;  // EKLE - User tablosundan gelecek
     createdAt?: string;
     updatedAt?: string;
 };
@@ -25,8 +25,8 @@ export type SenderProfileRequest = {
     productionTypes: string[];
     certificates: string[];
     billingInfo?: string;
-    phone?: string;
-    email?: string;
+    phone?: string;  // EKLE - User tablosuna kaydedilecek
+    email?: string;  // EKLE - User tablosuna kaydedilecek
 };
 
 export type SenderProfileUpdateRequest = {
@@ -35,8 +35,8 @@ export type SenderProfileUpdateRequest = {
     productionTypes?: string[];
     certificates?: string[];
     billingInfo?: string;
-    phone?: string;
-    email?: string;
+    phone?: string;  // EKLE - User tablosuna kaydedilecek
+    email?: string;  // EKLE - User tablosuna kaydedilecek
 };
 
 export type PageResponse<T> = {
@@ -86,6 +86,42 @@ const senderService = {
             return await apiService.get<SenderProfile>(`/sender-profiles/user/${userId}`);
         } catch (error) {
             console.error(`Get sender profile by user ID (${userId}) error:`, error);
+            throw error;
+        }
+    },
+
+    // Dosya yükleme işlemi
+    uploadCertificateFiles: async (profileId: string, files: File[]): Promise<string[]> => {
+        try {
+            const formData = new FormData();
+            files.forEach(file => {
+                formData.append('files', file);
+            });
+
+            const response = await apiService.uploadFile<string[]>(`/sender-profiles/${profileId}/upload-certificate`, formData);
+            return response;
+        } catch (error) {
+            console.error('Certificate files upload error:', error);
+            throw error;
+        }
+    },
+
+    // Gönderici profilini günceller - ID ile
+    updateSenderProfile: async (id: string, profileData: SenderProfileUpdateRequest): Promise<SenderProfile> => {
+        try {
+            return await apiService.put<SenderProfile, SenderProfileUpdateRequest>(`/sender-profiles/${id}`, profileData);
+        } catch (error) {
+            console.error(`Update sender profile (ID: ${id}) error:`, error);
+            throw error;
+        }
+    },
+
+    // YENI EKLENEN: User ID ile gönderici profilini günceller
+    updateSenderProfileByUserId: async (userId: string, profileData: SenderProfileUpdateRequest): Promise<SenderProfile> => {
+        try {
+            return await apiService.put<SenderProfile, SenderProfileUpdateRequest>(`/sender-profiles/user/${userId}`, profileData);
+        } catch (error) {
+            console.error(`Update sender profile by user ID (${userId}) error:`, error);
             throw error;
         }
     },
@@ -330,16 +366,6 @@ const senderService = {
             return await apiService.get<number>('/sender-profiles/count-by-company-status', { isCompany });
         } catch (error) {
             console.error(`Count senders by company status (${isCompany}) error:`, error);
-            throw error;
-        }
-    },
-
-    // Gönderici profilini günceller
-    updateSenderProfile: async (id: string, profileData: SenderProfileUpdateRequest): Promise<SenderProfile> => {
-        try {
-            return await apiService.put<SenderProfile, SenderProfileUpdateRequest>(`/sender-profiles/${id}`, profileData);
-        } catch (error) {
-            console.error(`Update sender profile (ID: ${id}) error:`, error);
             throw error;
         }
     },

@@ -54,6 +54,7 @@ export default function SenderProfilePage() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [hasExistingProfile, setHasExistingProfile] = useState(false);
+    const [currentProfileId, setCurrentProfileId] = useState<string | null>(null); // BURADA DEĞİŞİKLİK
 
     // Predefined data
     const productionTypeOptions = [
@@ -83,6 +84,7 @@ export default function SenderProfilePage() {
     ];
 
     // Load existing profile
+    // Load existing profile
     useEffect(() => {
         const loadProfile = async () => {
             if (!userWithPhone?.id) return;
@@ -97,11 +99,12 @@ export default function SenderProfilePage() {
                     productionTypes: profile.productionTypes || [],
                     certificates: profile.certificates || [],
                     certificateFiles: [],
-                    phone: profile.phone || userWithPhone.phone || '',
-                    email: profile.email || userWithPhone.email || '',
+                    phone: profile.phone || userWithPhone.phone || '', // ✅ Backend'den gelen phone
+                    email: profile.email || userWithPhone.email || '', // ✅ Backend'den gelen email
                     billingInfo: profile.billingInfo || ''
                 });
                 setHasExistingProfile(true);
+                setCurrentProfileId(profile.id);
             } catch (error) {
                 console.log('No existing profile found, creating new one');
                 setFormData(prev => ({
@@ -110,6 +113,7 @@ export default function SenderProfilePage() {
                     email: userWithPhone?.email || ''
                 }));
                 setHasExistingProfile(false);
+                setCurrentProfileId(null);
             } finally {
                 setIsLoading(false);
             }
@@ -134,10 +138,21 @@ export default function SenderProfilePage() {
     };
 
     const handleProductionTypeRemove = (type: string) => {
+        console.log('Removing production type:', type); // Debug için
         setFormData(prev => ({
             ...prev,
             productionTypes: prev.productionTypes.filter(t => t !== type)
         }));
+        setError(''); // Hata mesajını temizle
+    };
+
+    const handleCertificateRemove = (cert: string) => {
+        console.log('Removing certificate:', cert); // Debug için
+        setFormData(prev => ({
+            ...prev,
+            certificates: prev.certificates.filter(c => c !== cert)
+        }));
+        setError(''); // Hata mesajını temizle
     };
 
     const handleCertificateAdd = (cert: string) => {
@@ -149,19 +164,28 @@ export default function SenderProfilePage() {
         }
     };
 
-    const handleCertificateRemove = (cert: string) => {
-        setFormData(prev => ({
-            ...prev,
-            certificates: prev.certificates.filter(c => c !== cert)
-        }));
-    };
-
-    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(event.target.files || []);
+
+        // Dosya tipini kontrol et
+        const invalidFiles = files.filter(file =>
+            !file.type.includes('pdf') &&
+            !file.type.startsWith('image/')
+        );
+
+        if (invalidFiles.length > 0) {
+            setError('Sadece PDF ve resim dosyaları yüklenebilir');
+            return;
+        }
+
+        // Dosyaları formData'ya ekle (şimdilik local'de tutuyoruz)
         setFormData(prev => ({
             ...prev,
             certificateFiles: [...prev.certificateFiles, ...files]
         }));
+
+        // Input'u temizle
+        event.target.value = '';
     };
 
     const handleFileRemove = (index: number) => {
@@ -188,21 +212,42 @@ export default function SenderProfilePage() {
                 companyName: formData.companyName,
                 productionTypes: formData.productionTypes,
                 certificates: formData.certificates,
+                billingInfo: formData.billingInfo,
                 phone: formData.phone,
-                email: formData.email,
-                billingInfo: formData.billingInfo
+                email: formData.email
             };
 
-            if (hasExistingProfile) {
-                await senderService.updateSenderProfile(userWithPhone.id, profileData);
+            let savedProfile;
+            if (hasExistingProfile && currentProfileId) {
+                savedProfile = await senderService.updateSenderProfile(currentProfileId, profileData);
             } else {
-                await senderService.createSenderProfile(profileData);
+                savedProfile = await senderService.createSenderProfile(profileData);
                 setHasExistingProfile(true);
+                setCurrentProfileId(savedProfile.id);
+            }
+
+            // Dosya yükleme işlemi
+            if (formData.certificateFiles.length > 0) {
+                try {
+                    await senderService.uploadCertificateFiles(
+                        savedProfile.id || currentProfileId!,
+                        formData.certificateFiles
+                    );
+                    // Dosyalar yüklendikten sonra local files'ı temizle
+                    setFormData(prev => ({
+                        ...prev,
+                        certificateFiles: []
+                    }));
+                } catch (fileError) {
+                    console.error('File upload error:', fileError);
+                    setError('Profil kaydedildi ancak dosya yükleme başarısız oldu');
+                }
             }
 
             setSuccess(t('senderProfile.saved'));
             setTimeout(() => setSuccess(''), 3000);
         } catch (error: any) {
+            console.error('Save error:', error);
             setError(error.response?.data?.message || t('senderProfile.error'));
         } finally {
             setIsSaving(false);
