@@ -18,6 +18,18 @@ export type SenderProfile = {
     updatedAt?: string;
 };
 
+export type FileMetadata = {
+    id: string;
+    originalFileName: string;
+    storedFileName: string;
+    fileSize: number;
+    contentType: string;
+    fileType: string;
+    downloadUrl: string;
+    viewUrl: string;
+    createdAt: string;
+};
+
 export type SenderProfileRequest = {
     userId: string;
     company: boolean;
@@ -66,6 +78,24 @@ const senderService = {
             return await apiService.post<SenderProfile, SenderProfileRequest>('/sender-profiles', profileData);
         } catch (error) {
             console.error('Create sender profile error:', error);
+            throw error;
+        }
+    },
+
+    getCertificateFilesByProfileId: async (profileId: string): Promise<FileMetadata[]> => {
+        try {
+            return await apiService.get<FileMetadata[]>(`/sender-profiles/${profileId}/certificate-files`);
+        } catch (error) {
+            console.error(`Get certificate files by profile ID (${profileId}) error:`, error);
+            throw error;
+        }
+    },
+
+    deleteCertificateFile: async (profileId: string, fileId: string): Promise<void> => {
+        try {
+            await apiService.delete(`/sender-profiles/${profileId}/certificate-files/${fileId}`);
+        } catch (error) {
+            console.error(`Delete certificate file (${fileId}) error:`, error);
             throw error;
         }
     },

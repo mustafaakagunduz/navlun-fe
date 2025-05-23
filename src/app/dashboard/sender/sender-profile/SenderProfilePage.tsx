@@ -1,7 +1,7 @@
 // src/components/dashboard/sender/SenderProfilePage.tsx
 "use client"
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from "@/context/AuthContext";
 
 // Local User type with phone property
@@ -25,7 +25,21 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Upload, X, Building2, User, FileText, Mail, Phone, Save, AlertCircle, CheckCircle2 } from "lucide-react";
+import {
+    Loader2,
+    Upload,
+    X,
+    Building2,
+    User,
+    FileText,
+    Mail,
+    Phone,
+    Save,
+    AlertCircle,
+    CheckCircle2,
+    Eye,
+    Download
+} from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import senderService from '@/services/senderService';
 
@@ -54,7 +68,20 @@ export default function SenderProfilePage() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [hasExistingProfile, setHasExistingProfile] = useState(false);
-    const [currentProfileId, setCurrentProfileId] = useState<string | null>(null); // BURADA DEĞİŞİKLİK
+    const [currentProfileId, setCurrentProfileId] = useState<string | null>(null);
+
+    // Yeni dosya yönetimi state'leri
+    const [uploadedFiles, setUploadedFiles] = useState<{
+        id: string;
+        name: string;
+        size: string;
+        type: string;
+        url?: string;
+        downloadUrl?: string;
+        viewUrl?: string; // EKLENEN
+        uploadDate: string;
+        isPermanent?: boolean;
+    }[]>([]);
 
     // Predefined data
     const productionTypeOptions = [
@@ -83,8 +110,16 @@ export default function SenderProfilePage() {
         'BRC Sertifikası'
     ];
 
-    // Load existing profile
-    // Load existing profile
+    // Dosya boyutunu formatlamak için yardımcı fonksiyon
+    const formatFileSize = (bytes: number): string => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    };
+
+    // Load existing profile and files
     useEffect(() => {
         const loadProfile = async () => {
             if (!userWithPhone?.id) return;
@@ -99,12 +134,32 @@ export default function SenderProfilePage() {
                     productionTypes: profile.productionTypes || [],
                     certificates: profile.certificates || [],
                     certificateFiles: [],
-                    phone: profile.phone || userWithPhone.phone || '', // ✅ Backend'den gelen phone
-                    email: profile.email || userWithPhone.email || '', // ✅ Backend'den gelen email
+                    phone: profile.phone || userWithPhone.phone || '',
+                    email: profile.email || userWithPhone.email || '',
                     billingInfo: profile.billingInfo || ''
                 });
                 setHasExistingProfile(true);
                 setCurrentProfileId(profile.id);
+
+                // Mevcut dosyaları yükle
+                try {
+                    const existingFiles = await senderService.getCertificateFilesByProfileId(profile.id);
+                    const formattedFiles = existingFiles.map(file => ({
+                        id: file.id,
+                        name: file.originalFileName,
+                        size: formatFileSize(file.fileSize),
+                        type: file.contentType,
+                        url: file.viewUrl,
+                        viewUrl: file.viewUrl, // EKLENEN
+                        downloadUrl: file.downloadUrl,
+                        uploadDate: new Date(file.createdAt).toLocaleString('tr-TR'),
+                        isPermanent: true
+                    }));
+                    setUploadedFiles(formattedFiles);
+                } catch (fileError) {
+                    console.log('No existing files found or error loading files:', fileError);
+                }
+
             } catch (error) {
                 console.log('No existing profile found, creating new one');
                 setFormData(prev => ({
@@ -137,23 +192,33 @@ export default function SenderProfilePage() {
         }
     };
 
-    const handleProductionTypeRemove = (type: string) => {
-        console.log('Removing production type:', type); // Debug için
-        setFormData(prev => ({
-            ...prev,
-            productionTypes: prev.productionTypes.filter(t => t !== type)
-        }));
-        setError(''); // Hata mesajını temizle
-    };
+    const handleProductionTypeRemove = useCallback((typeToRemove: string) => {
+        console.log('Removing production type:', typeToRemove);
 
-    const handleCertificateRemove = (cert: string) => {
-        console.log('Removing certificate:', cert); // Debug için
-        setFormData(prev => ({
-            ...prev,
-            certificates: prev.certificates.filter(c => c !== cert)
-        }));
-        setError(''); // Hata mesajını temizle
-    };
+        setFormData(currentData => {
+            const filteredTypes = currentData.productionTypes.filter(type => type !== typeToRemove);
+            console.log('Filtered types:', filteredTypes);
+
+            return {
+                ...currentData,
+                productionTypes: filteredTypes
+            };
+        });
+    }, []);
+
+    const handleCertificateRemove = useCallback((certToRemove: string) => {
+        console.log('Removing certificate:', certToRemove);
+
+        setFormData(currentData => {
+            const filteredCertificates = currentData.certificates.filter(cert => cert !== certToRemove);
+            console.log('Filtered certificates:', filteredCertificates);
+
+            return {
+                ...currentData,
+                certificates: filteredCertificates
+            };
+        });
+    }, []);
 
     const handleCertificateAdd = (cert: string) => {
         if (!formData.certificates.includes(cert)) {
@@ -164,6 +229,7 @@ export default function SenderProfilePage() {
         }
     };
 
+    // Geliştirilmiş dosya yükleme fonksiyonu
     const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(event.target.files || []);
 
@@ -178,7 +244,28 @@ export default function SenderProfilePage() {
             return;
         }
 
-        // Dosyaları formData'ya ekle (şimdilik local'de tutuyoruz)
+        // Dosya boyutunu kontrol et (5MB limit)
+        const largeFiles = files.filter(file => file.size > 5 * 1024 * 1024);
+        if (largeFiles.length > 0) {
+            setError('Dosya boyutu 5MB\'dan büyük olamaz');
+            return;
+        }
+
+        // Geliştirme aşamasında dosyaları local olarak sakla
+        const newFiles = files.map(file => ({
+            id: crypto.randomUUID?.() || Math.random().toString(36),
+            name: file.name,
+            size: formatFileSize(file.size),
+            type: file.type,
+            url: URL.createObjectURL(file), // Önizleme için
+            uploadDate: new Date().toLocaleString('tr-TR'),
+            isPermanent: false
+        }));
+
+        // Mevcut dosyaları güncelle
+        setUploadedFiles(prev => [...prev, ...newFiles]);
+
+        // Form data'ya da ekle (backend için)
         setFormData(prev => ({
             ...prev,
             certificateFiles: [...prev.certificateFiles, ...files]
@@ -186,13 +273,65 @@ export default function SenderProfilePage() {
 
         // Input'u temizle
         event.target.value = '';
+        setError('');
     };
 
-    const handleFileRemove = (index: number) => {
-        setFormData(prev => ({
-            ...prev,
-            certificateFiles: prev.certificateFiles.filter((_, i) => i !== index)
-        }));
+    // Dosya silme fonksiyonu
+    const handleFileRemove = async (fileId: string) => {
+        // Silme işlemini onaylat
+        if (!window.confirm('Bu dosyayı silmek istediğinizden emin misiniz?')) {
+            return;
+        }
+
+        try {
+            const fileToRemove = uploadedFiles.find(f => f.id === fileId);
+
+            if (fileToRemove?.isPermanent && currentProfileId) {
+                // Backend'den sil (kaydedilmiş dosya)
+                await senderService.deleteCertificateFile(currentProfileId, fileId);
+            }
+
+            // UI'dan kaldır
+            setUploadedFiles(prev => {
+                const fileToRemove = prev.find(f => f.id === fileId);
+                if (fileToRemove?.url && !fileToRemove.isPermanent) {
+                    URL.revokeObjectURL(fileToRemove.url); // Memory temizliği
+                }
+                return prev.filter(f => f.id !== fileId);
+            });
+
+            // Form data'dan da sil (henüz kaydedilmemiş dosyalar için)
+            setFormData(prev => {
+                const fileIndex = uploadedFiles.findIndex(f => f.id === fileId);
+                if (fileIndex !== -1 && fileIndex < prev.certificateFiles.length) {
+                    const newFiles = [...prev.certificateFiles];
+                    newFiles.splice(fileIndex, 1);
+                    return { ...prev, certificateFiles: newFiles };
+                }
+                return prev;
+            });
+
+            setSuccess('Dosya başarıyla silindi');
+            setTimeout(() => setSuccess(''), 2000);
+
+        } catch (error: any) {
+            console.error('File delete error:', error);
+            setError('Dosya silinirken hata oluştu: ' + (error.response?.data?.message || error.message));
+            setTimeout(() => setError(''), 3000);
+        }
+    };
+
+    // Dosya önizleme fonksiyonu
+    const handleFilePreview = (file: { url?: string; type: string; name: string }) => {
+        if (!file.url) return;
+
+        if (file.type.startsWith('image/')) {
+            // Resim için modal açabilir veya yeni sekmede açabilirsiniz
+            window.open(file.url, '_blank');
+        } else if (file.type.includes('pdf')) {
+            // PDF için yeni sekmede aç
+            window.open(file.url, '_blank');
+        }
     };
 
     // Save profile
@@ -226,18 +365,41 @@ export default function SenderProfilePage() {
                 setCurrentProfileId(savedProfile.id);
             }
 
-            // Dosya yükleme işlemi
+            // Dosya yükleme işlemi - SADECE yeni dosyalar varsa
             if (formData.certificateFiles.length > 0) {
                 try {
-                    await senderService.uploadCertificateFiles(
+                    const uploadedFileNames = await senderService.uploadCertificateFiles(
                         savedProfile.id || currentProfileId!,
                         formData.certificateFiles
                     );
-                    // Dosyalar yüklendikten sonra local files'ı temizle
+
+                    console.log('Uploaded files:', uploadedFileNames);
+
+                    // Dosyalar başarıyla yüklendikten sonra dosya listesini yenile
+                    try {
+                        const refreshedFiles = await senderService.getCertificateFilesByProfileId(savedProfile.id || currentProfileId!);
+                        const formattedFiles = refreshedFiles.map(file => ({
+                            id: file.id,
+                            name: file.originalFileName,
+                            size: formatFileSize(file.fileSize),
+                            type: file.contentType,
+                            url: file.viewUrl,
+                            viewUrl: file.viewUrl, // EKLENEN
+                            downloadUrl: file.downloadUrl,
+                            uploadDate: new Date(file.createdAt).toLocaleString('tr-TR'),
+                            isPermanent: true
+                        }));
+                        setUploadedFiles(formattedFiles);
+                    } catch (refreshError) {
+                        console.error('Error refreshing file list:', refreshError);
+                    }
+
+                    // Geçici dosyaları temizle
                     setFormData(prev => ({
                         ...prev,
                         certificateFiles: []
                     }));
+
                 } catch (fileError) {
                     console.error('File upload error:', fileError);
                     setError('Profil kaydedildi ancak dosya yükleme başarısız oldu');
@@ -246,6 +408,7 @@ export default function SenderProfilePage() {
 
             setSuccess(t('senderProfile.saved'));
             setTimeout(() => setSuccess(''), 3000);
+
         } catch (error: any) {
             console.error('Save error:', error);
             setError(error.response?.data?.message || t('senderProfile.error'));
@@ -390,13 +553,24 @@ export default function SenderProfilePage() {
 
                                 {formData.productionTypes.length > 0 && (
                                     <div className="flex flex-wrap gap-2">
-                                        {formData.productionTypes.map((type) => (
-                                            <Badge key={type} variant="secondary" className="flex items-center gap-1">
-                                                {type}
-                                                <X
-                                                    className="h-3 w-3 cursor-pointer hover:text-red-500"
-                                                    onClick={() => handleProductionTypeRemove(type)}
-                                                />
+                                        {formData.productionTypes.map((type, index) => (
+                                            <Badge
+                                                key={`${type}-${index}`}
+                                                variant="secondary"
+                                                className="flex items-center gap-2 py-1 px-2"
+                                            >
+                                                <span>{type}</span>
+                                                <button
+                                                    type="button"
+                                                    className="ml-1 hover:text-red-500 cursor-pointer transition-colors"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        handleProductionTypeRemove(type);
+                                                    }}
+                                                >
+                                                    <X className="h-3 w-3" />
+                                                </button>
                                             </Badge>
                                         ))}
                                     </div>
@@ -423,13 +597,24 @@ export default function SenderProfilePage() {
 
                                 {formData.certificates.length > 0 && (
                                     <div className="flex flex-wrap gap-2">
-                                        {formData.certificates.map((cert) => (
-                                            <Badge key={cert} variant="outline" className="flex items-center gap-1">
-                                                {cert}
-                                                <X
-                                                    className="h-3 w-3 cursor-pointer hover:text-red-500"
-                                                    onClick={() => handleCertificateRemove(cert)}
-                                                />
+                                        {formData.certificates.map((cert, index) => (
+                                            <Badge
+                                                key={`${cert}-${index}`}
+                                                variant="outline"
+                                                className="flex items-center gap-2 py-1 px-2"
+                                            >
+                                                <span>{cert}</span>
+                                                <button
+                                                    type="button"
+                                                    className="ml-1 hover:text-red-500 cursor-pointer transition-colors"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        handleCertificateRemove(cert);
+                                                    }}
+                                                >
+                                                    <X className="h-3 w-3" />
+                                                </button>
                                             </Badge>
                                         ))}
                                     </div>
@@ -438,10 +623,12 @@ export default function SenderProfilePage() {
 
                             <Separator />
 
-                            {/* Certificate Files */}
+                            {/* Certificate Files - Geliştirilmiş UI */}
                             <div className="space-y-3">
                                 <Label>{t('senderProfile.companyInfo.certificateFiles')}</Label>
-                                <div>
+
+                                {/* Dosya Yükleme Alanı */}
+                                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-gray-400 transition-colors">
                                     <input
                                         type="file"
                                         multiple
@@ -452,31 +639,146 @@ export default function SenderProfilePage() {
                                     />
                                     <Label
                                         htmlFor="certificateFiles"
-                                        className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 border border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors"
+                                        className="cursor-pointer flex flex-col items-center gap-3"
                                     >
-                                        <Upload className="h-4 w-4" />
-                                        {t('senderProfile.companyInfo.selectFile')}
+                                        <div className="p-3 bg-gray-100 rounded-full">
+                                            <Upload className="h-6 w-6 text-gray-600" />
+                                        </div>
+                                        <div className="text-center">
+                                            <p className="text-sm font-medium text-gray-700">
+                                                {t('senderProfile.companyInfo.selectFile')}
+                                            </p>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                PDF, JPG, PNG dosyaları desteklenir (Max: 5MB)
+                                            </p>
+                                        </div>
                                     </Label>
                                 </div>
 
-                                {formData.certificateFiles.length > 0 && (
-                                    <div className="space-y-2">
-                                        {formData.certificateFiles.map((file, index) => (
-                                            <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                                                <div className="flex items-center gap-2">
-                                                    <FileText className="h-4 w-4 text-gray-500" />
-                                                    <span className="text-sm">{file.name}</span>
+                                {/* Yüklenen Dosyalar Listesi */}
+                                {uploadedFiles.length > 0 && (
+                                    <div className="space-y-3">
+                                        <p className="text-sm font-medium text-gray-700">Yüklenen Dosyalar:</p>
+                                        <div className="grid gap-3">
+                                            {uploadedFiles.map((file) => (
+                                                <div key={file.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
+                                                    <div className="flex items-center gap-3 flex-1">
+                                                        {/* Dosya İkonu */}
+                                                        <div className="p-2 bg-white rounded border">
+                                                            {file.type.startsWith('image/') && file.url ? (
+                                                                <img
+                                                                    src={file.url}
+                                                                    alt={file.name}
+                                                                    className="h-8 w-8 object-cover rounded"
+                                                                />
+                                                            ) : (
+                                                                <FileText className="h-6 w-6 text-red-600" />
+                                                            )}
+                                                        </div>
+
+                                                        {/* Dosya Bilgileri */}
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-medium text-gray-900 truncate">
+                                                                {file.name}
+                                                            </p>
+                                                            <div className="flex items-center gap-2 mt-1">
+                                                                <span className="text-xs text-gray-500">{file.size}</span>
+                                                                <span className="text-xs text-gray-400">•</span>
+                                                                <span className="text-xs text-gray-500">{file.uploadDate}</span>
+                                                                {file.isPermanent && (
+                                                                    <>
+                                                                        <span className="text-xs text-gray-400">•</span>
+                                                                        <span className="text-xs text-green-600">Kaydedildi</span>
+                                                                    </>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Dosya Aksiyon Butonları */}
+                                                    <div className="flex items-center gap-2">
+                                                        {/* Önizleme Butonu - SADECE GÖRÜNTÜLE */}
+                                                        {(file.url || file.viewUrl) && (
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => {
+                                                                    // ÖNCE viewUrl'i dene, yoksa url'i kullan
+                                                                    const displayUrl = file.viewUrl || file.url;
+                                                                    if (displayUrl) {
+                                                                        // Yeni sekmede aç (görüntüleme için)
+                                                                        window.open(displayUrl, '_blank');
+                                                                    }
+                                                                }}
+                                                                className="h-8 w-8 p-0 hover:bg-blue-100"
+                                                                title="Görüntüle"
+                                                            >
+                                                                <Eye className="h-4 w-4 text-blue-600" />
+                                                            </Button>
+                                                        )}
+
+                                                        {/* İndirme Butonu - SADECE İNDİR */}
+                                                        {(file.url || file.downloadUrl) && (
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => {
+                                                                    const downloadUrl = file.downloadUrl || file.url;
+                                                                    if (downloadUrl) {
+                                                                        if (file.isPermanent && file.downloadUrl) {
+                                                                            // Backend dosyası için: fetch + download
+                                                                            fetch(downloadUrl)
+                                                                                .then(response => response.blob())
+                                                                                .then(blob => {
+                                                                                    const url = window.URL.createObjectURL(blob);
+                                                                                    const a = document.createElement('a');
+                                                                                    a.href = url;
+                                                                                    a.download = file.name;
+                                                                                    document.body.appendChild(a);
+                                                                                    a.click();
+                                                                                    document.body.removeChild(a);
+                                                                                    window.URL.revokeObjectURL(url);
+                                                                                })
+                                                                                .catch(error => {
+                                                                                    console.error('Download error:', error);
+                                                                                    // Fallback: direkt link aç
+                                                                                    window.open(downloadUrl, '_blank');
+                                                                                });
+                                                                        } else {
+                                                                            // Local dosya için: blob download
+                                                                            const a = document.createElement('a');
+                                                                            a.href = downloadUrl;
+                                                                            a.download = file.name;
+                                                                            document.body.appendChild(a);
+                                                                            a.click();
+                                                                            document.body.removeChild(a);
+                                                                        }
+                                                                    }
+                                                                }}
+                                                                className="h-8 w-8 p-0 hover:bg-green-100"
+                                                                title="İndir"
+                                                            >
+                                                                <Download className="h-4 w-4 text-green-600" />
+                                                            </Button>
+                                                        )}
+
+                                                        {/* Silme Butonu */}
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => handleFileRemove(file.id)}
+                                                            className="h-8 w-8 p-0 hover:bg-red-100"
+                                                            title="Sil"
+                                                        >
+                                                            <X className="h-4 w-4 text-red-600" />
+                                                        </Button>
+                                                    </div>
                                                 </div>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => handleFileRemove(index)}
-                                                    className="h-6 w-6 p-0 hover:bg-red-100"
-                                                >
-                                                    <X className="h-3 w-3" />
-                                                </Button>
-                                            </div>
-                                        ))}
+                                            ))}
+                                        </div>
                                     </div>
                                 )}
                             </div>
