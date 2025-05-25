@@ -36,6 +36,45 @@ export type CarrierProfileUpdateRequest = {
     driverLicense?: string;
 };
 
+export type Vehicle = {
+    id: string;
+    plateNumber: string;
+    type: string;
+    ecoCertified: boolean;
+    insuranceStatus: boolean;
+    inspectionDate: string;
+    driverName: string;
+    carryingCapacity: number;
+    isActive: boolean;
+    documents: string[];
+    carrierId: string;
+    createdAt?: string;
+    updatedAt?: string;
+};
+
+export type VehicleRequest = {
+    plateNumber: string;
+    type: string;
+    ecoCertified: boolean;
+    insuranceStatus: boolean;
+    inspectionDate: string;
+    driverName: string;
+    carryingCapacity: number;
+    carrierId: string;
+    documents?: string[];
+};
+
+export type VehicleUpdateRequest = {
+    type?: string;
+    ecoCertified?: boolean;
+    insuranceStatus?: boolean;
+    inspectionDate?: string;
+    driverName?: string;
+    carryingCapacity?: number;
+    active?: boolean;
+    documents?: string[];
+};
+
 export type PageResponse<T> = {
     content: T[];
     page: number;
@@ -47,7 +86,11 @@ export type PageResponse<T> = {
 };
 
 const carrierService = {
-    // Tüm taşıyıcı profillerini getirir
+    // Carrier Profile CRUD Operations
+
+    /**
+     * Tüm taşıyıcı profillerini getirir
+     */
     getAllCarrierProfiles: async (): Promise<CarrierProfile[]> => {
         try {
             return await apiService.get<CarrierProfile[]>('/carrier-profiles');
@@ -57,7 +100,9 @@ const carrierService = {
         }
     },
 
-    // Belirli bir taşıyıcı profilini ID'ye göre getirir
+    /**
+     * Belirli bir taşıyıcı profilini ID'ye göre getirir
+     */
     getCarrierProfileById: async (id: string): Promise<CarrierProfile> => {
         try {
             return await apiService.get<CarrierProfile>(`/carrier-profiles/${id}`);
@@ -67,7 +112,9 @@ const carrierService = {
         }
     },
 
-    // Kullanıcı ID'sine göre taşıyıcı profilini getirir
+    /**
+     * Kullanıcı ID'sine göre taşıyıcı profilini getirir
+     */
     getCarrierProfileByUserId: async (userId: string): Promise<CarrierProfile> => {
         try {
             return await apiService.get<CarrierProfile>(`/carrier-profiles/user/${userId}`);
@@ -77,7 +124,9 @@ const carrierService = {
         }
     },
 
-    // Yeni taşıyıcı profili oluşturur
+    /**
+     * Yeni taşıyıcı profili oluşturur
+     */
     createCarrierProfile: async (profileData: CarrierProfileRequest): Promise<CarrierProfile> => {
         try {
             return await apiService.post<CarrierProfile, CarrierProfileRequest>('/carrier-profiles', profileData);
@@ -87,7 +136,9 @@ const carrierService = {
         }
     },
 
-    // Taşıyıcı profilini günceller
+    /**
+     * Taşıyıcı profilini günceller
+     */
     updateCarrierProfile: async (id: string, profileData: CarrierProfileUpdateRequest): Promise<CarrierProfile> => {
         try {
             return await apiService.put<CarrierProfile, CarrierProfileUpdateRequest>(`/carrier-profiles/${id}`, profileData);
@@ -97,7 +148,9 @@ const carrierService = {
         }
     },
 
-    // Taşıyıcı profilini siler
+    /**
+     * Taşıyıcı profilini siler
+     */
     deleteCarrierProfile: async (id: string): Promise<void> => {
         try {
             await apiService.delete(`/carrier-profiles/${id}`);
@@ -107,57 +160,116 @@ const carrierService = {
         }
     },
 
-    // Mevcut kullanıcının taşıyıcı profilini getirir
-    getCurrentCarrierProfile: async (): Promise<CarrierProfile> => {
+    // Vehicle CRUD Operations
+
+    /**
+     * Yeni araç oluşturur
+     */
+    createVehicle: async (vehicleData: VehicleRequest): Promise<Vehicle> => {
         try {
-            return await apiService.get<CarrierProfile>('/carrier-profiles/me');
+            return await apiService.post<Vehicle, VehicleRequest>('/vehicles', vehicleData);
         } catch (error) {
-            console.error('Get current carrier profile error:', error);
+            console.error('Create vehicle error:', error);
             throw error;
         }
     },
 
-    // Şirket durumuna göre taşıyıcı profillerini getirir (şirket veya bireysel)
-    getCarrierProfilesByCompanyStatus: async (isCompany: boolean): Promise<CarrierProfile[]> => {
+    /**
+     * Belirli bir aracı ID'ye göre getirir
+     */
+    getVehicleById: async (id: string): Promise<Vehicle> => {
         try {
-            return await apiService.get<CarrierProfile[]>('/carrier-profiles/company-status', { isCompany });
+            return await apiService.get<Vehicle>(`/vehicles/${id}`);
         } catch (error) {
-            console.error(`Get carrier profiles by company status (${isCompany}) error:`, error);
+            console.error(`Get vehicle by ID (${id}) error:`, error);
             throw error;
         }
     },
 
-    // Çevre dostu durumuna göre taşıyıcı profillerini getirir
-    getCarrierProfilesByEcoFriendlyStatus: async (isEcoFriendly: boolean): Promise<CarrierProfile[]> => {
+    /**
+     * Taşıyıcı ID'sine göre araçları getirir
+     */
+    getVehiclesByCarrier: async (carrierId: string): Promise<Vehicle[]> => {
         try {
-            return await apiService.get<CarrierProfile[]>('/carrier-profiles/eco-friendly', { isEcoFriendly });
+            return await apiService.get<Vehicle[]>(`/vehicles/carrier/${carrierId}`);
         } catch (error) {
-            console.error(`Get carrier profiles by eco-friendly status (${isEcoFriendly}) error:`, error);
+            console.error(`Get vehicles by carrier (${carrierId}) error:`, error);
             throw error;
         }
     },
 
-    // Deneyimli taşıyıcıları getirir (belirli bir teslimat sayısının üzerinde)
-    getExperiencedCarriers: async (minDeliveries: number): Promise<CarrierProfile[]> => {
+    /**
+     * Araç bilgilerini günceller
+     */
+    updateVehicle: async (id: string, vehicleData: VehicleUpdateRequest): Promise<Vehicle> => {
         try {
-            return await apiService.get<CarrierProfile[]>('/carrier-profiles/experienced', { minDeliveries });
+            return await apiService.put<Vehicle, VehicleUpdateRequest>(`/vehicles/${id}`, vehicleData);
         } catch (error) {
-            console.error(`Get experienced carriers (min: ${minDeliveries}) error:`, error);
+            console.error(`Update vehicle (ID: ${id}) error:`, error);
             throw error;
         }
     },
 
-    // En iyi derecelendirmeye sahip çevre dostu taşıyıcıları getirir
-    getTopEcoFriendlyCarriers: async (minRating: number): Promise<CarrierProfile[]> => {
+    /**
+     * Aracı siler
+     */
+    deleteVehicle: async (id: string): Promise<void> => {
         try {
-            return await apiService.get<CarrierProfile[]>('/carrier-profiles/top-eco-friendly', { minRating });
+            await apiService.delete(`/vehicles/${id}`);
         } catch (error) {
-            console.error(`Get top eco-friendly carriers (min rating: ${minRating}) error:`, error);
+            console.error(`Delete vehicle (ID: ${id}) error:`, error);
             throw error;
         }
     },
 
-    // Taşıyıcı istatistiklerini getirir
+    /**
+     * Plaka numarasının sistemde kayıtlı olup olmadığını kontrol eder
+     */
+    isPlateNumberExists: async (plateNumber: string): Promise<boolean> => {
+        try {
+            return await apiService.get<boolean>(`/vehicles/check-plate/${plateNumber}`);
+        } catch (error) {
+            console.error(`Check plate number exists (${plateNumber}) error:`, error);
+            throw error;
+        }
+    },
+
+    /**
+     * Mevcut kullanıcının (taşıyıcı) araçlarını getirir
+     */
+    getCurrentUserVehicles: async (): Promise<Vehicle[]> => {
+        try {
+            return await apiService.get<Vehicle[]>('/vehicles/my-vehicles');
+        } catch (error) {
+            console.error('Get current user vehicles error:', error);
+            throw error;
+        }
+    },
+
+    /**
+     * Araç tiplerini getirir (static list)
+     */
+    getVehicleTypes: (): string[] => {
+        return [
+            'Tır',
+            'Kamyon',
+            'Kamyonet',
+            'Açık Kasa',
+            'Kapalı Kasa',
+            'Tenten',
+            'Termoking',
+            'Soğutucu',
+            'Tanker',
+            'Konteyner Taşıyıcı',
+            'Lowbed',
+            'Çekici',
+            'Dorse'
+        ];
+    },
+
+    /**
+     * Taşıyıcı istatistiklerini getirir
+     */
     getCarrierStatistics: async (carrierId: string): Promise<{
         completedDeliveries: number;
         pendingDeliveries: number;
@@ -181,7 +293,9 @@ const carrierService = {
         }
     },
 
-    // Taşıyıcının derecelendirmesini günceller
+    /**
+     * Taşıyıcının derecelendirmesini günceller
+     */
     updateCarrierRating: async (carrierId: string, rating: number): Promise<void> => {
         try {
             await apiService.post(`/carrier-profiles/${carrierId}/ratings`, { rating });
@@ -191,7 +305,9 @@ const carrierService = {
         }
     },
 
-    // Belirli kriterlere göre taşıyıcı arama
+    /**
+     * Belirli kriterlere göre taşıyıcı arama
+     */
     searchCarriers: async (params: {
         name?: string;
         isCompany?: boolean;

@@ -199,6 +199,107 @@
       "totalDistance": "Total Distance",
       "totalEarnings": "Total Earnings"
     },
+  "carrierProfile": {
+    "title": "My Carrier Profile",
+    "save": "Save Profile",
+    "saving": "Saving...",
+    "loading": "Loading profile...",
+    "saved": "Profile saved successfully!",
+    "error": "Error saving profile",
+    "userNotFound": "User information not found",
+    "description": "Manage your profile information and vehicles",
+
+    "userType": {
+      "title": "Account Type",
+      "individual": "Individual",
+      "company": "Company"
+    },
+
+    "basicInfo": {
+      "title": "Basic Information",
+      "nameIndividual": "Full Name",
+      "nameCompany": "Company Name",
+      "nameRequired": "required",
+      "namePlaceholder": "Enter your full name",
+      "companyNamePlaceholder": "Enter your company name",
+      "taxNumber": "Tax Number (Optional)",
+      "taxNumberPlaceholder": "Enter your tax number",
+      "iban": "IBAN",
+      "ibanPlaceholder": "TR00 0000 0000 0000 0000 0000 00",
+      "driverLicense": "Driver's License",
+      "driverLicensePlaceholder": "Enter your license class (e.g: B, C, CE)"
+    },
+
+    "contactInfo": {
+      "title": "Contact Information",
+      "phone": "Phone",
+      "phonePlaceholder": "Enter your phone number",
+      "email": "Email",
+      "emailPlaceholder": "Enter your email address"
+    },
+
+    "ecoFriendly": {
+      "title": "Eco-Friendly Transportation",
+      "question": "Is Vehicle Eco-Friendly?",
+      "description": "This option will appear in your profile and offers",
+      "certified": "✅ Eco-Friendly Carrier",
+      "certifiedDescription": "This profile will appear in the eco-friendly transportation category"
+    },
+
+    "vehicles": {
+      "title": "My Vehicles",
+      "count": "vehicles",
+      "add": "Add Vehicle",
+      "edit": "Edit Vehicle",
+      "delete": "Delete Vehicle",
+      "deleteConfirm": "Are you sure you want to delete this vehicle?",
+      "noVehicles": "No vehicles added yet",
+      "noVehiclesDescription": "Click the button above to add your first vehicle",
+      "addNew": "Add New Vehicle",
+      "update": "Update",
+      "cancel": "Cancel",
+      "save": "Add Vehicle",
+      "added": "Vehicle added successfully!",
+      "updated": "Vehicle updated successfully!",
+      "deleted": "Vehicle deleted successfully!",
+      "addError": "Vehicle could not be added",
+      "updateError": "Vehicle could not be updated",
+      "deleteError": "Vehicle could not be deleted",
+      "requiredFields": "Plate number, vehicle type and driver name are required",
+      "saveProfileFirst": "You must save the profile first",
+
+      "form": {
+        "plateNumber": "Plate Number",
+        "plateNumberPlaceholder": "34 ABC 123",
+        "plateNumberRequired": "Plate Number *",
+        "type": "Vehicle Type",
+        "typePlaceholder": "Select vehicle type",
+        "typeRequired": "Vehicle Type *",
+        "driverName": "Driver Name",
+        "driverNamePlaceholder": "Enter driver name",
+        "driverNameRequired": "Driver Name *",
+        "carryingCapacity": "Carrying Capacity (tons)",
+        "carryingCapacityPlaceholder": "0.0",
+        "inspectionDate": "Inspection Date",
+        "ecoCertified": "Eco-Friendly Vehicle",
+        "ecoCertifiedDescription": "Does this vehicle have eco-friendly certification?",
+        "insuranceStatus": "Insurance Status",
+        "insuranceStatusDescription": "Does the vehicle have insurance?"
+      },
+
+      "details": {
+        "driver": "Driver:",
+        "inspection": "Inspection:",
+        "insurance": "Insurance:",
+        "status": "Status:",
+        "insuranceYes": "✅ Yes",
+        "insuranceNo": "❌ No",
+        "active": "Active",
+        "inactive": "Inactive",
+        "ecoFriendlyBadge": "Eco-Friendly"
+      }
+    }
+  },
   "brokerPage": {
     "title": "Broker Panel",
     "welcome": "Welcome to your broker panel",

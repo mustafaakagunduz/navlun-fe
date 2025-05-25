@@ -200,6 +200,107 @@
     "totalDistance": "Toplam Mesafe",
     "totalEarnings": "Toplam Kazanç"
   },
+  "carrierProfile": {
+    "title": "Taşıyıcı Profilim",
+    "save": "Profili Kaydet",
+    "saving": "Kaydediliyor...",
+    "loading": "Profil yükleniyor...",
+    "saved": "Profil başarıyla kaydedildi!",
+    "error": "Profil kaydedilirken hata oluştu",
+    "userNotFound": "Kullanıcı bilgileri bulunamadı",
+    "description": "Profil bilgilerinizi ve araçlarınızı yönetin",
+
+    "userType": {
+      "title": "Hesap Türü",
+      "individual": "Bireysel",
+      "company": "Firma"
+    },
+
+    "basicInfo": {
+      "title": "Temel Bilgiler",
+      "nameIndividual": "Ad Soyad",
+      "nameCompany": "Firma Adı",
+      "nameRequired": "zorunludur",
+      "namePlaceholder": "Adınızı ve soyadınızı girin",
+      "companyNamePlaceholder": "Firma adınızı girin",
+      "taxNumber": "Vergi Numarası (Opsiyonel)",
+      "taxNumberPlaceholder": "Vergi numaranızı girin",
+      "iban": "IBAN",
+      "ibanPlaceholder": "TR00 0000 0000 0000 0000 0000 00",
+      "driverLicense": "Ehliyet",
+      "driverLicensePlaceholder": "Ehliyet sınıfınızı girin (örn: B, C, CE)"
+    },
+
+    "contactInfo": {
+      "title": "İletişim Bilgileri",
+      "phone": "Telefon",
+      "phonePlaceholder": "Telefon numaranızı girin",
+      "email": "E-posta",
+      "emailPlaceholder": "E-posta adresinizi girin"
+    },
+
+    "ecoFriendly": {
+      "title": "Çevre Dostu Taşımacılık",
+      "question": "Araç Çevre Dostu mu?",
+      "description": "Bu seçenek profilinizde ve tekliflerinizde görünecektir",
+      "certified": "✅ Çevre Dostu Taşıyıcı",
+      "certifiedDescription": "Bu profil çevre dostu taşımacılık kategorisinde görünecektir"
+    },
+
+    "vehicles": {
+      "title": "Araçlarım",
+      "count": "araç",
+      "add": "Araç Ekle",
+      "edit": "Araç Düzenle",
+      "delete": "Aracı Sil",
+      "deleteConfirm": "Bu aracı silmek istediğinizden emin misiniz?",
+      "noVehicles": "Henüz araç eklenmemiş",
+      "noVehiclesDescription": "İlk aracınızı eklemek için yukarıdaki butona tıklayın",
+      "addNew": "Yeni Araç Ekle",
+      "update": "Güncelle",
+      "cancel": "İptal",
+      "save": "Araç Ekle",
+      "added": "Araç başarıyla eklendi!",
+      "updated": "Araç başarıyla güncellendi!",
+      "deleted": "Araç başarıyla silindi!",
+      "addError": "Araç eklenemedi",
+      "updateError": "Araç güncellenemedi",
+      "deleteError": "Araç silinemedi",
+      "requiredFields": "Plaka, araç tipi ve sürücü adı zorunludur",
+      "saveProfileFirst": "Önce profili kaydetmelisiniz",
+
+      "form": {
+        "plateNumber": "Plaka Numarası",
+        "plateNumberPlaceholder": "34 ABC 123",
+        "plateNumberRequired": "Plaka Numarası *",
+        "type": "Araç Tipi",
+        "typePlaceholder": "Araç tipini seçin",
+        "typeRequired": "Araç Tipi *",
+        "driverName": "Sürücü Adı",
+        "driverNamePlaceholder": "Sürücü adını girin",
+        "driverNameRequired": "Sürücü Adı *",
+        "carryingCapacity": "Taşıma Kapasitesi (ton)",
+        "carryingCapacityPlaceholder": "0.0",
+        "inspectionDate": "Muayene Tarihi",
+        "ecoCertified": "Çevre Dostu Araç",
+        "ecoCertifiedDescription": "Bu araç çevre dostu sertifikasına sahip mi?",
+        "insuranceStatus": "Sigorta Durumu",
+        "insuranceStatusDescription": "Aracın sigortası mevcut mu?"
+      },
+
+      "details": {
+        "driver": "Sürücü:",
+        "inspection": "Muayene:",
+        "insurance": "Sigorta:",
+        "status": "Durum:",
+        "insuranceYes": "✅ Var",
+        "insuranceNo": "❌ Yok",
+        "active": "Aktif",
+        "inactive": "Pasif",
+        "ecoFriendlyBadge": "Çevre Dostu"
+      }
+    }
+  },
   "brokerPage": {
     "title": "Aracı Paneli",
     "welcome": "Aracı panelinize hoş geldiniz",

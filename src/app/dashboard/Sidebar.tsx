@@ -37,7 +37,7 @@ export default function Sidebar() {
         { href: "/dashboard/carrier/available-loads", label: t("dashboard.sidebar.availableLoads"), icon: Package },
         { href: "/dashboard/carrier/my-loads", label: t("dashboard.sidebar.myLoads"), icon: Truck },
         { href: "/dashboard/carrier/schedule", label: t("dashboard.sidebar.schedule"), icon: Calendar },
-        { href: "/dashboard/carrier/profile", label: t("dashboard.sidebar.profile"), icon: Users },
+        { href: "/dashboard/carrier/carrier-profile", label: t("dashboard.sidebar.profile"), icon: Users },
     ];
 
     const brokerMenuItems = [
@@ -45,7 +45,7 @@ export default function Sidebar() {
         { href: "/dashboard/broker/available-loads", label: t("dashboard.sidebar.availableLoads"), icon: Package },
         { href: "/dashboard/broker/deals", label: t("dashboard.sidebar.deals"), icon: HandshakeIcon },
         { href: "/dashboard/broker/commissions", label: t("dashboard.sidebar.commissions"), icon: DollarSign },
-        { href: "/dashboard/broker/profile", label: t("dashboard.sidebar.profile"), icon: Users },
+        { href: "/dashboard/broker/broker-profile", label: t("dashboard.sidebar.profile"), icon: Users },
     ];
 
     const adminMenuItems = [
