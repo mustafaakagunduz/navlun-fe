@@ -102,7 +102,7 @@ export default function CarrierProfilePage() {
     // Vehicle types
     const vehicleTypes = carrierService.getVehicleTypes();
 
-    // Utility functions
+    // Utility functionss
     const formatDate = (dateString: string): string => {
         if (!dateString) return '';
 
