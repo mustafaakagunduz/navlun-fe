@@ -218,7 +218,7 @@ export default function NewLoadForm() {
 
     return (
         <ProtectedRoute allowedRoles={['SENDER']}>
-            <div className="p-8 max-w-4xl mx-auto">
+            <div className="p-4 lg:p-8 max-w-6xl mx-auto">
                 {/* Header */}
                 <div className="flex items-center gap-4 mb-8">
                     <Button
@@ -473,7 +473,7 @@ export default function NewLoadForm() {
                                 {t('newLoad.sections.insurance')}
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
+                        <CardContent className="space-y-6">
                             {/* Insurance Checkbox */}
                             <div className="flex items-center space-x-3 p-4 border rounded-lg bg-blue-50">
                                 <Checkbox
