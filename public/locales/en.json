@@ -185,6 +185,66 @@
       "placeholder": "Enter your billing information"
     }
   },
+  "loads": {
+    "title": "My Loads",
+    "description": "Manage your loads and add new ones",
+    "newLoad": "Add New Load",
+    "loading": "Loading loads...",
+    "searchPlaceholder": "Search loads...",
+    "noResults": "No loads found matching your search criteria",
+    "noLoads": "You don't have any loads yet",
+    "tryDifferentFilter": "Try different search criteria or clear filters",
+    "createFirstLoad": "Click the button below to create your first load",
+    "resultsCount": "loads found",
+    "totalCount": "total",
+    "clickForDetails": "Click for details",
+    "createdAt": "Created",
+    "pickup": "PICKUP",
+    "delivery": "DELIVERY",
+    "insured": "Insured",
+    "filters": {
+      "all": "All",
+      "pending": "Pending",
+      "assigned": "Assigned",
+      "inTransit": "In Transit",
+      "delivered": "Delivered",
+      "completed": "Completed"
+    },
+    "status": {
+      "pending": "Pending",
+      "assigned": "Assigned",
+      "in_transit": "In Transit",
+      "delivered": "Delivered",
+      "completed": "Completed"
+    },
+    "units": {
+      "kg": "kg",
+      "ton": "ton",
+      "co2": "ton CO₂"
+    },
+    "details": {
+      "basicInfo": "Basic Information",
+      "goodsType": "Goods Type",
+      "weight": "Weight",
+      "loadingDate": "Loading Date",
+      "deliveryDate": "Delivery Date",
+      "addresses": "Addresses",
+      "pickupAddress": "Pickup Address",
+      "deliveryAddress": "Delivery Address",
+      "additionalInfo": "Additional Information",
+      "insurance": "Insurance",
+      "insured": "Insured",
+      "notInsured": "Not Insured",
+      "carbonFootprint": "Carbon Footprint",
+      "completionStatus": "Completion Status",
+      "completed": "Completed",
+      "inProgress": "In Progress",
+      "description": "Description",
+      "timestamps": "Timestamps",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At"
+    }
+  },
   "carrierPage": {
       "title": "Carrier Panel",
       "welcome": "Welcome to your carrier panel",
@@ -390,7 +450,130 @@
     }
 
 
+  },
+
+
+  "newLoad": {
+    "title": "Add New Load",
+    "description": "Enter load information and start searching for carriers",
+    "loading": "Loading data...",
+    "searchGoodsType": "Search goods type...",
+    "noGoodsTypeFound": "No goods type found",
+    "packagingRecommendations": "Packaging Recommendations",
+    "sections": {
+      "basicInfo": "Basic Information",
+      "addresses": "Address Information",
+      "dates": "Date Information",
+      "insurance": "Insurance",
+      "carbonFootprint": "Carbon Footprint"
+    },
+    "fields": {
+      "title": "Load Title",
+      "goodsType": "Goods Type",
+      "weight": "Net Weight",
+      "loadingAddress": "Loading Address",
+      "deliveryAddress": "Delivery Address",
+      "loadingDate": "Loading Date",
+      "deliveryDate": "Delivery Date",
+      "description": "Description",
+      "insuranceRequested": "Request Insurance"
+    },
+    "placeholders": {
+      "title": "E.g: Electronic Device Shipment",
+      "goodsType": "Select goods type",
+      "weight": "Enter weight in kilograms",
+      "loadingAddress": "Complete loading address",
+      "deliveryAddress": "Complete delivery address",
+      "description": "Additional information about the load, special requirements..."
+    },
+    "validation": {
+      "titleRequired": "Load title is required",
+      "goodsTypeRequired": "Goods type selection is required",
+      "weightRequired": "Weight information is required",
+      "weightMin": "Weight must be greater than 0",
+      "loadingAddressRequired": "Loading address is required",
+      "deliveryAddressRequired": "Delivery address is required",
+      "loadingDateRequired": "Loading date is required",
+      "deliveryDateRequired": "Delivery date is required",
+      "dateNotPast": "Date cannot be in the past",
+      "deliveryAfterLoading": "Delivery date must be after loading date",
+      "insurancePolicyRequired": "If requesting insurance, policy selection is required"
+    },
+    "recommendations": {
+      "coldChain": "Cold chain",
+      "moistureProtection": "Moisture protection",
+      "expiryTracking": "Expiry tracking",
+      "antiStatic": "Anti-static",
+      "vibrationProtection": "Vibration protection",
+      "adrCertificate": "ADR certificate",
+      "specialPackaging": "Special packaging",
+      "safetyLabels": "Safety labels",
+      "wrinkleProtection": "Wrinkle protection",
+      "heavyLoad": "Heavy load",
+      "shockResistant": "Shock resistant",
+      "standard": "Standard packaging"
+    },
+    "insurance": {
+      "selectPolicy": "Select Insurance Policy",
+      "optionsAvailable": "options available",
+      "noPolicies": "No Insurance Policies Found",
+      "noPoliciesDescription": "No insurance policies are currently available",
+      "recommended": "Recommended",
+      "price": "Price",
+      "coverage": "Coverage",
+      "provider": "Provider",
+      "duration": "Duration",
+      "features": "Features",
+      "selectedPolicy": "Selected Policy",
+      "totalCost": "Total Cost"
+    },
+    "success": {
+      "created": "Load created successfully! Redirecting..."
+    },
+    "errors": {
+      "loadingData": "Error loading data",
+      "userNotFound": "User information not found",
+      "createFailed": "Error creating load"
+    },
+    "descriptionHelp": "You can add additional information about the load such as special requirements, important notes, etc.",
+    "insuranceDescription": "Request insurance coverage for your load. You can receive compensation in case of damage.",
+    "createLoad": "Create Load"
+  },
+  "carbonFootprint": {
+    "title": "Carbon Footprint",
+    "estimated": "Estimated value",
+    "unit": "ton CO₂",
+    "calculating": "Calculating...",
+    "low": "Low",
+    "high": "High",
+    "categories": {
+      "excellent": "Excellent",
+      "good": "Good",
+      "moderate": "Moderate",
+      "high": "High"
+    },
+    "treesEquivalent": "tree equivalent",
+    "kmEquivalent": "km car equivalent",
+    "ecoTips": "Eco Tips",
+    "tips": {
+      "consolidateShipments": "Consolidate shipments",
+      "chooseEcoVehicles": "Choose eco-friendly vehicles",
+      "optimizeRoutes": "Optimize routes",
+      "reducePackaging": "Reduce packaging",
+      "localSuppliers": "Choose local suppliers"
+    },
+    "calculationBased": "Calculation Based On:",
+    "calculationNote": "Calculated based on weight and estimated distance. Actual values may vary."
+  },
+  "common": {
+    "back": "Back",
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "required": "Required"
   }
+
 
 
 }

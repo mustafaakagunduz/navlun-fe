@@ -186,6 +186,66 @@
       "placeholder": "Fatura bilgilerinizi girin"
     }
   },
+  "loads": {
+    "title": "Yüklerim",
+    "description": "Yüklerinizi yönetin ve yeni yük ekleyin",
+    "newLoad": "Yeni Yük Ekle",
+    "loading": "Yükler yükleniyor...",
+    "searchPlaceholder": "Yük ara...",
+    "noResults": "Arama kriterlerinize uygun yük bulunamadı",
+    "noLoads": "Henüz hiç yüğünüz yok",
+    "tryDifferentFilter": "Farklı arama kriterleri deneyin veya filtreleri temizleyin",
+    "createFirstLoad": "İlk yüğünüzü oluşturmak için aşağıdaki butona tıklayın",
+    "resultsCount": "yük bulundu",
+    "totalCount": "toplam",
+    "clickForDetails": "Detaylar için tıklayın",
+    "createdAt": "Oluşturulma",
+    "pickup": "YÜKLEME",
+    "delivery": "TESLİMAT",
+    "insured": "Sigortalı",
+    "filters": {
+      "all": "Tümü",
+      "pending": "Bekleyen",
+      "assigned": "Atanmış",
+      "inTransit": "Taşınıyor",
+      "delivered": "Teslim Edildi",
+      "completed": "Tamamlandı"
+    },
+    "status": {
+      "pending": "Bekleyen",
+      "assigned": "Atanmış",
+      "in_transit": "Taşınıyor",
+      "delivered": "Teslim Edildi",
+      "completed": "Tamamlandı"
+    },
+    "units": {
+      "kg": "kg",
+      "ton": "ton",
+      "co2": "ton CO₂"
+    },
+    "details": {
+      "basicInfo": "Temel Bilgiler",
+      "goodsType": "Mal Türü",
+      "weight": "Ağırlık",
+      "loadingDate": "Yükleme Tarihi",
+      "deliveryDate": "Teslimat Tarihi",
+      "addresses": "Adresler",
+      "pickupAddress": "Yükleme Adresi",
+      "deliveryAddress": "Teslimat Adresi",
+      "additionalInfo": "Ek Bilgiler",
+      "insurance": "Sigorta",
+      "insured": "Sigortalı",
+      "notInsured": "Sigortasız",
+      "carbonFootprint": "Karbon Ayak İzi",
+      "completionStatus": "Tamamlanma Durumu",
+      "completed": "Tamamlandı",
+      "inProgress": "Devam Ediyor",
+      "description": "Açıklama",
+      "timestamps": "Zaman Bilgileri",
+      "createdAt": "Oluşturulma Tarihi",
+      "updatedAt": "Güncellenme Tarihi"
+    }
+  },
   "carrierPage": {
     "title": "Taşıyıcı Paneli",
     "welcome": "Taşıyıcı panelinize hoş geldiniz",
@@ -390,7 +450,129 @@
         "refreshInbox": "Gelen kutunuzu yenileyin"
       }
     }
+  },
+
+  "newLoad": {
+    "title": "Yeni Yük Ekle",
+    "description": "Yük bilgilerini girin ve taşıyıcı aramaya başlayın",
+    "loading": "Veriler yükleniyor...",
+    "searchGoodsType": "Mal türü ara...",
+    "noGoodsTypeFound": "Aradığınız mal türü bulunamadı",
+    "packagingRecommendations": "Paketleme Önerileri",
+    "sections": {
+      "basicInfo": "Temel Bilgiler",
+      "addresses": "Adres Bilgileri",
+      "dates": "Tarih Bilgileri",
+      "insurance": "Sigorta",
+      "carbonFootprint": "Karbon Ayak İzi"
+    },
+    "fields": {
+      "title": "Yük Başlığı",
+      "goodsType": "Mal Türü",
+      "weight": "Net Ağırlık",
+      "loadingAddress": "Yükleme Adresi",
+      "deliveryAddress": "Teslimat Adresi",
+      "loadingDate": "Yükleme Tarihi",
+      "deliveryDate": "Teslimat Tarihi",
+      "description": "Açıklama",
+      "insuranceRequested": "Sigorta Talep Ediyorum"
+    },
+    "placeholders": {
+      "title": "Örn: Elektronik Cihaz Sevkiyatı",
+      "goodsType": "Mal türü seçin",
+      "weight": "Ağırlığı kilogram cinsinden girin",
+      "loadingAddress": "Yükleme yapılacak tam adres",
+      "deliveryAddress": "Teslim edilecek tam adres",
+      "description": "Yük hakkında ek bilgiler, özel gereksinimler..."
+    },
+    "validation": {
+      "titleRequired": "Yük başlığı zorunludur",
+      "goodsTypeRequired": "Mal türü seçimi zorunludur",
+      "weightRequired": "Ağırlık bilgisi zorunludur",
+      "weightMin": "Ağırlık 0'dan büyük olmalıdır",
+      "loadingAddressRequired": "Yükleme adresi zorunludur",
+      "deliveryAddressRequired": "Teslimat adresi zorunludur",
+      "loadingDateRequired": "Yükleme tarihi zorunludur",
+      "deliveryDateRequired": "Teslimat tarihi zorunludur",
+      "dateNotPast": "Tarih bugünden önce olamaz",
+      "deliveryAfterLoading": "Teslimat tarihi yükleme tarihinden sonra olmalıdır",
+      "insurancePolicyRequired": "Sigorta talep ediyorsanız poliçe seçimi zorunludur"
+    },
+    "recommendations": {
+      "coldChain": "Soğuk zincir",
+      "moistureProtection": "Nem koruması",
+      "expiryTracking": "SKT takibi",
+      "antiStatic": "Antistatik",
+      "vibrationProtection": "Titreşim koruması",
+      "adrCertificate": "ADR sertifikası",
+      "specialPackaging": "Özel ambalaj",
+      "safetyLabels": "Güvenlik etiketleri",
+      "wrinkleProtection": "Kırışma koruması",
+      "heavyLoad": "Ağır yük",
+      "shockResistant": "Darbe dayanıklı",
+      "standard": "Standart paketleme"
+    },
+    "insurance": {
+      "selectPolicy": "Sigorta Poliçesi Seçin",
+      "optionsAvailable": "seçenek mevcut",
+      "noPolicies": "Sigorta Poliçesi Bulunamadı",
+      "noPoliciesDescription": "Şu anda mevcut sigorta poliçesi bulunmamaktadır",
+      "recommended": "Önerilen",
+      "price": "Fiyat",
+      "coverage": "Teminat",
+      "provider": "Şirket",
+      "duration": "Süre",
+      "features": "Özellikler",
+      "selectedPolicy": "Seçilen Poliçe",
+      "totalCost": "Toplam Maliyet"
+    },
+    "success": {
+      "created": "Yük başarıyla oluşturuldu! Yönlendiriliyorsunuz..."
+    },
+    "errors": {
+      "loadingData": "Veriler yüklenirken hata oluştu",
+      "userNotFound": "Kullanıcı bilgileri bulunamadı",
+      "createFailed": "Yük oluşturulurken hata oluştu"
+    },
+    "descriptionHelp": "Yük hakkında özel gereksinimler, dikkat edilmesi gereken noktalar gibi ek bilgiler ekleyebilirsiniz.",
+    "insuranceDescription": "Yükünüz için sigorta koruması talep edin. Hasar durumunda tazminat alabilirsiniz.",
+    "createLoad": "Yük Oluştur"
+  },
+  "carbonFootprint": {
+    "title": "Karbon Ayak İzi",
+    "estimated": "Tahmini değer",
+    "unit": "ton CO₂",
+    "calculating": "Hesaplanıyor...",
+    "low": "Düşük",
+    "high": "Yüksek",
+    "categories": {
+      "excellent": "Mükemmel",
+      "good": "İyi",
+      "moderate": "Orta",
+      "high": "Yüksek"
+    },
+    "treesEquivalent": "ağaç eşdeğeri",
+    "kmEquivalent": "km araç eşdeğeri",
+    "ecoTips": "Çevreci Öneriler",
+    "tips": {
+      "consolidateShipments": "Sevkiyatları birleştirin",
+      "chooseEcoVehicles": "Çevre dostu araçları tercih edin",
+      "optimizeRoutes": "Rotaları optimize edin",
+      "reducePackaging": "Ambalaj kullanımını azaltın",
+      "localSuppliers": "Yerel tedarikçileri tercih edin"
+    },
+    "calculationBased": "Hesaplama Temeli:",
+    "calculationNote": "Ağırlık ve tahmini mesafe üzerinden hesaplanmıştır. Gerçek değerler değişkenlik gösterebilir."
+  },
+  "common": {
+    "back": "Geri",
+    "save": "Kaydet",
+    "saving": "Kaydediliyor...",
+    "cancel": "İptal",
+    "continue": "Devam Et",
+    "required": "Zorunlu"
   }
+
 
 
 

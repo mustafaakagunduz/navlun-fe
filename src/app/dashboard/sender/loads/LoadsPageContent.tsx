@@ -1,0 +1,223 @@
+// src/app/dashboard/sender/loads/LoadsPageContent.tsx
+"use client"
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Search, Plus, Filter, Package, Calendar, MapPin, Weight, AlertCircle } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
+import loadService, { Load, LoadStatus } from '@/services/loadService';
+import LoadCard from './LoadCard';
+import LoadDetailsDialog from './LoadDetailsDialog';
+import senderService from "@/services/senderService";
+import authService from "@/services/authService";
+
+export default function LoadsPageContent() {
+    const router = useRouter();
+    const { t } = useLanguage();
+
+    const [loads, setLoads] = useState<Load[]>([]);
+    const [filteredLoads, setFilteredLoads] = useState<Load[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState<LoadStatus | 'ALL'>('ALL');
+    const [selectedLoad, setSelectedLoad] = useState<Load | null>(null);
+    const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+
+    useEffect(() => {
+        const fetchLoads = async () => {
+            try {
+                // Önce user ID'yi al
+                const currentUser = await authService.getCurrentUser();
+
+                // Sonra user'ın sender profile'ını al
+                const senderProfile = await senderService.getSenderProfileByUserId(currentUser.id);
+
+                // Sonra o sender'ın yüklerini al
+                const response = await loadService.getLoadsBySenderPaginated(senderProfile.id);
+
+                setLoads(response.content);
+                setFilteredLoads(response.content);
+            } catch (error) {
+                console.error('Yükler yüklenirken hata:', error);
+                setLoads([]);
+                setFilteredLoads([]);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchLoads();
+    }, []);
+
+    // Filtre ve arama işlemleri
+    useEffect(() => {
+        let result = loads;
+
+        // Arama filtresi
+        if (searchQuery) {
+            result = result.filter(load =>
+                load.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                load.goodsType.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        }
+
+        // Durum filtresi
+        if (statusFilter !== 'ALL') {
+            result = result.filter(load => load.status === statusFilter);
+        }
+
+        setFilteredLoads(result);
+    }, [searchQuery, statusFilter, loads]);
+
+    const handleNewLoadClick = () => {
+        router.push('/dashboard/sender/loads/new-load');
+    };
+
+    const handleLoadClick = (load: Load) => {
+        setSelectedLoad(load);
+        setShowDetailsDialog(true);
+    };
+
+    const getStatusColor = (status: LoadStatus) => {
+        switch (status) {
+            case 'PENDING': return 'bg-yellow-100 text-yellow-800';
+            case 'ASSIGNED': return 'bg-blue-100 text-blue-800';
+            case 'IN_TRANSIT': return 'bg-purple-100 text-purple-800';
+            case 'DELIVERED': return 'bg-green-100 text-green-800';
+            case 'COMPLETED': return 'bg-gray-100 text-gray-800';
+            default: return 'bg-gray-100 text-gray-800';
+        }
+    };
+
+    const getStatusText = (status: LoadStatus) => {
+        return t(`loads.status.${status.toLowerCase()}`);
+    };
+
+    if (isLoading) {
+        return (
+            <ProtectedRoute allowedRoles={['SENDER']}>
+                <div className="flex items-center justify-center min-h-[400px]">
+                    <div className="flex items-center gap-3">
+                        <Package className="h-6 w-6 animate-pulse text-green-600" />
+                        <span className="text-gray-600">{t('loads.loading')}</span>
+                    </div>
+                </div>
+            </ProtectedRoute>
+        );
+    }
+
+    return (
+        <ProtectedRoute allowedRoles={['SENDER']}>
+            <div className="p-8 space-y-6">
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold">{t('loads.title')}</h1>
+                        <p className="text-gray-600 mt-1">{t('loads.description')}</p>
+                    </div>
+
+                    <Button
+                        onClick={handleNewLoadClick}
+                        className="bg-green-600 hover:bg-green-700"
+                    >
+                        <Plus className="mr-2 h-4 w-4" />
+                        {t('loads.newLoad')}
+                    </Button>
+                </div>
+
+                {/* Filters */}
+                <Card>
+                    <CardContent className="p-6">
+                        <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
+                            <div className="relative w-full md:w-64">
+                                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                                <Input
+                                    placeholder={t('loads.searchPlaceholder')}
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="pl-10"
+                                />
+                            </div>
+
+                            <Tabs defaultValue="ALL" onValueChange={(value) => setStatusFilter(value as LoadStatus | 'ALL')}>
+                                <TabsList>
+                                    <TabsTrigger value="ALL">{t('loads.filters.all')}</TabsTrigger>
+                                    <TabsTrigger value="PENDING">{t('loads.filters.pending')}</TabsTrigger>
+                                    <TabsTrigger value="ASSIGNED">{t('loads.filters.assigned')}</TabsTrigger>
+                                    <TabsTrigger value="IN_TRANSIT">{t('loads.filters.inTransit')}</TabsTrigger>
+                                    <TabsTrigger value="DELIVERED">{t('loads.filters.delivered')}</TabsTrigger>
+                                    <TabsTrigger value="COMPLETED">{t('loads.filters.completed')}</TabsTrigger>
+                                </TabsList>
+                            </Tabs>
+                        </div>
+
+                        {/* Results Summary */}
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Package className="h-4 w-4" />
+                            <span>
+                                {filteredLoads.length} {t('loads.resultsCount')}
+                                {loads.length !== filteredLoads.length && (
+                                    <span className="ml-1">({loads.length} {t('loads.totalCount')})</span>
+                                )}
+                            </span>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Loads List */}
+                {filteredLoads.length === 0 ? (
+                    <Card>
+                        <CardContent className="p-12 text-center">
+                            <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">
+                                {searchQuery || statusFilter !== 'ALL'
+                                    ? t('loads.noResults')
+                                    : t('loads.noLoads')
+                                }
+                            </h3>
+                            <p className="text-gray-600 mb-4">
+                                {searchQuery || statusFilter !== 'ALL'
+                                    ? t('loads.tryDifferentFilter')
+                                    : t('loads.createFirstLoad')
+                                }
+                            </p>
+                            {(!searchQuery && statusFilter === 'ALL') && (
+                                <Button onClick={handleNewLoadClick} className="bg-green-600 hover:bg-green-700">
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    {t('loads.newLoad')}
+                                </Button>
+                            )}
+                        </CardContent>
+                    </Card>
+                ) : (
+                    <div className="grid gap-4">
+                        {filteredLoads.map((load) => (
+                            <LoadCard
+                                key={load.id}
+                                load={load}
+                                onClick={() => handleLoadClick(load)}
+                                getStatusColor={getStatusColor}
+                                getStatusText={getStatusText}
+                            />
+                        ))}
+                    </div>
+                )}
+
+                {/* Load Details Dialog */}
+                <LoadDetailsDialog
+                    load={selectedLoad}
+                    isOpen={showDetailsDialog}
+                    onClose={() => {
+                        setShowDetailsDialog(false);
+                        setSelectedLoad(null);
+                    }}
+                />
+            </div>
+        </ProtectedRoute>
+    );
+}

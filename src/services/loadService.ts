@@ -19,6 +19,8 @@ export type Load = {
     deliveryAddress: string;
     loadingDate: string;
     deliveryDate: string;
+    selectedInsurancePolicy?: string;
+    insurancePolicyDetails?: string;
     description?: string;
     insuranceRequested: boolean;
     estimatedCarbonFootprint: number;
@@ -40,6 +42,8 @@ export type LoadRequest = {
     description?: string;
     insuranceRequested: boolean;
     senderId: string;
+    selectedInsurancePolicy?: string;
+    insurancePolicyDetails?: string;
 };
 
 export type LoadUpdateRequest = {
@@ -54,6 +58,18 @@ export type LoadUpdateRequest = {
     insuranceRequested?: boolean;
     status?: LoadStatus;
     isCompleted?: boolean;
+};
+
+export type InsurancePolicy = {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    coverage: number;
+    features: string[];
+    provider: string;
+    duration: string;
+    recommended: boolean;
 };
 
 export type PageResponse<T> = {
@@ -90,6 +106,58 @@ const loadService = {
             return await apiService.get<Load>(`/loads/${id}`);
         } catch (error) {
             console.error(`Get load by ID (${id}) error:`, error);
+            throw error;
+        }
+    },
+
+
+    /**
+     * Mevcut sigorta poliçelerini getirir
+     */
+    getInsurancePolicies: async (): Promise<InsurancePolicy[]> => {
+        try {
+            return await apiService.get<InsurancePolicy[]>('/loads/insurance-policies');
+        } catch (error) {
+            console.error('Get insurance policies error:', error);
+            throw error;
+        }
+    },
+
+    /**
+     * Mevcut mal türlerini getirir
+     */
+    getGoodsTypes: async (): Promise<string[]> => {
+        try {
+            return await apiService.get<string[]>('/loads/goods-types');
+        } catch (error) {
+            console.error('Get goods types error:', error);
+            throw error;
+        }
+    },
+
+    /**
+     * Karbon ayak izi hesaplar (basit versiyon)
+     */
+    calculateCarbonFootprint: async (loadData: {
+        netWeight: number;
+        distance?: number;
+    }): Promise<number> => {
+        try {
+            // Basit hesaplama - gerçek API'ye dönüştürülecek
+            const { netWeight, distance = 500 } = loadData;
+
+            // Ağırlık faktörü: ton başına 0.5 CO2
+            const weightFactor = (netWeight / 1000) * 0.5;
+
+            // Mesafe faktörü: km başına 0.8 CO2
+            const distanceFactor = distance * 0.8;
+
+            // Toplam karbon ayak izi (ton CO2)
+            const totalCarbon = (weightFactor + distanceFactor) / 100;
+
+            return Math.round(totalCarbon * 100) / 100; // 2 ondalık basamak
+        } catch (error) {
+            console.error('Calculate carbon footprint error:', error);
             throw error;
         }
     },
@@ -432,7 +500,8 @@ const loadService = {
             const params: Record<string, any> = { page, size };
             if (status) params.status = status;
 
-            return await apiService.get<PageResponse<Load>>('/loads/me', params);
+            // Mevcut kullanıcının sender ID'sini otomatik almak için backend'de özel endpoint
+            return await apiService.get<PageResponse<Load>>('/loads/current-user', params);
         } catch (error) {
             console.error('Get current user loads error:', error);
             throw error;
