@@ -26,13 +26,12 @@ export type Offer = {
 
 export type OfferRequest = {
     loadId: string;
-    carrierId: string;
+    // carrierId: string; // Bu satırı kaldır veya opsiyonel yap
     vehicleId: string;
     price: number;
     insuranceAccepted: boolean;
     isEcoFriendly: boolean;
 };
-
 export type OfferUpdateRequest = {
     price?: number;
     insuranceAccepted?: boolean;
@@ -121,7 +120,7 @@ const offerService = {
             // Standart teklif verme metodunu kullan, vehicle validation backend'de yapılacak
             return await apiService.post<Offer, OfferRequest>('/offers', {
                 loadId: offerData.loadId,
-                carrierId: offerData.carrierId,
+
                 vehicleId: offerData.vehicleId,
                 price: offerData.price,
                 insuranceAccepted: offerData.insuranceAccepted,

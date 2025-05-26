@@ -41,9 +41,9 @@ export default function AvailableLoadsPage() {
     const fetchAvailableLoads = async () => {
         try {
             setLoading(true);
-            console.log('Fetching available loads...'); // Debug için
+
             const response = await loadService.getAvailableLoadsForOffers(0, 50);
-            console.log('Response:', response); // Debug için
+
             setLoads(response.content);
         } catch (error: any) {
             console.error('Detailed error:', error);
@@ -94,7 +94,7 @@ export default function AvailableLoadsPage() {
 
             const offerData: OfferRequest = {
                 loadId: selectedLoad.id,
-                carrierId: '', // Backend'de current user'dan alınacak
+                // carrierId kaldırıldı - backend'de current user'dan alınacak
                 vehicleId: offerForm.vehicleId,
                 price: parseFloat(offerForm.price),
                 insuranceAccepted: offerForm.insuranceAccepted,
