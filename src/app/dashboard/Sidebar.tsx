@@ -13,7 +13,7 @@ import {
     FileText,
     DollarSign,
     HandshakeIcon,
-    Building
+    Leaf
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
@@ -29,6 +29,8 @@ export default function Sidebar() {
         { href: "/dashboard", label: t("dashboard.sidebar.home"), icon: Home },
         { href: "/dashboard/sender/loads", label: t("dashboard.sidebar.myLoads"), icon: Package },
         { href: "/dashboard/sender/offers", label: t("dashboard.sidebar.offers"), icon: FileText },
+        { href: "/dashboard/carrier/sender-completed-deliveries", label: t("dashboard.sidebar.completed"), icon: CheckCheck },
+        { href: "/dashboard/carrier/environmental-effect", label: t("dashboard.sidebar.environmental"), icon: Leaf },
         { href: "/dashboard/sender/sender-profile", label: t("dashboard.sidebar.profile"), icon: Users },
     ];
 
@@ -36,7 +38,7 @@ export default function Sidebar() {
         { href: "/dashboard", label: t("dashboard.sidebar.home"), icon: Home },
         { href: "/dashboard/carrier/available-loads", label: t("dashboard.sidebar.availableLoads"), icon: Package },
         { href: "/dashboard/carrier/my-loads", label: t("dashboard.sidebar.myLoads"), icon: Truck },
-        { href: "/dashboard/carrier/completed-deliveries", label: t("dashboard.sidebar.completed"), icon: CheckCheck },
+        { href: "/dashboard/carrier/carrier-completed-deliveries", label: t("dashboard.sidebar.completed"), icon: CheckCheck },
         { href: "/dashboard/carrier/carrier-profile", label: t("dashboard.sidebar.profile"), icon: Users },
     ];
 
