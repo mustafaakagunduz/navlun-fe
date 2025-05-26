@@ -60,12 +60,15 @@ export default function AvailableLoadsPage() {
 
     const fetchUserVehicles = async () => {
         try {
-            const userVehicles = await vehicleService.getVehiclesForOffers();
+            console.log('Fetching user vehicles...'); // Debug
+            const userVehicles = await vehicleService.getCurrentUserVehicles();
+            console.log('Fetched vehicles:', userVehicles); // Debug
             setVehicles(userVehicles);
-        } catch (error) {
+        } catch (error: any) {
+            console.error('Vehicle fetch error:', error); // Debug
             toast({
                 title: 'Hata',
-                description: 'Araçlar yüklenirken bir hata oluştu.',
+                description: `Araçlar yüklenirken bir hata oluştu: ${error.response?.data?.message || error.message}`,
                 variant: 'destructive',
             });
         }

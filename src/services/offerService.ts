@@ -105,7 +105,8 @@ const offerService = {
     // Mevcut kullanıcının araçlarını getirir (teklif verme için)
     getCurrentUserVehicles: async (): Promise<VehicleInfo[]> => {
         try {
-            return await apiService.get<VehicleInfo[]>('/offers/current-user-vehicles');
+            const vehicles = await apiService.get<VehicleInfo[]>('/offers/current-user-vehicles');
+            return vehicles;
         } catch (error) {
             console.error('Get current user vehicles for offers error:', error);
             throw error;
