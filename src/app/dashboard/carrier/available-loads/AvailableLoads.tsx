@@ -41,12 +41,16 @@ export default function AvailableLoadsPage() {
     const fetchAvailableLoads = async () => {
         try {
             setLoading(true);
+            console.log('Fetching available loads...'); // Debug için
             const response = await loadService.getAvailableLoadsForOffers(0, 50);
+            console.log('Response:', response); // Debug için
             setLoads(response.content);
-        } catch (error) {
+        } catch (error: any) {
+            console.error('Detailed error:', error);
+            console.error('Error response:', error.response?.data);
             toast({
                 title: 'Hata',
-                description: 'Yükler yüklenirken bir hata oluştu.',
+                description: `Yükler yüklenirken bir hata oluştu: ${error.response?.data?.message || error.message}`,
                 variant: 'destructive',
             });
         } finally {
