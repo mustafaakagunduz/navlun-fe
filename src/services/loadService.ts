@@ -46,6 +46,28 @@ export type LoadRequest = {
     insurancePolicyDetails?: string;
 };
 
+export type OfferWithVehicleInfo = {
+    offerId: string;
+    carrierId: string;
+    carrierName: string;
+    vehicleId: string;
+    vehiclePlateNumber: string;
+    vehicleType: string;
+    vehicleEcoCertified: boolean;
+    price: number;
+    insuranceAccepted: boolean;
+    isEcoFriendly: boolean;
+    status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+    createdAt: string;
+};
+
+export type LoadWithOffers = {
+    load: Load;
+    offers: OfferWithVehicleInfo[];
+    pendingOffersCount: number;
+    hasAcceptedOffer: boolean;
+};
+
 export type LoadUpdateRequest = {
     title?: string;
     goodsType?: string;
@@ -506,7 +528,119 @@ const loadService = {
             console.error('Get current user loads error:', error);
             throw error;
         }
+    },
+
+    // Mevcut kullanıcının teklifli yüklerini getirir (sender için)
+    getCurrentUserLoadsWithOffers: async (): Promise<LoadWithOffers[]> => {
+        try {
+            return await apiService.get<LoadWithOffers[]>('/loads/my-loads-with-offers');
+        } catch (error) {
+            console.error('Get current user loads with offers error:', error);
+            throw error;
+        }
+    },
+
+    // Teklif verilebilir yükleri getirir (carrier için)
+    getAvailableLoadsForOffers: async (
+        page: number = 0,
+        size: number = 20,
+        sortBy?: string,
+        sortDirection?: 'asc' | 'desc'
+    ): Promise<PageResponse<Load>> => {
+        try {
+            const params: Record<string, any> = { page, size };
+            if (sortBy) params.sortBy = sortBy;
+            if (sortDirection) params.sortDirection = sortDirection;
+
+            return await apiService.get<PageResponse<Load>>('/loads/available-for-offers', params);
+        } catch (error) {
+            console.error('Get available loads for offers error:', error);
+            throw error;
+        }
+    },
+
+    // Kullanıcının aktif yüklerini getirir
+    getCurrentUserActiveLoads: async (): Promise<Load[]> => {
+        try {
+            return await apiService.get<Load[]>('/loads/my-active-loads');
+        } catch (error) {
+            console.error('Get current user active loads error:', error);
+            throw error;
+        }
+    },
+
+    // Yük için çevreci teklif var mı kontrol eder
+    hasEcoFriendlyOffers: (loadWithOffers: LoadWithOffers): boolean => {
+        return loadWithOffers.offers.some(offer =>
+            offer.vehicleEcoCertified || offer.isEcoFriendly
+        );
+    },
+
+    // Yük için en iyi çevreci teklifi bulur
+    getBestEcoFriendlyOffer: (loadWithOffers: LoadWithOffers): OfferWithVehicleInfo | null => {
+        const ecoOffers = loadWithOffers.offers.filter(offer =>
+            offer.vehicleEcoCertified || offer.isEcoFriendly
+        );
+
+        if (ecoOffers.length === 0) return null;
+
+        // En düşük fiyatlı çevreci teklifi döndür
+        return ecoOffers.reduce((best, current) =>
+            current.price < best.price ? current : best
+        );
+    },
+
+    // Yük için en düşük fiyatlı teklifi bulur
+    getCheapestOffer: (loadWithOffers: LoadWithOffers): OfferWithVehicleInfo | null => {
+        const pendingOffers = loadWithOffers.offers.filter(offer => offer.status === 'PENDING');
+
+        if (pendingOffers.length === 0) return null;
+
+        return pendingOffers.reduce((cheapest, current) =>
+            current.price < cheapest.price ? current : cheapest
+        );
+    },
+
+    // Çevreci vs normal teklifler karşılaştırması
+    compareOffersByEnvironmentalImpact: (loadWithOffers: LoadWithOffers) => {
+        const ecoOffers = loadWithOffers.offers.filter(offer =>
+            offer.vehicleEcoCertified || offer.isEcoFriendly
+        );
+        const regularOffers = loadWithOffers.offers.filter(offer =>
+            !offer.vehicleEcoCertified && !offer.isEcoFriendly
+        );
+
+        const bestEco = ecoOffers.length > 0 ?
+            ecoOffers.reduce((best, current) => current.price < best.price ? current : best) : null;
+
+        const bestRegular = regularOffers.length > 0 ?
+            regularOffers.reduce((best, current) => current.price < best.price ? current : best) : null;
+
+        return {
+            ecoFriendlyOffer: bestEco,
+            regularOffer: bestRegular,
+            hasEcoOption: ecoOffers.length > 0,
+            ecoAdvantage: bestEco && bestRegular ?
+                ((bestRegular.price - bestEco.price) / bestRegular.price * 100) : 0,
+            carbonSavingsEstimate: bestEco ? 15 : 0 // %15 karbon tasarrufu varsayımı
+        };
+    },
+
+    // Yük detayları için önerileri getir
+    getOfferRecommendations: (loadWithOffers: LoadWithOffers) => {
+        const comparison = loadService.compareOffersByEnvironmentalImpact(loadWithOffers);
+
+        return {
+            shouldChooseEco: comparison.hasEcoOption && comparison.ecoAdvantage >= -10, // %10'a kadar fark kabul et
+            recommendation: comparison.hasEcoOption ?
+                'Çevre dostu araç seçeneği mevcut! Doğaya katkı sağlayabilirsiniz.' :
+                'Bu yük için çevre dostu araç seçeneği bulunmuyor.',
+            priceComparison: comparison.ecoAdvantage,
+            environmentalBenefit: comparison.carbonSavingsEstimate
+        };
     }
+
+
 };
 
 export default loadService;

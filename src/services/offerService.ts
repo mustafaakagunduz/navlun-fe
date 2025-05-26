@@ -49,6 +49,38 @@ export type PageResponse<T> = {
     last: boolean;
 };
 
+export type VehicleInfo = {
+    id: string;
+    plateNumber: string;
+    type: string;
+    ecoCertified: boolean;
+    carryingCapacity: number;
+    driverName: string;
+    isActive: boolean;
+};
+
+export type OfferWithVehicleInfo = {
+    offerId: string;
+    carrierId: string;
+    carrierName: string;
+    vehicleId: string;
+    vehiclePlateNumber: string;
+    vehicleType: string;
+    vehicleEcoCertified: boolean;
+    price: number;
+    insuranceAccepted: boolean;
+    isEcoFriendly: boolean;
+    status: OfferStatus;
+    createdAt: string;
+};
+
+export type LoadWithOffers = {
+    load: any; // Load tipini buraya import edebiliriz
+    offers: OfferWithVehicleInfo[];
+    pendingOffersCount: number;
+    hasAcceptedOffer: boolean;
+};
+
 const offerService = {
     // Yeni teklif oluşturur
     createOffer: async (offerData: OfferRequest): Promise<Offer> => {
@@ -68,6 +100,72 @@ const offerService = {
             console.error(`Get offer by ID (${id}) error:`, error);
             throw error;
         }
+    },
+
+    // Mevcut kullanıcının araçlarını getirir (teklif verme için)
+    getCurrentUserVehicles: async (): Promise<VehicleInfo[]> => {
+        try {
+            return await apiService.get<VehicleInfo[]>('/offers/current-user-vehicles');
+        } catch (error) {
+            console.error('Get current user vehicles for offers error:', error);
+            throw error;
+        }
+    },
+
+    // Araç bilgisi dahil teklif verme
+    createOfferWithVehicle: async (offerData: OfferRequest & {
+        vehicleInfo?: VehicleInfo
+    }): Promise<Offer> => {
+        try {
+            // Standart teklif verme metodunu kullan, vehicle validation backend'de yapılacak
+            return await apiService.post<Offer, OfferRequest>('/offers', {
+                loadId: offerData.loadId,
+                carrierId: offerData.carrierId,
+                vehicleId: offerData.vehicleId,
+                price: offerData.price,
+                insuranceAccepted: offerData.insuranceAccepted,
+                isEcoFriendly: offerData.isEcoFriendly
+            });
+        } catch (error) {
+            console.error('Create offer with vehicle error:', error);
+            throw error;
+        }
+    },
+
+    // Teklif verirken çevreci araç kontrolü
+    isVehicleEcoFriendly: (vehicleInfo: VehicleInfo): boolean => {
+        return vehicleInfo.ecoCertified;
+    },
+
+    // Teklif listesini sıralama utilities
+    sortOffersByPrice: (offers: OfferWithVehicleInfo[], ascending: boolean = true): OfferWithVehicleInfo[] => {
+        return [...offers].sort((a, b) =>
+            ascending ? a.price - b.price : b.price - a.price
+        );
+    },
+
+    sortOffersByEcoFriendly: (offers: OfferWithVehicleInfo[]): OfferWithVehicleInfo[] => {
+        return [...offers].sort((a, b) => {
+            // Çevreci araçları öne çıkar
+            if (a.vehicleEcoCertified && !b.vehicleEcoCertified) return -1;
+            if (!a.vehicleEcoCertified && b.vehicleEcoCertified) return 1;
+            // Eğer her ikisi de çevreci veya değilse, fiyata göre sırala
+            return a.price - b.price;
+        });
+    },
+
+    // Çevreci teklifleri filtrele
+    filterEcoFriendlyOffers: (offers: OfferWithVehicleInfo[]): OfferWithVehicleInfo[] => {
+        return offers.filter(offer => offer.vehicleEcoCertified || offer.isEcoFriendly);
+    },
+
+    // Teklif detayları için karbor emisyonu hesaplama (basit)
+    calculateCarbonSavings: (regularOffer: OfferWithVehicleInfo, ecoOffer: OfferWithVehicleInfo): number => {
+        // Basit hesaplama: çevreci araç %15 daha az emisyon yapar
+        if (ecoOffer.vehicleEcoCertified && !regularOffer.vehicleEcoCertified) {
+            return 0.15; // %15 azalma
+        }
+        return 0;
     },
 
     // Tüm teklifleri getirir

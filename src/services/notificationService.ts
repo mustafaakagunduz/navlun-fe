@@ -33,6 +33,21 @@ export type NotificationUpdateRequest = {
     isRead: boolean;
 };
 
+
+export type BulkNotificationRequest = {
+    userIds: string[];
+    title: string;
+    content: string;
+    type: NotificationType;
+};
+
+export type NotificationStats = {
+    totalCount: number;
+    unreadCount: number;
+    todayCount: number;
+    thisWeekCount: number;
+};
+
 const notificationService = {
     // Yeni bildirim oluşturur
     createNotification: async (notificationData: NotificationRequest): Promise<Notification> => {
@@ -53,6 +68,8 @@ const notificationService = {
             throw error;
         }
     },
+
+
 
     // Tüm bildirimleri getirir
     getAllNotifications: async (): Promise<Notification[]> => {
@@ -202,6 +219,128 @@ const notificationService = {
             console.error('Get notification count error:', error);
             throw error;
         }
+    },
+
+    // Bu metodları dosyanın sonuna, son } 'den önce ekle
+
+    // Kullanıcının okunmamış bildirim sayısını getirir
+    getUnreadNotificationCount: async (userId: string): Promise<number> => {
+        try {
+            return await apiService.get<number>(`/notifications/user/${userId}/unread-count`);
+        } catch (error) {
+            console.error(`Get unread notification count (${userId}) error:`, error);
+            throw error;
+        }
+    },
+
+    // Kullanıcının son bildirimlerini getirir (sınırlı sayıda)
+    getRecentNotificationsByUser: async (userId: string, limit: number = 10): Promise<Notification[]> => {
+        try {
+            return await apiService.get<Notification[]>(`/notifications/user/${userId}/recent`, { limit });
+        } catch (error) {
+            console.error(`Get recent notifications by user (${userId}) error:`, error);
+            throw error;
+        }
+    },
+
+    // Toplu bildirim gönderir
+    sendBulkNotification: async (bulkData: BulkNotificationRequest): Promise<void> => {
+        try {
+            await apiService.post('/notifications/bulk', bulkData);
+        } catch (error) {
+            console.error('Send bulk notification error:', error);
+            throw error;
+        }
+    },
+
+    // Mevcut kullanıcının bildirim istatistiklerini getirir
+    getCurrentUserNotificationStats: async (): Promise<NotificationStats> => {
+        try {
+            const notifications = await notificationService.getCurrentUserNotifications();
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const thisWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+            return {
+                totalCount: notifications.length,
+                unreadCount: notifications.filter(n => !n.isRead).length,
+                todayCount: notifications.filter(n =>
+                    new Date(n.createdAt || '') >= today
+                ).length,
+                thisWeekCount: notifications.filter(n =>
+                    new Date(n.createdAt || '') >= thisWeek
+                ).length
+            };
+        } catch (error) {
+            console.error('Get current user notification stats error:', error);
+            throw error;
+        }
+    },
+
+    // Bildirim tipine göre renk döndürür (UI için)
+    getNotificationColor: (type: NotificationType): string => {
+        switch (type) {
+            case NotificationType.SUCCESS:
+                return 'green';
+            case NotificationType.WARNING:
+                return 'yellow';
+            case NotificationType.ERROR:
+                return 'red';
+            case NotificationType.INFO:
+            default:
+                return 'blue';
+        }
+    },
+
+    // Bildirim tipine göre ikon döndürür (UI için)
+    getNotificationIcon: (type: NotificationType): string => {
+        switch (type) {
+            case NotificationType.SUCCESS:
+                return 'CheckCircle';
+            case NotificationType.WARNING:
+                return 'AlertTriangle';
+            case NotificationType.ERROR:
+                return 'XCircle';
+            case NotificationType.INFO:
+            default:
+                return 'Info';
+        }
+    },
+
+    // Bildirim içeriğini özetler (uzun bildirimleri kısaltır)
+    summarizeNotificationContent: (content: string, maxLength: number = 100): string => {
+        if (content.length <= maxLength) {
+            return content;
+        }
+        return content.substring(0, maxLength) + '...';
+    },
+
+    // Teklif bildirimi için özel format
+    formatOfferNotification: (
+        loadTitle: string,
+        carrierName: string,
+        price: number,
+        vehicleInfo: string,
+        isEcoFriendly: boolean = false
+    ): { title: string; content: string } => {
+        const ecoText = isEcoFriendly ? ' 🌱 (Çevreci Araç)' : '';
+        return {
+            title: 'Yeni Teklif Aldınız',
+            content: `"${loadTitle}" yükünüz için ${carrierName} firmasından ${price} TL teklif aldınız. Araç: ${vehicleInfo}${ecoText}`
+        };
+    },
+
+    // Teklif kabul bildirimi için özel format
+    formatOfferAcceptedNotification: (
+        loadTitle: string,
+        loadingAddress: string,
+        deliveryAddress: string,
+        loadingDate: string
+    ): { title: string; content: string } => {
+        return {
+            title: 'Teklifiniz Kabul Edildi! 🎉',
+            content: `"${loadTitle}" yükü için verdiğiniz teklif kabul edildi. Yükleme: ${loadingAddress}, Teslimat: ${deliveryAddress}, Tarih: ${loadingDate}`
+        };
     }
 };
 

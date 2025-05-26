@@ -192,6 +192,144 @@ const vehicleService = {
         }
     },
 
+    // Bu metodları dosyanın sonuna, son } 'den önce ekle
+
+    // Teklif verme için uygun araçları getirir (sadece aktif ve sigortalı)
+    getVehiclesForOffers: async (): Promise<Vehicle[]> => {
+        try {
+            const vehicles = await vehicleService.getCurrentUserVehicles();
+
+            // Sadece aktif, sigortalı ve muayenesi geçerli araçları filtrele
+            return vehicles.filter(vehicle =>
+                vehicle.isActive &&
+                vehicle.insuranceStatus &&
+                new Date(vehicle.inspectionDate) > new Date()
+            );
+        } catch (error) {
+            console.error('Get vehicles for offers error:', error);
+            throw error;
+        }
+    },
+
+    // Araç için taşıma kapasitesi uygunluğunu kontrol eder
+    checkVehicleCapacityForLoad: (vehicle: Vehicle, loadWeight: number): {
+        suitable: boolean;
+        capacityUsage: number;
+        recommendation: string;
+    } => {
+        const capacityUsage = (loadWeight / 1000) / vehicle.carryingCapacity; // kg'ı ton'a çevir
+
+        if (capacityUsage > 1) {
+            return {
+                suitable: false,
+                capacityUsage: capacityUsage * 100,
+                recommendation: 'Araç kapasitesi yetersiz! Daha yüksek kapasiteli araç seçin.'
+            };
+        } else if (capacityUsage > 0.9) {
+            return {
+                suitable: true,
+                capacityUsage: capacityUsage * 100,
+                recommendation: 'Kapasite %90\'ın üzerinde kullanılacak. Dikkatli olun.'
+            };
+        } else if (capacityUsage > 0.7) {
+            return {
+                suitable: true,
+                capacityUsage: capacityUsage * 100,
+                recommendation: 'Uygun kapasite kullanımı.'
+            };
+        } else {
+            return {
+                suitable: true,
+                capacityUsage: capacityUsage * 100,
+                recommendation: 'Kapasiteye göre hafif yük. Ek yük alabilirsiniz.'
+            };
+        }
+    },
+
+    // Araç için çevreci avantajları hesaplar
+    calculateEcoAdvantages: (vehicle: Vehicle): {
+        isEcoFriendly: boolean;
+        benefits: string[];
+        carbonReduction: number;
+    } => {
+        const benefits: string[] = [];
+        let carbonReduction = 0;
+
+        if (vehicle.ecoCertified) {
+            benefits.push('Çevreci sertifikalı araç');
+            benefits.push('Düşük emisyon değerleri');
+            benefits.push('Yakıt tasarrufu sağlar');
+            carbonReduction = 15; // %15 karbon azalımı
+        }
+
+        return {
+            isEcoFriendly: vehicle.ecoCertified,
+            benefits,
+            carbonReduction
+        };
+    },
+
+    // Araç seçimi için öneri sistemi
+    recommendVehicleForLoad: (
+        vehicles: Vehicle[],
+        loadWeight: number,
+        preferEco: boolean = false
+    ): {
+        recommended: Vehicle | null;
+        alternatives: Vehicle[];
+        reason: string;
+    } => {
+        // Uygun araçları filtrele
+        const suitableVehicles = vehicles.filter(vehicle => {
+            const capacity = vehicleService.checkVehicleCapacityForLoad(vehicle, loadWeight);
+            return capacity.suitable;
+        });
+
+        if (suitableVehicles.length === 0) {
+            return {
+                recommended: null,
+                alternatives: [],
+                reason: 'Hiçbir araç bu yük için uygun değil.'
+            };
+        }
+
+        let recommended: Vehicle;
+        let reason: string;
+
+        if (preferEco) {
+            // Çevreci araçları öncelikle
+            const ecoVehicles = suitableVehicles.filter(v => v.ecoCertified);
+            if (ecoVehicles.length > 0) {
+                recommended = ecoVehicles[0];
+                reason = 'Çevre dostu tercih nedeniyle seçildi';
+            } else {
+                recommended = suitableVehicles[0];
+                reason = 'Çevreci araç bulunamadı, en uygun araç seçildi';
+            }
+        } else {
+            // En uygun kapasiteye sahip aracı seç
+            recommended = suitableVehicles.reduce((best, current) => {
+                const bestCapacity = vehicleService.checkVehicleCapacityForLoad(best, loadWeight);
+                const currentCapacity = vehicleService.checkVehicleCapacityForLoad(current, loadWeight);
+
+                // %70-90 arası kullanım en ideal
+                const bestScore = Math.abs(bestCapacity.capacityUsage - 80);
+                const currentScore = Math.abs(currentCapacity.capacityUsage - 80);
+
+                return currentScore < bestScore ? current : best;
+            });
+            reason = 'Kapasite kullanımına göre en uygun araç';
+        }
+
+        const alternatives = suitableVehicles.filter(v => v.id !== recommended.id);
+
+        return {
+            recommended,
+            alternatives,
+            reason
+        };
+    },
+
     // Aktif durumuna göre araçları getirir
     getVehiclesByActiveStatus: async (isActive: boolean): Promise<Vehicle[]> => {
         try {
