@@ -1,7 +1,9 @@
+// src/app/dashboard/Sidebar.tsx dosyasının güncellenmiş hali
 "use client"
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 import {
     Home,
     Package,
@@ -18,17 +20,40 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/context/LanguageContext";
+import loadService from "@/services/loadService";
+
+// Notification Badge komponenti
+const NotificationBadge = ({ count }: { count: number }) => {
+    if (count <= 0) return null;
+
+    return (
+        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+            {count > 99 ? '99+' : count}
+        </span>
+    );
+};
 
 export default function Sidebar() {
     const pathname = usePathname();
     const { user } = useAuth();
     const { t } = useLanguage();
 
+    // Notification counts state
+    const [notificationCounts, setNotificationCounts] = useState({
+        offers: 0,
+        loads: 0
+    });
+
     // Role-specific menu items
     const senderMenuItems = [
         { href: "/dashboard", label: t("dashboard.sidebar.home"), icon: Home },
         { href: "/dashboard/sender/loads", label: t("dashboard.sidebar.myLoads"), icon: Package },
-        { href: "/dashboard/sender/offers", label: t("dashboard.sidebar.offers"), icon: FileText },
+        {
+            href: "/dashboard/sender/offers",
+            label: t("dashboard.sidebar.offers"),
+            icon: FileText,
+            badge: notificationCounts.offers
+        },
         { href: "/dashboard/carrier/sender-completed-deliveries", label: t("dashboard.sidebar.completed"), icon: CheckCheck },
         { href: "/dashboard/carrier/environmental-effect", label: t("dashboard.sidebar.environmental"), icon: Leaf },
         { href: "/dashboard/sender/sender-profile", label: t("dashboard.sidebar.profile"), icon: Users },
@@ -57,6 +82,34 @@ export default function Sidebar() {
         { href: "/dashboard/admin/settings", label: t("dashboard.sidebar.settings"), icon: Settings },
     ];
 
+    // Notification counts'u fetch et - sadece sayfa yüklendiğinde
+    useEffect(() => {
+        const fetchNotificationCounts = async () => {
+            if (!user) return;
+
+            try {
+                if (user.role === 'SENDER') {
+                    // Sender için gelen teklifleri say
+                    const loadsWithOffers = await loadService.getCurrentUserLoadsWithOffers();
+                    const totalPendingOffers = loadsWithOffers.reduce(
+                        (total, loadWithOffers) => total + loadWithOffers.pendingOffersCount,
+                        0
+                    );
+
+                    setNotificationCounts(prev => ({
+                        ...prev,
+                        offers: totalPendingOffers
+                    }));
+                }
+                // Diğer roller için de benzer logic eklenebilir
+            } catch (error) {
+                console.error('Notification counts fetch error:', error);
+            }
+        };
+
+        fetchNotificationCounts();
+    }, [user]); // Sadece user değiştiğinde çalışsın
+
     // Role-based menu selection
     let menuItems = senderMenuItems; // Default
     if (user?.role === 'ADMIN') {
@@ -64,7 +117,7 @@ export default function Sidebar() {
     } else if (user?.role === 'CARRIER') {
         menuItems = carrierMenuItems;
     } else if (user?.role === 'BROKER') {
-        menuItems = brokerMenuItems; // Broker rolü için menü öğeleri
+        menuItems = brokerMenuItems;
     }
 
     return (
@@ -74,20 +127,22 @@ export default function Sidebar() {
                     {menuItems.map((item) => {
                         const Icon = item.icon;
                         const isActive = pathname === item.href;
+                        const hasBadge = 'badge' in item && item.badge && item.badge > 0;
 
                         return (
                             <Link
                                 key={item.href}
                                 href={item.href}
                                 className={cn(
-                                    "flex items-center px-4 py-3 text-sm font-medium rounded-md",
+                                    "flex items-center px-4 py-3 text-sm font-medium rounded-md relative",
                                     isActive
                                         ? "bg-green-50 text-green-600"
                                         : "text-gray-700 hover:bg-gray-100"
                                 )}
                             >
                                 <Icon className={cn("mr-3 h-5 w-5", isActive ? "text-green-600" : "text-gray-400")} />
-                                {item.label}
+                                <span className="flex-1">{item.label}</span>
+                                {hasBadge && <NotificationBadge count={item.badge as number} />}
                             </Link>
                         );
                     })}
