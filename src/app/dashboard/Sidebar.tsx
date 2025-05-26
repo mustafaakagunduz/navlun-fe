@@ -6,7 +6,7 @@ import {
     Home,
     Package,
     Truck,
-    Calendar,
+    CheckCheck,
     BarChart3,
     Users,
     Settings,
@@ -36,7 +36,7 @@ export default function Sidebar() {
         { href: "/dashboard", label: t("dashboard.sidebar.home"), icon: Home },
         { href: "/dashboard/carrier/available-loads", label: t("dashboard.sidebar.availableLoads"), icon: Package },
         { href: "/dashboard/carrier/my-loads", label: t("dashboard.sidebar.myLoads"), icon: Truck },
-        { href: "/dashboard/carrier/schedule", label: t("dashboard.sidebar.schedule"), icon: Calendar },
+        { href: "/dashboard/carrier/completed-deliveries", label: t("dashboard.sidebar.completed"), icon: CheckCheck },
         { href: "/dashboard/carrier/carrier-profile", label: t("dashboard.sidebar.profile"), icon: Users },
     ];
 

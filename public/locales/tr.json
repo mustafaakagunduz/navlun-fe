@@ -114,8 +114,8 @@
       "myLoads": "Yüklerim",
       "offers": "Gelen Teklifler",
       "profile": "Profilim",
-      "availableLoads": "Yeni Yükler",
-      "schedule": "Takvim",
+      "availableLoads": "Bekleyen Yükler",
+      "completed": "Tamamlananlar",
       "deals": "Anlaşmalar",
       "brokerages": "Aracılık İşlemleri",
       "commissions": "Komisyonlar"
