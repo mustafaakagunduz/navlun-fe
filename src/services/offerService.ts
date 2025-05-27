@@ -373,6 +373,25 @@ const offerService = {
             console.error('Get current sender received offers error:', error);
             throw error;
         }
+    },
+    // Mevcut kullanıcının (taşıyıcı) kabul edilmiş yüklerini getirir
+    getCurrentCarrierAcceptedLoads: async (): Promise<LoadWithOffers[]> => {
+        try {
+            return await apiService.get<LoadWithOffers[]>('/offers/my-accepted-loads');
+        } catch (error) {
+            console.error('Get current carrier accepted loads error:', error);
+            throw error;
+        }
+    },
+
+    // Mevcut kullanıcının (taşıyıcı) reddedilen tekliflerini getirir
+    getCurrentCarrierRejectedOffers: async (): Promise<LoadWithOffers[]> => {
+        try {
+            return await apiService.get<LoadWithOffers[]>('/offers/my-rejected-offers');
+        } catch (error) {
+            console.error('Get current carrier rejected offers error:', error);
+            throw error;
+        }
     }
 };
 

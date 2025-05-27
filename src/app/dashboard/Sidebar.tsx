@@ -21,6 +21,7 @@ import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/context/LanguageContext";
 import loadService from "@/services/loadService";
+import offerService from "@/services/offerService";
 
 // Notification Badge komponenti
 const NotificationBadge = ({ count }: { count: number }) => {
@@ -62,7 +63,12 @@ export default function Sidebar() {
     const carrierMenuItems = [
         { href: "/dashboard", label: t("dashboard.sidebar.home"), icon: Home },
         { href: "/dashboard/carrier/available-loads", label: t("dashboard.sidebar.availableLoads"), icon: Package },
-        { href: "/dashboard/carrier/my-loads", label: t("dashboard.sidebar.myLoads"), icon: Truck },
+        {
+            href: "/dashboard/carrier/my-loads",
+            label: t("dashboard.sidebar.myLoads"),
+            icon: Truck,
+            badge: notificationCounts.loads
+        },
         { href: "/dashboard/carrier/carrier-completed-deliveries", label: t("dashboard.sidebar.completed"), icon: CheckCheck },
         { href: "/dashboard/carrier/carrier-profile", label: t("dashboard.sidebar.profile"), icon: Users },
     ];
@@ -83,13 +89,14 @@ export default function Sidebar() {
     ];
 
     // Notification counts'u fetch et - sadece sayfa yüklendiğinde
+    // Notification counts'u fetch et - sadece sayfa yüklendiğinde
+    // useEffect'i güncelle:
     useEffect(() => {
         const fetchNotificationCounts = async () => {
             if (!user) return;
 
             try {
                 if (user.role === 'SENDER') {
-                    // Sender için gelen teklifleri say
                     const loadsWithOffers = await loadService.getCurrentUserLoadsWithOffers();
                     const totalPendingOffers = loadsWithOffers.reduce(
                         (total, loadWithOffers) => total + loadWithOffers.pendingOffersCount,
@@ -100,15 +107,35 @@ export default function Sidebar() {
                         ...prev,
                         offers: totalPendingOffers
                     }));
+                } else if (user.role === 'CARRIER') {
+                    // Hem kabul edilmiş hem de reddedilen yüklerin sayısını al
+                    const acceptedLoads = await offerService.getCurrentCarrierAcceptedLoads();
+                    const rejectedOffers = await offerService.getCurrentCarrierRejectedOffers(); // Yeni method
+
+                    setNotificationCounts(prev => ({
+                        ...prev,
+                        loads: acceptedLoads.length + rejectedOffers.length
+                    }));
                 }
-                // Diğer roller için de benzer logic eklenebilir
             } catch (error) {
                 console.error('Notification counts fetch error:', error);
             }
         };
 
         fetchNotificationCounts();
-    }, [user]); // Sadece user değiştiğinde çalışsın
+    }, [user]);
+
+
+
+    useEffect(() => {
+        // Eğer kullanıcı my-loads sayfasına girerse badge'i sıfırla
+        if (user?.role === 'CARRIER' && pathname === '/dashboard/carrier/my-loads') {
+            setNotificationCounts(prev => ({
+                ...prev,
+                loads: 0
+            }));
+        }
+    }, [pathname, user?.role]);
 
     // Role-based menu selection
     let menuItems = senderMenuItems; // Default

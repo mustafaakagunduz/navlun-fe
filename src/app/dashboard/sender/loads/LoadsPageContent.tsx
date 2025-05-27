@@ -78,10 +78,36 @@ export default function LoadsPageContent() {
         router.push('/dashboard/sender/loads/new-load');
     };
 
+    // useEffect'ten sonra, handleLoadClick'ten önce bu fonksiyonu ekle:
+    const refreshLoads = async () => {
+        try {
+            // Mevcut yük listesini yenile
+            const currentUser = await authService.getCurrentUser();
+            const senderProfile = await senderService.getSenderProfileByUserId(currentUser.id);
+            const response = await loadService.getLoadsBySenderPaginated(senderProfile.id);
+
+            setLoads(response.content);
+            setFilteredLoads(response.content);
+        } catch (error) {
+            console.error('Yükler yenilenirken hata:', error);
+        }
+    };
+
+// handleLoadClick fonksiyonunu güncelle:
     const handleLoadClick = (load: Load) => {
         setSelectedLoad(load);
         setShowDetailsDialog(true);
     };
+
+// LoadDetailsDialog'u kapatırken yükleri yenile
+    const handleCloseDialog = () => {
+        setShowDetailsDialog(false);
+        setSelectedLoad(null);
+        // Dialog kapanırken yükleri yenile
+        refreshLoads();
+    };
+
+
 
     const getStatusColor = (status: LoadStatus) => {
         switch (status) {
@@ -212,10 +238,7 @@ export default function LoadsPageContent() {
                 <LoadDetailsDialog
                     load={selectedLoad}
                     isOpen={showDetailsDialog}
-                    onClose={() => {
-                        setShowDetailsDialog(false);
-                        setSelectedLoad(null);
-                    }}
+                    onClose={handleCloseDialog}
                 />
             </div>
         </ProtectedRoute>
