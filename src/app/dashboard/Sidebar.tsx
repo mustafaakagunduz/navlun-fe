@@ -22,6 +22,16 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/context/LanguageContext";
 import loadService from "@/services/loadService";
 import offerService from "@/services/offerService";
+import { useAppDispatch, useAppSelector } from '@/hooks/redux'
+import { fetchLoadsWithOffers } from '@/store/slices/offersSlice'
+import { fetchAcceptedLoads, fetchRejectedOffers } from '@/store/slices/offersSlice'
+import {
+    fetchNotificationCounts,
+    resetOfferCount,
+    resetLoadCount,
+    updateOfferCount, updateLoadCount
+} from '@/store/slices/notificationsSlice'
+
 
 // Notification Badge komponenti
 const NotificationBadge = ({ count }: { count: number }) => {
@@ -35,15 +45,17 @@ const NotificationBadge = ({ count }: { count: number }) => {
 };
 
 export default function Sidebar() {
+
     const pathname = usePathname();
     const { user } = useAuth();
     const { t } = useLanguage();
+    const dispatch = useAppDispatch();
+    const { counts } = useAppSelector(state => state.notifications);
 
-    // Notification counts state
-    const [notificationCounts, setNotificationCounts] = useState({
-        offers: 0,
-        loads: 0
-    });
+    const { loadsWithOffers } = useAppSelector(state => state.offers);
+    const { acceptedLoads, rejectedOffers } = useAppSelector(state => state.offers);
+
+    const notificationCounts = counts;
 
     // Role-specific menu items
     const senderMenuItems = [
@@ -88,54 +100,39 @@ export default function Sidebar() {
         { href: "/dashboard/admin/settings", label: t("dashboard.sidebar.settings"), icon: Settings },
     ];
 
-    // Notification counts'u fetch et - sadece sayfa yüklendiğinde
-    // Notification counts'u fetch et - sadece sayfa yüklendiğinde
-    // useEffect'i güncelle:
     useEffect(() => {
-        const fetchNotificationCounts = async () => {
-            if (!user) return;
+        if (!user) return;
 
-            try {
-                if (user.role === 'SENDER') {
-                    const loadsWithOffers = await loadService.getCurrentUserLoadsWithOffers();
-                    const totalPendingOffers = loadsWithOffers.reduce(
-                        (total, loadWithOffers) => total + loadWithOffers.pendingOffersCount,
-                        0
-                    );
-
-                    setNotificationCounts(prev => ({
-                        ...prev,
-                        offers: totalPendingOffers
-                    }));
-                } else if (user.role === 'CARRIER') {
-                    // Hem kabul edilmiş hem de reddedilen yüklerin sayısını al
-                    const acceptedLoads = await offerService.getCurrentCarrierAcceptedLoads();
-                    const rejectedOffers = await offerService.getCurrentCarrierRejectedOffers(); // Yeni method
-
-                    setNotificationCounts(prev => ({
-                        ...prev,
-                        loads: acceptedLoads.length + rejectedOffers.length
-                    }));
-                }
-            } catch (error) {
-                console.error('Notification counts fetch error:', error);
-            }
-        };
-
-        fetchNotificationCounts();
-    }, [user]);
-
-
-
-    useEffect(() => {
-        // Eğer kullanıcı my-loads sayfasına girerse badge'i sıfırla
-        if (user?.role === 'CARRIER' && pathname === '/dashboard/carrier/my-loads') {
-            setNotificationCounts(prev => ({
-                ...prev,
-                loads: 0
-            }));
+        if (user.role === 'SENDER') {
+            dispatch(fetchLoadsWithOffers());
+        } else if (user.role === 'CARRIER') {
+            dispatch(fetchAcceptedLoads());
+            dispatch(fetchRejectedOffers());
         }
-    }, [pathname, user?.role]);
+    }, [user, dispatch]);
+
+    useEffect(() => {
+        // Notification counts'u her değişiklikten sonra güncelle
+        if (user?.role === 'SENDER') {
+            const totalPendingOffers = loadsWithOffers.reduce(
+                (total, loadWithOffers) => total + loadWithOffers.pendingOffersCount,
+                0
+            );
+            dispatch(updateOfferCount(totalPendingOffers));
+        } else if (user?.role === 'CARRIER') {
+            const totalLoads = acceptedLoads.length + rejectedOffers.length;
+            dispatch(updateLoadCount(totalLoads));
+        }
+    }, [loadsWithOffers, acceptedLoads, rejectedOffers, user?.role, dispatch]);
+
+    useEffect(() => {
+        // Sayfa değişikliklerinde badge'leri sıfırla
+        if (user?.role === 'SENDER' && pathname === '/dashboard/sender/offers') {
+            dispatch(resetOfferCount());
+        } else if (user?.role === 'CARRIER' && pathname === '/dashboard/carrier/my-loads') {
+            dispatch(resetLoadCount());
+        }
+    }, [pathname, user?.role, dispatch]);
 
     // Role-based menu selection
     let menuItems = senderMenuItems; // Default

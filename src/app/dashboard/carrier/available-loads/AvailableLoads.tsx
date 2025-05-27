@@ -8,18 +8,27 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Package, MapPin, Calendar, Weight, Shield, Leaf, TruckIcon } from 'lucide-react';
 import loadService, { Load, LoadStatus } from '@/services/loadService';
 import offerService, { OfferRequest, VehicleInfo } from '@/services/offerService';
 import vehicleService from '@/services/vehicleService';
+import { useAppDispatch, useAppSelector } from '@/hooks/redux'
+import { fetchAvailableLoads, removeLoadFromAvailable } from '@/store/slices/loadsSlice'
+import { createOffer } from '@/store/slices/offersSlice'
 
 export default function AvailableLoadsPage() {
-    const [loads, setLoads] = useState<Load[]>([]);
+
+    const dispatch = useAppDispatch()
+    const {
+        availableLoads,
+        availableLoadsLoading
+    } = useAppSelector(state => state.loads)
+    const {
+        offerSubmitting
+    } = useAppSelector(state => state.offers)
+
     const [vehicles, setVehicles] = useState<VehicleInfo[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [submitting, setSubmitting] = useState(false);
     const [selectedLoad, setSelectedLoad] = useState<Load | null>(null);
     const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
 
@@ -34,29 +43,9 @@ export default function AvailableLoadsPage() {
     const { toast } = useToast();
 
     useEffect(() => {
-        fetchAvailableLoads();
+        dispatch(fetchAvailableLoads({ page: 0, size: 50 }));
         fetchUserVehicles();
-    }, []);
-
-    const fetchAvailableLoads = async () => {
-        try {
-            setLoading(true);
-
-            const response = await loadService.getAvailableLoadsForOffers(0, 50);
-
-            setLoads(response.content);
-        } catch (error: any) {
-            console.error('Detailed error:', error);
-            console.error('Error response:', error.response?.data);
-            toast({
-                title: 'Hata',
-                description: `Yükler yüklenirken bir hata oluştu: ${error.response?.data?.message || error.message}`,
-                variant: 'destructive',
-            });
-        } finally {
-            setLoading(false);
-        }
-    };
+    }, [dispatch]);
 
     const fetchUserVehicles = async () => {
         try {
@@ -85,8 +74,6 @@ export default function AvailableLoadsPage() {
         }
 
         try {
-            setSubmitting(true);
-
             const selectedVehicle = vehicles.find(v => v.id === offerForm.vehicleId);
             if (!selectedVehicle) {
                 throw new Error('Seçilen araç bulunamadı');
@@ -94,14 +81,13 @@ export default function AvailableLoadsPage() {
 
             const offerData: OfferRequest = {
                 loadId: selectedLoad.id,
-                // carrierId kaldırıldı - backend'de current user'dan alınacak
                 vehicleId: offerForm.vehicleId,
                 price: parseFloat(offerForm.price),
                 insuranceAccepted: offerForm.insuranceAccepted,
                 isEcoFriendly: selectedVehicle.ecoCertified
             };
 
-            await offerService.createOffer(offerData);
+            await dispatch(createOffer(offerData)).unwrap();
 
             toast({
                 title: 'Başarılı!',
@@ -111,16 +97,13 @@ export default function AvailableLoadsPage() {
 
             setIsOfferModalOpen(false);
             resetOfferForm();
-            fetchAvailableLoads(); // Listeyi yenile
 
         } catch (error: any) {
             toast({
                 title: 'Hata',
-                description: error.message || 'Teklif gönderilirken bir hata oluştu.',
+                description: error || 'Teklif gönderilirken bir hata oluştu.',
                 variant: 'destructive',
             });
-        } finally {
-            setSubmitting(false);
         }
     };
 
@@ -154,7 +137,7 @@ export default function AvailableLoadsPage() {
         }).format(amount);
     };
 
-    if (loading) {
+    if (availableLoadsLoading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
                 <Loader2 className="h-8 w-8 animate-spin" />
@@ -172,7 +155,7 @@ export default function AvailableLoadsPage() {
                 </p>
             </div>
 
-            {loads.length === 0 ? (
+            {availableLoads.length === 0 ? (
                 <Card>
                     <CardContent className="flex flex-col items-center justify-center py-12">
                         <Package className="h-12 w-12 text-muted-foreground mb-4" />
@@ -184,7 +167,7 @@ export default function AvailableLoadsPage() {
                 </Card>
             ) : (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {loads.map((load) => (
+                    {availableLoads.map((load) => (
                         <Card key={load.id} className="hover:shadow-lg transition-shadow">
                             <CardHeader>
                                 <CardTitle className="flex items-center justify-between">
@@ -349,10 +332,10 @@ export default function AvailableLoadsPage() {
                                                     </Button>
                                                     <Button
                                                         onClick={handleOfferSubmit}
-                                                        disabled={submitting}
+                                                        disabled={offerSubmitting}
                                                         className="flex-1"
                                                     >
-                                                        {submitting ? (
+                                                        {offerSubmitting ? (
                                                             <>
                                                                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                                                                 Gönderiliyor...

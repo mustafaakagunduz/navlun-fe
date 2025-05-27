@@ -7,40 +7,40 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Loader2, Package, MapPin, Calendar, Weight, Shield, Leaf, TruckIcon, XCircle } from 'lucide-react';
 import offerService, { LoadWithOffers } from '@/services/offerService';
 import { useToast } from '@/hooks/use-toast';
+import { useAppDispatch, useAppSelector } from '@/hooks/redux'
+import { fetchAcceptedLoads, fetchRejectedOffers } from '@/store/slices/offersSlice'
+import {updateLoadCount} from "@/store/slices/notificationsSlice";
 
 export default function MyLoadsPageContent() {
-    const [acceptedLoads, setAcceptedLoads] = useState<LoadWithOffers[]>([]);
-    const [rejectedOffers, setRejectedOffers] = useState<LoadWithOffers[]>([]);
-    const [loading, setLoading] = useState(true);
+
+    const dispatch = useAppDispatch()
+    const {
+        acceptedLoads,
+        acceptedLoadsLoading,
+        rejectedOffers,
+        rejectedOffersLoading
+    } = useAppSelector(state => state.offers)
+
+
     const { toast } = useToast();
 
     useEffect(() => {
-        fetchAllData();
-    }, []);
+        Promise.all([
+            dispatch(fetchAcceptedLoads()),
+            dispatch(fetchRejectedOffers())
+        ]).then(() => {
 
-    const fetchAllData = async () => {
-        try {
-            setLoading(true);
-            const [accepted, rejected] = await Promise.all([
-                offerService.getCurrentCarrierAcceptedLoads(),
-                offerService.getCurrentCarrierRejectedOffers()
-            ]);
-            setAcceptedLoads(accepted);
-            setRejectedOffers(rejected);
-        } catch (error: any) {
-            toast({
-                title: 'Hata',
-                description: 'Veriler yüklenirken bir hata oluştu.',
-                variant: 'destructive',
-            });
-        } finally {
-            setLoading(false);
-        }
-    };
+            const totalLoads = acceptedLoads.length + rejectedOffers.length;
+            dispatch(updateLoadCount(totalLoads));
+        });
+    }, [dispatch]);
+
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('tr-TR');
     };
+
+    const loading = acceptedLoadsLoading || rejectedOffersLoading;
 
     if (loading) {
         return (

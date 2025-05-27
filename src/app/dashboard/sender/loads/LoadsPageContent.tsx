@@ -15,48 +15,20 @@ import LoadCard from './LoadCard';
 import LoadDetailsDialog from './LoadDetailsDialog';
 import senderService from "@/services/senderService";
 import authService from "@/services/authService";
+import { useAppDispatch, useAppSelector } from '@/hooks/redux'
+import { fetchMyLoads, setStatusFilter, setSearchQuery } from '@/store/slices/loadsSlice'
+
+
 
 export default function LoadsPageContent() {
     const router = useRouter();
     const { t } = useLanguage();
 
-    const [loads, setLoads] = useState<Load[]>([]);
-    const [filteredLoads, setFilteredLoads] = useState<Load[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [statusFilter, setStatusFilter] = useState<LoadStatus | 'ALL'>('ALL');
-    const [selectedLoad, setSelectedLoad] = useState<Load | null>(null);
-    const [showDetailsDialog, setShowDetailsDialog] = useState(false);
-
-    useEffect(() => {
-        const fetchLoads = async () => {
-            try {
-                // Önce user ID'yi al
-                const currentUser = await authService.getCurrentUser();
-
-                // Sonra user'ın sender profile'ını al
-                const senderProfile = await senderService.getSenderProfileByUserId(currentUser.id);
-
-                // Sonra o sender'ın yüklerini al
-                const response = await loadService.getLoadsBySenderPaginated(senderProfile.id);
-
-                setLoads(response.content);
-                setFilteredLoads(response.content);
-            } catch (error) {
-                console.error('Yükler yüklenirken hata:', error);
-                setLoads([]);
-                setFilteredLoads([]);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchLoads();
-    }, []);
-
-    // Filtre ve arama işlemleri
-    useEffect(() => {
-        let result = loads;
+    const dispatch = useAppDispatch()
+    const { myLoads, myLoadsLoading, statusFilter, searchQuery } = useAppSelector(state => state.loads)
+    const filteredLoads = useAppSelector(state => {
+        const { myLoads, statusFilter, searchQuery } = state.loads;
+        let result = myLoads;
 
         // Arama filtresi
         if (searchQuery) {
@@ -71,27 +43,25 @@ export default function LoadsPageContent() {
             result = result.filter(load => load.status === statusFilter);
         }
 
-        setFilteredLoads(result);
-    }, [searchQuery, statusFilter, loads]);
+        return result;
+    });
+
+    const [selectedLoad, setSelectedLoad] = useState<Load | null>(null);
+    const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+
+    useEffect(() => {
+        dispatch(fetchMyLoads())
+    }, [dispatch])
+
+
 
     const handleNewLoadClick = () => {
         router.push('/dashboard/sender/loads/new-load');
     };
 
-    // useEffect'ten sonra, handleLoadClick'ten önce bu fonksiyonu ekle:
-    const refreshLoads = async () => {
-        try {
-            // Mevcut yük listesini yenile
-            const currentUser = await authService.getCurrentUser();
-            const senderProfile = await senderService.getSenderProfileByUserId(currentUser.id);
-            const response = await loadService.getLoadsBySenderPaginated(senderProfile.id);
-
-            setLoads(response.content);
-            setFilteredLoads(response.content);
-        } catch (error) {
-            console.error('Yükler yenilenirken hata:', error);
-        }
-    };
+    const refreshLoads = () => {
+        dispatch(fetchMyLoads())
+    }
 
 // handleLoadClick fonksiyonunu güncelle:
     const handleLoadClick = (load: Load) => {
@@ -106,6 +76,14 @@ export default function LoadsPageContent() {
         // Dialog kapanırken yükleri yenile
         refreshLoads();
     };
+
+    const handleStatusFilterChange = (value: string) => {
+        dispatch(setStatusFilter(value as LoadStatus | 'ALL'))
+    }
+
+    const handleSearchChange = (value: string) => {
+        dispatch(setSearchQuery(value))
+    }
 
 
 
@@ -124,7 +102,7 @@ export default function LoadsPageContent() {
         return t(`loads.status.${status.toLowerCase()}`);
     };
 
-    if (isLoading) {
+    if (myLoadsLoading) {
         return (
             <ProtectedRoute allowedRoles={['SENDER']}>
                 <div className="flex items-center justify-center min-h-[400px]">
@@ -165,12 +143,12 @@ export default function LoadsPageContent() {
                                 <Input
                                     placeholder={t('loads.searchPlaceholder')}
                                     value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onChange={(e) => handleSearchChange(e.target.value)}
                                     className="pl-10"
                                 />
                             </div>
 
-                            <Tabs defaultValue="ALL" onValueChange={(value) => setStatusFilter(value as LoadStatus | 'ALL')}>
+                            <Tabs defaultValue="ALL" onValueChange={handleStatusFilterChange}>
                                 <TabsList>
                                     <TabsTrigger value="ALL">{t('loads.filters.all')}</TabsTrigger>
                                     <TabsTrigger value="PENDING">{t('loads.filters.pending')}</TabsTrigger>
@@ -186,11 +164,11 @@ export default function LoadsPageContent() {
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                             <Package className="h-4 w-4" />
                             <span>
-                                {filteredLoads.length} {t('loads.resultsCount')}
-                                {loads.length !== filteredLoads.length && (
-                                    <span className="ml-1">({loads.length} {t('loads.totalCount')})</span>
+                {filteredLoads.length} {t('loads.resultsCount')}
+                                {myLoads.length !== filteredLoads.length && (
+                                    <span className="ml-1">({myLoads.length} {t('loads.totalCount')})</span>
                                 )}
-                            </span>
+            </span>
                         </div>
                     </CardContent>
                 </Card>

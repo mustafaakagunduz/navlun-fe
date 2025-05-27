@@ -23,12 +23,20 @@ import {
 } from 'lucide-react';
 import loadService, { LoadWithOffers, OfferWithVehicleInfo } from '@/services/loadService';
 import offerService from '@/services/offerService';
+import { useAppDispatch, useAppSelector } from '@/hooks/redux'
+import { fetchLoadsWithOffers, acceptOffer, rejectOffer, setSelectedOffer } from '@/store/slices/offersSlice'
+import {decrementOfferCount, updateOfferCount} from "@/store/slices/notificationsSlice";
 
 export default function SenderOffersPage() {
-    const [loadsWithOffers, setLoadsWithOffers] = useState<LoadWithOffers[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [submitting, setSubmitting] = useState(false);
-    const [selectedOffer, setSelectedOffer] = useState<OfferWithVehicleInfo | null>(null);
+
+    const dispatch = useAppDispatch()
+    const {
+        loadsWithOffers,
+        loadsWithOffersLoading,
+        selectedOffer,
+        offerSubmitting
+    } = useAppSelector(state => state.offers)
+
     const [selectedLoad, setSelectedLoad] = useState<LoadWithOffers | null>(null);
     const [isOfferDetailModalOpen, setIsOfferDetailModalOpen] = useState(false);
     const [filter, setFilter] = useState<'all' | 'pending' | 'eco'>('all');
@@ -36,29 +44,20 @@ export default function SenderOffersPage() {
     const { toast } = useToast();
 
     useEffect(() => {
-        fetchLoadsWithOffers();
-    }, []);
-
-    const fetchLoadsWithOffers = async () => {
-        try {
-            setLoading(true);
-            const data = await loadService.getCurrentUserLoadsWithOffers();
-            setLoadsWithOffers(data);
-        } catch (error) {
-            toast({
-                title: 'Hata',
-                description: 'Teklifler yüklenirken bir hata oluştu.',
-                variant: 'destructive',
-            });
-        } finally {
-            setLoading(false);
-        }
-    };
+        dispatch(fetchLoadsWithOffers()).then(() => {
+            // Notification count'u hesapla ve güncelle
+            const totalPendingOffers = loadsWithOffers.reduce(
+                (total, loadWithOffers) => total + loadWithOffers.pendingOffersCount,
+                0
+            );
+            dispatch(updateOfferCount(totalPendingOffers));
+        });
+    }, [dispatch]);
 
     const handleAcceptOffer = async (offerId: string) => {
         try {
-            setSubmitting(true);
-            await offerService.acceptOffer(offerId);
+            await dispatch(acceptOffer(offerId)).unwrap()
+            dispatch(decrementOfferCount()); // Notification count'u azalt
 
             toast({
                 title: 'Başarılı!',
@@ -67,23 +66,19 @@ export default function SenderOffersPage() {
             });
 
             setIsOfferDetailModalOpen(false);
-            fetchLoadsWithOffers(); // Listeyi yenile
-
         } catch (error: any) {
             toast({
                 title: 'Hata',
-                description: error.message || 'Teklif kabul edilirken bir hata oluştu.',
+                description: error || 'Teklif kabul edilirken bir hata oluştu.',
                 variant: 'destructive',
             });
-        } finally {
-            setSubmitting(false);
         }
     };
 
     const handleRejectOffer = async (offerId: string) => {
         try {
-            setSubmitting(true);
-            await offerService.rejectOffer(offerId);
+            await dispatch(rejectOffer(offerId)).unwrap()
+            dispatch(decrementOfferCount()); // Notification count'u azalt
 
             toast({
                 title: 'Başarılı!',
@@ -92,21 +87,17 @@ export default function SenderOffersPage() {
             });
 
             setIsOfferDetailModalOpen(false);
-            fetchLoadsWithOffers(); // Listeyi yenile
-
         } catch (error: any) {
             toast({
                 title: 'Hata',
-                description: error.message || 'Teklif reddedilirken bir hata oluştu.',
+                description: error || 'Teklif reddedilirken bir hata oluştu.',
                 variant: 'destructive',
             });
-        } finally {
-            setSubmitting(false);
         }
     };
 
     const openOfferDetail = (offer: OfferWithVehicleInfo, load: LoadWithOffers) => {
-        setSelectedOffer(offer);
+        dispatch(setSelectedOffer(offer));
         setSelectedLoad(load);
         setIsOfferDetailModalOpen(true);
     };
@@ -175,7 +166,7 @@ export default function SenderOffersPage() {
         return true;
     });
 
-    if (loading) {
+    if (loadsWithOffersLoading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
                 <Loader2 className="h-8 w-8 animate-spin" />
@@ -460,9 +451,9 @@ export default function SenderOffersPage() {
                                         <Button
                                             variant="outline"
                                             onClick={() => handleRejectOffer(selectedOffer.offerId)}
-                                            disabled={submitting}
+                                            disabled={offerSubmitting}
                                         >
-                                            {submitting ? (
+                                            {offerSubmitting ? (
                                                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
                                             ) : (
                                                 <XCircle className="h-4 w-4 mr-2" />
@@ -471,10 +462,10 @@ export default function SenderOffersPage() {
                                         </Button>
                                         <Button
                                             onClick={() => handleAcceptOffer(selectedOffer.offerId)}
-                                            disabled={submitting}
+                                            disabled={offerSubmitting}
                                             className="bg-green-600 hover:bg-green-700"
                                         >
-                                            {submitting ? (
+                                            {offerSubmitting ? (
                                                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
                                             ) : (
                                                 <CheckCircle className="h-4 w-4 mr-2" />

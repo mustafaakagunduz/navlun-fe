@@ -4,6 +4,7 @@ import "./globals.css";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { AuthProvider} from "@/context/AuthContext";
 import { Toaster } from "@/components/ui/toaster"
+import ReduxProvider from "@/providers/ReduxProvider"  // Yeni import
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -30,9 +31,11 @@ export default function RootLayout({
         <body
             className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-        <AuthProvider>
-            <LanguageProvider>{children}</LanguageProvider>
-        </AuthProvider>
+        <ReduxProvider>
+            <AuthProvider>
+                <LanguageProvider>{children}</LanguageProvider>
+            </AuthProvider>
+        </ReduxProvider>
         <Toaster />
         </body>
         </html>

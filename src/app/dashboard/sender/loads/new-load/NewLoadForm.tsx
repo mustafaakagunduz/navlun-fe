@@ -7,7 +7,8 @@ import { useForm } from 'react-hook-form';
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-
+import { useAppDispatch } from '@/hooks/redux'
+import { createLoad } from '@/store/slices/loadsSlice'
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,7 +16,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
 import {
     ArrowLeft,
     Save,
@@ -30,7 +30,6 @@ import {
     AlertCircle,
     CheckCircle2
 } from "lucide-react";
-
 import loadService, { LoadRequest, InsurancePolicy } from '@/services/loadService';
 import GoodsTypeSelect from "@/app/dashboard/sender/loads/new-load/GoodsTypeSelect";
 import InsurancePolicyCard from "@/app/dashboard/sender/loads/new-load/InsurancePolicyCard";
@@ -54,6 +53,7 @@ export default function NewLoadForm() {
     const router = useRouter();
     const { user } = useAuth();
     const { t } = useLanguage();
+    const dispatch = useAppDispatch();
 
     // Form state
     const {
@@ -168,13 +168,13 @@ export default function NewLoadForm() {
                 insurancePolicyDetails: data.insuranceRequested && data.selectedInsurancePolicy
                     ? JSON.stringify(insurancePolicies.find(p => p.id === data.selectedInsurancePolicy))
                     : undefined,
-                senderId: senderProfile.id  // ← BURADA SENDER PROFILE ID KULLAN
+                senderId: senderProfile.id
             };
 
             console.log('📤 Gönderilen LoadRequest:', loadRequest);
 
-            // Create load
-            await loadService.createLoad(loadRequest);
+            // Redux kullan:
+            await dispatch(createLoad(loadRequest)).unwrap();
 
             setSubmitSuccess(t('newLoad.success.created'));
 
@@ -186,10 +186,11 @@ export default function NewLoadForm() {
         } catch (error: any) {
             console.error('❌ Yük oluşturma hatası:', error);
 
-            if (error.message.includes('Sender profile not found')) {
+            if (error.message && error.message.includes('Sender profile not found')) {
                 setSubmitError('Gönderici profili bulunamadı. Lütfen önce profil oluşturun.');
             } else {
                 setSubmitError(
+                    error || // Redux thunk error
                     error.response?.data?.message ||
                     error.message ||
                     t('newLoad.errors.createFailed')
@@ -197,7 +198,6 @@ export default function NewLoadForm() {
             }
         }
     };
-
     // Handle back navigation
     const handleBack = () => {
         router.push('/dashboard/sender/loads');
