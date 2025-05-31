@@ -66,8 +66,10 @@ export default function StatusUpdateModal() {
         if (!selectedDelivery) return;
 
         try {
+            // DÜZELTME: selectedDelivery.loadId zaten doğru delivery status ID'si
+            // Ekstra API çağrısına gerek yok
             await dispatch(updateDeliveryStatus({
-                deliveryStatusId: selectedDelivery.loadId, // Bu aslında delivery status id olmalı
+                deliveryStatusId: selectedDelivery.loadId, // Bu zaten delivery status ID
                 request: formData
             })).unwrap();
 

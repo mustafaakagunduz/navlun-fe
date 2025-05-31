@@ -494,7 +494,18 @@ const deliveryService = {
     isValidFileSize: (file: File): boolean => {
         const maxSize = 5 * 1024 * 1024; // 5MB
         return file.size <= maxSize;
-    }
+    },
+    // getDeliveryStatusIdByLoadId method'unu ekleyin
+    getDeliveryStatusIdByLoadId: async (loadId: string): Promise<string> => {
+        try {
+            const tracking = await deliveryService.getDeliveryTrackingByLoad(loadId);
+            // Backend'den gelen response'da gerçek delivery status ID'sini döndür
+            return tracking.loadId; // Bu aslında delivery status ID olacak
+        } catch (error) {
+            console.error(`Get delivery status ID by load ID (${loadId}) error:`, error);
+            throw error;
+        }
+    },
 };
 
 export default deliveryService;

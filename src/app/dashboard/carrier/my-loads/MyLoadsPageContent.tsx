@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Loader2, Package, MapPin, Calendar, Weight, Shield, Leaf, TruckIcon, XCircle } from 'lucide-react';
-import offerService, { LoadWithOffers } from '@/services/offerService';
 import { useToast } from '@/hooks/use-toast';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
 import { fetchAcceptedLoads, fetchRejectedOffers } from '@/store/slices/offersSlice'
@@ -186,7 +185,7 @@ export default function MyLoadsPageContent() {
                                                     className="flex-1"
                                                     onClick={() => {
                                                         // Aynı sekmede yönlendir
-                                                        window.location.href = '/dashboard/sender/delivery-status';
+                                                        window.location.href = '/dashboard/carrier/delivery-tracking';
                                                     }}
                                                 >
                                                     <TruckIcon className="h-4 w-4 mr-2" />
