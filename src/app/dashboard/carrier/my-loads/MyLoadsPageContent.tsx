@@ -10,6 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
 import { fetchAcceptedLoads, fetchRejectedOffers } from '@/store/slices/offersSlice'
 import {updateLoadCount} from "@/store/slices/notificationsSlice";
+import { Button } from '@/components/ui/button';
+
 
 export default function MyLoadsPageContent() {
 
@@ -95,8 +97,103 @@ export default function MyLoadsPageContent() {
                                             </Badge>
                                         </CardTitle>
                                     </CardHeader>
+
                                     <CardContent>
-                                        {/* Yük detayları - önceki kodla aynı */}
+                                        <div className="grid grid-cols-2 gap-4 mb-4">
+                                            <div className="space-y-2">
+                                                <div className="flex items-center gap-2">
+                                                    <Weight className="h-4 w-4 text-muted-foreground" />
+                                                    <span className="text-sm">Ağırlık: {loadWithOffers.load.netWeight} kg</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                                                    <span className="text-sm">
+                    {loadWithOffers.load.loadingAddress} → {loadWithOffers.load.deliveryAddress}
+                </span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                                                    <span className="text-sm">
+                    Yükleme: {formatDate(loadWithOffers.load.loadingDate)}
+                </span>
+                                                </div>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <div className="flex items-center gap-2">
+                                                    <Package className="h-4 w-4 text-muted-foreground" />
+                                                    <span className="text-sm">Tür: {loadWithOffers.load.goodsType}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                                                    <span className="text-sm">
+                    Teslimat: {formatDate(loadWithOffers.load.deliveryDate)}
+                </span>
+                                                </div>
+                                                {loadWithOffers.load.insuranceRequested && (
+                                                    <div className="flex items-center gap-2">
+                                                        <Shield className="h-4 w-4 text-green-600" />
+                                                        <span className="text-sm text-green-600">Sigortalı</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Açıklama */}
+                                        {loadWithOffers.load.description && (
+                                            <div className="mb-4">
+                                                <p className="text-sm text-muted-foreground">
+                                                    <strong>Açıklama:</strong> {loadWithOffers.load.description}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {/* Kabul edilmiş teklif bilgisi */}
+                                        {loadWithOffers.hasAcceptedOffer && (
+                                            <div className="bg-green-50 p-3 rounded-md mb-4 border border-green-200">
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        <p className="text-sm font-medium text-green-800">Teklif Kabul Edildi</p>
+                                                        <p className="text-sm text-green-600">Teslimat süreci başladı</p>
+                                                    </div>
+                                                    <Badge className="bg-green-100 text-green-800">
+                                                        Atandı
+                                                    </Badge>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Action Buttons */}
+                                        <div className="flex gap-2 pt-4 border-t">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="flex-1"
+                                                onClick={() => {
+                                                    // Yük detaylarını göster
+                                                    toast({
+                                                        title: "Bilgi",
+                                                        description: "Yük detayları özelliği yakında eklenecek",
+                                                    });
+                                                }}
+                                            >
+                                                <Package className="h-4 w-4 mr-2" />
+                                                Detaylar
+                                            </Button>
+
+                                            {loadWithOffers.hasAcceptedOffer && (
+                                                <Button
+                                                    size="sm"
+                                                    className="flex-1"
+                                                    onClick={() => {
+                                                        // Aynı sekmede yönlendir
+                                                        window.location.href = '/dashboard/sender/delivery-status';
+                                                    }}
+                                                >
+                                                    <TruckIcon className="h-4 w-4 mr-2" />
+                                                    Teslimat Takibi
+                                                </Button>
+                                            )}
+                                        </div>
                                     </CardContent>
                                 </Card>
                             ))}

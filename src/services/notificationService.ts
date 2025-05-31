@@ -341,6 +341,81 @@ const notificationService = {
             title: 'Teklifiniz Kabul Edildi! 🎉',
             content: `"${loadTitle}" yükü için verdiğiniz teklif kabul edildi. Yükleme: ${loadingAddress}, Teslimat: ${deliveryAddress}, Tarih: ${loadingDate}`
         };
+    },
+    // Mevcut formatOfferAcceptedNotification metodundan sonra ekle:
+
+// Teslimat durum değişikliği bildirimi
+    formatDeliveryStatusNotification: (
+        loadTitle: string,
+        previousStatus: string,
+        newStatus: string,
+        location?: string
+    ): { title: string; content: string } => {
+        let title = 'Teslimat Durumu Güncellendi 🚛';
+        let content = `"${loadTitle}" yükünüzün durumu güncellendi: ${newStatus}`;
+
+        if (location) {
+            content += `\nMevcut konum: ${location}`;
+        }
+
+        return { title, content };
+    },
+
+// Yük alım bildirimi
+    formatPickupNotification: (
+        loadTitle: string,
+        carrierName: string,
+        location?: string,
+        note?: string
+    ): { title: string; content: string } => {
+        let content = `"${loadTitle}" yükünüz ${carrierName} tarafından alındı 📦`;
+
+        if (location) {
+            content += `\nKonum: ${location}`;
+        }
+
+        if (note) {
+            content += `\nNot: ${note}`;
+        }
+
+        return {
+            title: 'Yük Alındı! 📦',
+            content
+        };
+    },
+
+// Teslimat tamamlanma bildirimi
+    formatDeliveryCompletedNotification: (
+        loadTitle: string,
+        carrierName: string,
+        location?: string,
+        note?: string
+    ): { title: string; content: string } => {
+        let content = `"${loadTitle}" yükünüz ${carrierName} tarafından başarıyla teslim edildi ✅`;
+
+        if (location) {
+            content += `\nTeslimat konumu: ${location}`;
+        }
+
+        if (note) {
+            content += `\nNot: ${note}`;
+        }
+
+        return {
+            title: 'Teslimat Tamamlandı! ✅',
+            content
+        };
+    },
+
+// Konum güncelleme bildirimi
+    formatLocationUpdateNotification: (
+        loadTitle: string,
+        newLocation: string
+    ): { title: string; content: string } => {
+        return {
+            title: 'Konum Güncellendi 📍',
+            content: `"${loadTitle}" yükünüzün mevcut konumu: ${newLocation}`
+        };
     }
 };
 

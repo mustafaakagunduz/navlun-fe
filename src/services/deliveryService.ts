@@ -39,6 +39,55 @@ export type LocationUpdateRequest = {
     location: string;
 };
 
+// Mevcut type'lardan sonra ekle:
+
+export type DeliveryTrackingData = {
+    loadId: string;
+    loadTitle: string;
+    currentStatus: DeliveryStep;
+    currentLocation?: string;
+    lastUpdate: string;
+    statusNote?: string;
+    statusHistory: StatusHistoryItem[];
+    pickupDocuments: string[];
+    deliveryDocuments: string[];
+    carrier: {
+        name: string;
+        phone?: string;
+        isEcoFriendly: boolean;
+    };
+    vehicle: {
+        plateNumber: string;
+        type: string;
+        ecoCertified: boolean;
+    };
+};
+
+export type StatusHistoryItem = {
+    status: DeliveryStep;
+    timestamp: string;
+    location?: string;
+    note?: string;
+};
+
+export type DocumentUploadRequest = {
+    file: File;
+    description?: string;
+};
+
+export type DocumentUploadResponse = {
+    documentUrl: string;
+    documentType: string;
+    description?: string;
+    uploadedAt: string;
+};
+
+export type StatusUpdateRequest = {
+    step: DeliveryStep;
+    location?: string;
+    note?: string;
+};
+
 const deliveryService = {
     // Tüm teslimat durumlarını getirir
     getAllDeliveryStatus: async (): Promise<DeliveryStatus[]> => {
@@ -229,6 +278,222 @@ const deliveryService = {
             console.error('File upload error:', error);
             throw error;
         }
+    },
+    // Mevcut uploadFile metodundan sonra ekle:
+
+// === TESLİMAT TAKİBİ METODLARI ===
+
+// Pickup belgesi yükleme
+    uploadPickupDocument: async (deliveryStatusId: string, file: File, description?: string): Promise<DocumentUploadResponse> => {
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            if (description) {
+                formData.append('description', description);
+            }
+
+            const response = await apiService.uploadFile<DocumentUploadResponse>(
+                `/delivery-status/${deliveryStatusId}/upload-pickup-document`,
+                formData
+            );
+            return response;
+        } catch (error) {
+            console.error('Pickup document upload error:', error);
+            throw error;
+        }
+    },
+
+// Delivery belgesi yükleme
+    uploadDeliveryDocument: async (deliveryStatusId: string, file: File, description?: string): Promise<DocumentUploadResponse> => {
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            if (description) {
+                formData.append('description', description);
+            }
+
+            const response = await apiService.uploadFile<DocumentUploadResponse>(
+                `/delivery-status/${deliveryStatusId}/upload-delivery-document`,
+                formData
+            );
+            return response;
+        } catch (error) {
+            console.error('Delivery document upload error:', error);
+            throw error;
+        }
+    },
+
+// Status güncelleme + bildirim gönderme
+    updateStatusWithNotification: async (deliveryStatusId: string, request: StatusUpdateRequest): Promise<DeliveryStatus> => {
+        try {
+            const params = new URLSearchParams();
+            params.append('step', request.step);
+            if (request.location) params.append('location', request.location);
+            if (request.note) params.append('note', request.note);
+
+            return await apiService.post<DeliveryStatus>(
+                `/delivery-status/${deliveryStatusId}/update-status-with-notification?${params.toString()}`,
+                {}
+            );
+        } catch (error) {
+            console.error('Update status with notification error:', error);
+            throw error;
+        }
+    },
+
+// Delivery tracking bilgilerini getir
+    getDeliveryTracking: async (deliveryStatusId: string): Promise<DeliveryTrackingData> => {
+        try {
+            return await apiService.get<DeliveryTrackingData>(`/delivery-status/${deliveryStatusId}/tracking`);
+        } catch (error) {
+            console.error(`Get delivery tracking (${deliveryStatusId}) error:`, error);
+            throw error;
+        }
+    },
+
+// Load ID'ye göre delivery tracking
+    getDeliveryTrackingByLoad: async (loadId: string): Promise<DeliveryTrackingData> => {
+        try {
+            return await apiService.get<DeliveryTrackingData>(`/delivery-status/tracking/load/${loadId}`);
+        } catch (error) {
+            console.error(`Get delivery tracking by load (${loadId}) error:`, error);
+            throw error;
+        }
+    },
+
+// Carrier'ın aktif teslimatları
+    getCurrentCarrierActiveDeliveries: async (): Promise<DeliveryTrackingData[]> => {
+        try {
+            return await apiService.get<DeliveryTrackingData[]>('/delivery-status/my-active-deliveries');
+        } catch (error) {
+            console.error('Get current carrier active deliveries error:', error);
+            throw error;
+        }
+    },
+
+// Sender'ın teslimat takipleri
+    getSenderDeliveryTrackings: async (senderId: string): Promise<DeliveryTrackingData[]> => {
+        try {
+            return await apiService.get<DeliveryTrackingData[]>(`/delivery-status/sender/${senderId}/trackings`);
+        } catch (error) {
+            console.error(`Get sender delivery trackings (${senderId}) error:`, error);
+            throw error;
+        }
+    },
+
+// Konum güncelleme
+    updateLocationOnly: async (deliveryStatusId: string, location: string): Promise<DeliveryStatus> => {
+        try {
+            const params = new URLSearchParams();
+            params.append('location', location);
+
+            return await apiService.patch<DeliveryStatus>(
+                `/delivery-status/${deliveryStatusId}/location?${params.toString()}`,
+                {}
+            );
+        } catch (error) {
+            console.error(`Update location (${deliveryStatusId}) error:`, error);
+            throw error;
+        }
+    },
+
+// Belge silme
+    removeDocument: async (deliveryStatusId: string, documentUrl: string, documentType: 'pickup' | 'delivery'): Promise<void> => {
+        try {
+            const params = new URLSearchParams();
+            params.append('documentUrl', documentUrl);
+            params.append('documentType', documentType);
+
+            await apiService.delete(`/delivery-status/${deliveryStatusId}/documents?${params.toString()}`);
+        } catch (error) {
+            console.error(`Remove document (${deliveryStatusId}) error:`, error);
+            throw error;
+        }
+    },
+
+// Pickup belgelerini getir
+    getPickupDocuments: async (deliveryStatusId: string): Promise<string[]> => {
+        try {
+            return await apiService.get<string[]>(`/delivery-status/${deliveryStatusId}/pickup-documents`);
+        } catch (error) {
+            console.error(`Get pickup documents (${deliveryStatusId}) error:`, error);
+            throw error;
+        }
+    },
+
+// Delivery belgelerini getir
+    getDeliveryDocuments: async (deliveryStatusId: string): Promise<string[]> => {
+        try {
+            return await apiService.get<string[]>(`/delivery-status/${deliveryStatusId}/delivery-documents`);
+        } catch (error) {
+            console.error(`Get delivery documents (${deliveryStatusId}) error:`, error);
+            throw error;
+        }
+    },
+
+// === HELPER METODLAR ===
+
+// Status display name
+    getStatusDisplayName: (step: DeliveryStep): string => {
+        switch (step) {
+            case DeliveryStep.ON_THE_WAY:
+                return 'Yüke Gidiliyor';
+            case DeliveryStep.PICKED_UP:
+                return 'Alındı';
+            case DeliveryStep.DELIVERED:
+                return 'Teslim Edildi';
+            default:
+                return String(step).replace(/_/g, ' ');
+        }
+    },
+
+// Status progress hesaplama
+    getStatusProgress: (step: DeliveryStep): number => {
+        switch (step) {
+            case DeliveryStep.ON_THE_WAY:
+                return 25;
+            case DeliveryStep.PICKED_UP:
+                return 50;
+            case DeliveryStep.DELIVERED:
+                return 100;
+            default:
+                return 0;
+        }
+    },
+
+// Status color
+    getStatusColor: (step: DeliveryStep): string => {
+        switch (step) {
+            case DeliveryStep.ON_THE_WAY:
+                return 'blue';
+            case DeliveryStep.PICKED_UP:
+                return 'orange';
+            case DeliveryStep.DELIVERED:
+                return 'green';
+            default:
+                return 'gray';
+        }
+    },
+
+// Dosya boyutu formatı
+    formatFileSize: (bytes: number): string => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    },
+
+// Dosya tipi kontrolü
+    isValidFileType: (file: File): boolean => {
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+        return allowedTypes.includes(file.type);
+    },
+
+// Maximum dosya boyutu kontrolü (5MB)
+    isValidFileSize: (file: File): boolean => {
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        return file.size <= maxSize;
     }
 };
 

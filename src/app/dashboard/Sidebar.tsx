@@ -15,7 +15,7 @@ import {
     FileText,
     DollarSign,
     HandshakeIcon,
-    Leaf
+    Leaf, MapPin
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
@@ -67,6 +67,7 @@ export default function Sidebar() {
             icon: FileText,
             badge: notificationCounts.offers
         },
+        { href: "/dashboard/sender/delivery-status", label: "Teslimat Takibi", icon: MapPin }, // Bu satırı ekle
         { href: "/dashboard/carrier/sender-completed-deliveries", label: t("dashboard.sidebar.completed"), icon: CheckCheck },
         { href: "/dashboard/carrier/environmental-effect", label: t("dashboard.sidebar.environmental"), icon: Leaf },
         { href: "/dashboard/sender/sender-profile", label: t("dashboard.sidebar.profile"), icon: Users },
@@ -81,6 +82,7 @@ export default function Sidebar() {
             icon: Truck,
             badge: notificationCounts.loads
         },
+        { href: "/dashboard/carrier/delivery-tracking", label: "Teslimat Takibi", icon: MapPin }, // Bu satırı ekle
         { href: "/dashboard/carrier/carrier-completed-deliveries", label: t("dashboard.sidebar.completed"), icon: CheckCheck },
         { href: "/dashboard/carrier/carrier-profile", label: t("dashboard.sidebar.profile"), icon: Users },
     ];
