@@ -289,7 +289,7 @@ export default function SenderOffersPage() {
 
                                     {/* Teklifler Listesi */}
                                     <div className="space-y-3">
-                                        {loadWithOffers.offers
+                                        {[...loadWithOffers.offers]
                                             .sort((a, b) => {
                                                 // Çevreci araçları öne çıkar, sonra fiyata göre sırala
                                                 if (a.vehicleEcoCertified && !b.vehicleEcoCertified) return -1;
