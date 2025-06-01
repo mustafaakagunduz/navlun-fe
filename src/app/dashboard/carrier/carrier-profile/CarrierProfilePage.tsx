@@ -3,6 +3,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from "@/context/AuthContext";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
 
 // Local User type with phone property
 type UserWithPhone = {
@@ -67,6 +69,10 @@ export default function CarrierProfilePage() {
         email: '',
     });
 
+
+    const [isAddVehicleDialogOpen, setIsAddVehicleDialogOpen] = useState(false);
+    const [isEditVehicleDialogOpen, setIsEditVehicleDialogOpen] = useState(false);
+
     // Vehicle form state
     const [vehicleFormData, setVehicleFormData] = useState<{
         plateNumber: string;
@@ -76,6 +82,7 @@ export default function CarrierProfilePage() {
         inspectionDate: string;
         driverName: string;
         carryingCapacity: number;
+        active: boolean;
     }>({
         plateNumber: '',
         type: '',
@@ -83,7 +90,8 @@ export default function CarrierProfilePage() {
         insuranceStatus: false,
         inspectionDate: '',
         driverName: '',
-        carryingCapacity: 0
+        carryingCapacity: 0,
+        active: true
     });
 
     // UI state
@@ -216,7 +224,8 @@ export default function CarrierProfilePage() {
                     taxNumber: profileData.taxNumber,
                     iban: profileData.iban,
                     isEcoFriendly: profileData.isEcoFriendly,
-                    driverLicense: profileData.driverLicense
+                    driverLicense: profileData.driverLicense,
+
                 };
                 savedProfile = await carrierService.updateCarrierProfile(currentProfileId, updatePayload);
             } else {
@@ -260,7 +269,8 @@ export default function CarrierProfilePage() {
                 inspectionDate: vehicleFormData.inspectionDate,
                 driverName: vehicleFormData.driverName,
                 carryingCapacity: vehicleFormData.carryingCapacity,
-                carrierId: currentProfileId
+                carrierId: currentProfileId,
+                active: vehicleFormData.active
             };
 
             const newVehicle = await carrierService.createVehicle(vehiclePayload);
@@ -274,10 +284,11 @@ export default function CarrierProfilePage() {
                 insuranceStatus: false,
                 inspectionDate: '',
                 driverName: '',
-                carryingCapacity: 0
+                carryingCapacity: 0,
+                active: true
             });
 
-            setIsAddingVehicle(false);
+            setIsAddVehicleDialogOpen(false); // Dialog'u kapat
             setSuccess('Araç başarıyla eklendi!');
             setTimeout(() => setSuccess(''), 3000);
 
@@ -298,13 +309,15 @@ export default function CarrierProfilePage() {
                 insuranceStatus: vehicleFormData.insuranceStatus,
                 inspectionDate: vehicleFormData.inspectionDate,
                 driverName: vehicleFormData.driverName,
-                carryingCapacity: vehicleFormData.carryingCapacity
+                carryingCapacity: vehicleFormData.carryingCapacity,
+                active: vehicleFormData.active
             };
 
             const updatedVehicle = await carrierService.updateVehicle(vehicleId, updatePayload);
             setVehicles(prev => prev.map(v => v.id === vehicleId ? updatedVehicle : v));
 
             setEditingVehicleId(null);
+            setIsEditVehicleDialogOpen(false); // Bu satırı ekleyin
             setSuccess('Araç başarıyla güncellendi!');
             setTimeout(() => setSuccess(''), 3000);
 
@@ -340,16 +353,18 @@ export default function CarrierProfilePage() {
             insuranceStatus: vehicle.insuranceStatus,
             inspectionDate: formatDate(vehicle.inspectionDate),
             driverName: vehicle.driverName,
-            carryingCapacity: vehicle.carryingCapacity
+            carryingCapacity: vehicle.carryingCapacity,
+            active: vehicle.active
         });
         setEditingVehicleId(vehicle.id);
-        setIsAddingVehicle(false);
+        setIsEditVehicleDialogOpen(true);
     };
 
     // Cancel editing
     const cancelEditing = () => {
         setEditingVehicleId(null);
-        setIsAddingVehicle(false);
+        setIsAddVehicleDialogOpen(false);
+        setIsEditVehicleDialogOpen(false); // Bu satırı ekleyin
         setVehicleFormData({
             plateNumber: '',
             type: '',
@@ -357,7 +372,8 @@ export default function CarrierProfilePage() {
             insuranceStatus: false,
             inspectionDate: '',
             driverName: '',
-            carryingCapacity: 0
+            carryingCapacity: 0,
+            active: true
         });
     };
 
@@ -597,7 +613,7 @@ export default function CarrierProfilePage() {
                                 </CardTitle>
                                 <Button
                                     onClick={() => {
-                                        setIsAddingVehicle(true);
+                                        setIsAddVehicleDialogOpen(true);
                                         setEditingVehicleId(null);
                                         setVehicleFormData({
                                             plateNumber: '',
@@ -606,7 +622,8 @@ export default function CarrierProfilePage() {
                                             insuranceStatus: false,
                                             inspectionDate: '',
                                             driverName: '',
-                                            carryingCapacity: 0
+                                            carryingCapacity: 0,
+                                            active: true
                                         });
                                     }}
                                     variant="outline"
@@ -709,15 +726,16 @@ export default function CarrierProfilePage() {
                     </Card>
 
                     {/* Vehicle Form */}
-                    {(isAddingVehicle || editingVehicleId) && (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
+                    <Dialog open={isAddVehicleDialogOpen} onOpenChange={setIsAddVehicleDialogOpen}>
+                        <DialogContent className="max-w-2xl">
+                            <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2">
                                     <Package className="h-5 w-5" />
-                                    {editingVehicleId ? 'Araç Düzenle' : 'Yeni Araç Ekle'}
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
+                                    Yeni Araç Ekle
+                                </DialogTitle>
+                            </DialogHeader>
+
+                            <form onSubmit={(e) => { e.preventDefault(); handleAddVehicle(); }} className="space-y-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="plateNumber">Plaka Numarası *</Label>
@@ -726,7 +744,6 @@ export default function CarrierProfilePage() {
                                             value={vehicleFormData.plateNumber}
                                             onChange={(e) => handleVehicleInputChange('plateNumber', e.target.value)}
                                             placeholder="34 ABC 123"
-                                            disabled={!!editingVehicleId} // Plaka düzenlemede değiştirilemez
                                             required
                                         />
                                     </div>
@@ -774,7 +791,7 @@ export default function CarrierProfilePage() {
                                         />
                                     </div>
 
-                                    <div className="space-y-2">
+                                    <div className="space-y-2 md:col-span-2">
                                         <Label htmlFor="inspectionDate">Muayene Tarihi</Label>
                                         <Input
                                             id="inspectionDate"
@@ -820,27 +837,213 @@ export default function CarrierProfilePage() {
                                             onCheckedChange={(checked) => handleVehicleInputChange('insuranceStatus', checked)}
                                         />
                                     </div>
+
+                                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                                        <div>
+                                            <Label htmlFor="active" className="font-medium">
+                                                Araç Durumu
+                                            </Label>
+                                            <p className="text-sm text-gray-600">
+                                                Bu araç aktif olarak kullanılıyor mu?
+                                            </p>
+                                        </div>
+                                        <Switch
+                                            id="active"
+                                            checked={vehicleFormData.active}
+                                            onCheckedChange={(checked) => handleVehicleInputChange('active', checked)}
+                                        />
+                                    </div>
                                 </div>
+
+                                {/* Error Display */}
+                                {error && (
+                                    <Alert variant="destructive">
+                                        <AlertCircle className="h-4 w-4" />
+                                        <AlertDescription>{error}</AlertDescription>
+                                    </Alert>
+                                )}
 
                                 {/* Action Buttons */}
                                 <div className="flex items-center gap-3 pt-4">
                                     <Button
-                                        onClick={editingVehicleId ? () => handleUpdateVehicle(editingVehicleId) : handleAddVehicle}
-                                        className="flex items-center gap-2"
+                                        type="submit"
+                                        className="flex items-center gap-2 flex-1"
                                     >
                                         <Save className="h-4 w-4" />
-                                        {editingVehicleId ? 'Güncelle' : 'Araç Ekle'}
+                                        Araç Ekle
                                     </Button>
                                     <Button
+                                        type="button"
                                         variant="outline"
                                         onClick={cancelEditing}
+                                        className="flex-1"
                                     >
                                         İptal
                                     </Button>
                                 </div>
-                            </CardContent>
-                        </Card>
-                    )}
+                            </form>
+                        </DialogContent>
+                    </Dialog>
+
+                    {/* Araç Düzenleme Dialog'u */}
+                    <Dialog open={isEditVehicleDialogOpen} onOpenChange={setIsEditVehicleDialogOpen}>
+                        <DialogContent className="max-w-2xl">
+                            <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2">
+                                    <Edit3 className="h-5 w-5" />
+                                    Araç Düzenle
+                                </DialogTitle>
+                            </DialogHeader>
+
+                            <form onSubmit={(e) => { e.preventDefault(); editingVehicleId && handleUpdateVehicle(editingVehicleId); }} className="space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="plateNumber">Plaka Numarası</Label>
+                                        <Input
+                                            id="plateNumber"
+                                            value={vehicleFormData.plateNumber}
+                                            disabled
+                                            className="bg-gray-100"
+                                        />
+                                        <p className="text-xs text-gray-500">Plaka numarası değiştirilemez</p>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="vehicleType">Araç Tipi *</Label>
+                                        <Select
+                                            value={vehicleFormData.type}
+                                            onValueChange={(value) => handleVehicleInputChange('type', value)}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Araç tipini seçin" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {vehicleTypes.map((type) => (
+                                                    <SelectItem key={type} value={type}>
+                                                        {type}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="driverName">Sürücü Adı *</Label>
+                                        <Input
+                                            id="driverName"
+                                            value={vehicleFormData.driverName}
+                                            onChange={(e) => handleVehicleInputChange('driverName', e.target.value)}
+                                            placeholder="Sürücü adını girin"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="carryingCapacity">Taşıma Kapasitesi (ton)</Label>
+                                        <Input
+                                            id="carryingCapacity"
+                                            type="number"
+                                            min="0"
+                                            step="0.1"
+                                            value={vehicleFormData.carryingCapacity}
+                                            onChange={(e) => handleVehicleInputChange('carryingCapacity', parseFloat(e.target.value) || 0)}
+                                            placeholder="0.0"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2 md:col-span-2">
+                                        <Label htmlFor="inspectionDate">Muayene Tarihi</Label>
+                                        <Input
+                                            id="inspectionDate"
+                                            type="date"
+                                            value={vehicleFormData.inspectionDate}
+                                            onChange={(e) => handleVehicleInputChange('inspectionDate', e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+
+                                <Separator />
+
+                                {/* Switches */}
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                                        <div>
+                                            <Label htmlFor="ecoCertified" className="font-medium">
+                                                Çevre Dostu Araç
+                                            </Label>
+                                            <p className="text-sm text-gray-600">
+                                                Bu araç çevre dostu sertifikasına sahip mi?
+                                            </p>
+                                        </div>
+                                        <Switch
+                                            id="ecoCertified"
+                                            checked={vehicleFormData.ecoCertified}
+                                            onCheckedChange={(checked) => handleVehicleInputChange('ecoCertified', checked)}
+                                        />
+                                    </div>
+
+                                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                                        <div>
+                                            <Label htmlFor="insuranceStatus" className="font-medium">
+                                                Sigorta Durumu
+                                            </Label>
+                                            <p className="text-sm text-gray-600">
+                                                Aracın sigortası mevcut mu?
+                                            </p>
+                                        </div>
+                                        <Switch
+                                            id="insuranceStatus"
+                                            checked={vehicleFormData.insuranceStatus}
+                                            onCheckedChange={(checked) => handleVehicleInputChange('insuranceStatus', checked)}
+                                        />
+                                    </div>
+
+                                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                                        <div>
+                                            <Label htmlFor="active" className="font-medium">
+                                                Araç Durumu
+                                            </Label>
+                                            <p className="text-sm text-gray-600">
+                                                Bu araç aktif olarak kullanılıyor mu?
+                                            </p>
+                                        </div>
+                                        <Switch
+                                            id="active"
+                                            checked={vehicleFormData.active}
+                                            onCheckedChange={(checked) => handleVehicleInputChange('active', checked)}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Error Display */}
+                                {error && (
+                                    <Alert variant="destructive">
+                                        <AlertCircle className="h-4 w-4" />
+                                        <AlertDescription>{error}</AlertDescription>
+                                    </Alert>
+                                )}
+
+                                {/* Action Buttons */}
+                                <div className="flex items-center gap-3 pt-4">
+                                    <Button
+                                        type="submit"
+                                        className="flex items-center gap-2 flex-1"
+                                    >
+                                        <Save className="h-4 w-4" />
+                                        Güncelle
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={cancelEditing}
+                                        className="flex-1"
+                                    >
+                                        İptal
+                                    </Button>
+                                </div>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
                 </div>
             </div>
         </div>

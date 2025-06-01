@@ -62,6 +62,7 @@ export type VehicleRequest = {
     carryingCapacity: number;
     carrierId: string;
     documents?: string[];
+    active?: boolean;
 };
 
 export type VehicleUpdateRequest = {

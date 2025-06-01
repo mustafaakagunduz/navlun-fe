@@ -55,7 +55,7 @@ export type VehicleInfo = {
     ecoCertified: boolean;
     carryingCapacity: number;
     driverName: string;
-    isActive: boolean;
+    active: boolean;
 };
 
 export type OfferWithVehicleInfo = {
