@@ -45,7 +45,7 @@ export type Vehicle = {
     inspectionDate: string;
     driverName: string;
     carryingCapacity: number;
-    isActive: boolean;
+    active: boolean;
     documents: string[];
     carrierId: string;
     createdAt?: string;

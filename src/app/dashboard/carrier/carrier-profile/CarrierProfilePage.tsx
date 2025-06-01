@@ -690,8 +690,8 @@ export default function CarrierProfilePage() {
                                                 </div>
                                                 <div>
                                                     <span className="text-gray-600">Durum:</span>
-                                                    <p className={`font-medium ${vehicle.isActive ? 'text-green-600' : 'text-gray-500'}`}>
-                                                        {vehicle.isActive ? 'Aktif' : 'Pasif'}
+                                                    <p className={`font-medium ${vehicle.active ? 'text-green-600' : 'text-gray-500'}`}>
+                                                        {vehicle.active ? 'Aktif' : 'Pasif'}
                                                     </p>
                                                 </div>
                                             </div>

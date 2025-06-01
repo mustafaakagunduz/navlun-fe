@@ -11,7 +11,7 @@ export type Vehicle = {
     inspectionDate: string;
     driverName: string;
     carryingCapacity: number;
-    isActive: boolean;
+    active: boolean;
     documents: string[];
     carrierId: string;
     createdAt?: string;
@@ -201,7 +201,7 @@ const vehicleService = {
 
             // Sadece aktif, sigortalı ve muayenesi geçerli araçları filtrele
             return vehicles.filter(vehicle =>
-                vehicle.isActive &&
+                vehicle.active &&
                 vehicle.insuranceStatus &&
                 new Date(vehicle.inspectionDate) > new Date()
             );
