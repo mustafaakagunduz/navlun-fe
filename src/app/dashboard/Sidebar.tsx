@@ -67,7 +67,7 @@ export default function Sidebar() {
             icon: FileText,
             badge: notificationCounts.offers
         },
-        { href: "/dashboard/sender/delivery-status", label: "Teslimat Takibi", icon: MapPin }, // Bu satırı ekle
+        { href: "/dashboard/sender/delivery-status", label: "Teslimat Takibi", icon: MapPin },  //buraya türkçe ve ingilizce dil desteği ekle
         { href: "/dashboard/carrier/sender-completed-deliveries", label: t("dashboard.sidebar.completed"), icon: CheckCheck },
         { href: "/dashboard/carrier/environmental-effect", label: t("dashboard.sidebar.environmental"), icon: Leaf },
         { href: "/dashboard/sender/sender-profile", label: t("dashboard.sidebar.profile"), icon: Users },
@@ -78,11 +78,11 @@ export default function Sidebar() {
         { href: "/dashboard/carrier/available-loads", label: t("dashboard.sidebar.availableLoads"), icon: Package },
         {
             href: "/dashboard/carrier/my-loads",
-            label: t("dashboard.sidebar.myLoads"),
+            label: "Tekliflerim", //buraya türkçe ve ingilizce dil desteği ekle
             icon: Truck,
             badge: notificationCounts.loads
         },
-        { href: "/dashboard/carrier/delivery-tracking", label: "Teslimat Takibi", icon: MapPin }, // Bu satırı ekle
+        { href: "/dashboard/carrier/delivery-tracking", label: "Teslimat Takibi", icon: MapPin },  //buraya türkçe ve ingilizce dil desteği ekle
         { href: "/dashboard/carrier/carrier-completed-deliveries", label: t("dashboard.sidebar.completed"), icon: CheckCheck },
         { href: "/dashboard/carrier/carrier-profile", label: t("dashboard.sidebar.profile"), icon: Users },
     ];

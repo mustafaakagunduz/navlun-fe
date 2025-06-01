@@ -176,22 +176,10 @@ export default function MyLoadsPageContent() {
                                                 }}
                                             >
                                                 <Package className="h-4 w-4 mr-2" />
-                                                Detaylar
+                                                Detaylar (burada görüntülenecek şeyi direkt karta yazabilirim)
                                             </Button>
 
-                                            {loadWithOffers.hasAcceptedOffer && (
-                                                <Button
-                                                    size="sm"
-                                                    className="flex-1"
-                                                    onClick={() => {
-                                                        // Aynı sekmede yönlendir
-                                                        window.location.href = '/dashboard/carrier/delivery-tracking';
-                                                    }}
-                                                >
-                                                    <TruckIcon className="h-4 w-4 mr-2" />
-                                                    Teslimat Takibi
-                                                </Button>
-                                            )}
+
                                         </div>
                                     </CardContent>
                                 </Card>

@@ -18,8 +18,7 @@ import {
     CheckCircle,
     XCircle,
     Clock,
-    Star,
-    AlertTriangle
+
 } from 'lucide-react';
 import loadService, { LoadWithOffers, OfferWithVehicleInfo } from '@/services/loadService';
 import offerService from '@/services/offerService';
