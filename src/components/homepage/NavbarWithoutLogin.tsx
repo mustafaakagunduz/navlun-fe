@@ -24,26 +24,42 @@ const NavbarWithoutLogin = () => {
         <header
             className={`sticky top-0 z-40 w-full transition-all duration-300 ${
                 isScrolled
-                    ? "bg-white border-b shadow-sm"
-                    : "bg-green-50"
+                    ? "bg-white/95 backdrop-blur-md border-b shadow-sm"
+                    : "bg-transparent"
             }`}
         >
             <div className="mx-auto flex h-16 items-center justify-between px-4 md:px-6 max-w-7xl">
-                <div className="flex items-center gap-2">
+                <div className={`flex items-center gap-2 ${isScrolled ? 'text-gray-900' : 'text-white'}`}>
                     <Leaf className="h-6 w-6 text-green-600" />
-                    <span className="text-xl font-bold">EkoTaşıma</span>
+                    <span className="text-xl font-bold">Transyük</span>
                 </div>
                 <nav className="hidden md:flex gap-6">
-                    <Link href="#hero" className="text-sm font-medium hover:text-green-600 transition-colors">
+                    <Link href="#hero" className={`text-base font-semibold transition-colors ${
+                        isScrolled
+                            ? 'text-gray-700 hover:text-green-600'
+                            : 'text-white hover:text-green-400'
+                    }`}>
                         {t("navbar.home")}
                     </Link>
-                    <Link href="#about" className="text-sm font-medium hover:text-green-600 transition-colors">
+                    <Link href="#about" className={`text-base font-semibold transition-colors ${
+                        isScrolled
+                            ? 'text-gray-700 hover:text-green-600'
+                            : 'text-white hover:text-green-400'
+                    }`}>
                         {t("navbar.about")}
                     </Link>
-                    <Link href="#services" className="text-sm font-medium hover:text-green-600 transition-colors">
+                    <Link href="#services" className={`text-base font-semibold transition-colors ${
+                        isScrolled
+                            ? 'text-gray-700 hover:text-green-600'
+                            : 'text-white hover:text-green-400'
+                    }`}>
                         {t("navbar.services")}
                     </Link>
-                    <Link href="#contact" className="text-sm font-medium hover:text-green-600 transition-colors">
+                    <Link href="#contact" className={`text-base font-semibold transition-colors ${
+                        isScrolled
+                            ? 'text-gray-700 hover:text-green-600'
+                            : 'text-white hover:text-green-400'
+                    }`}>
                         {t("navbar.contact")}
                     </Link>
                 </nav>
