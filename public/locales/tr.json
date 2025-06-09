@@ -261,6 +261,20 @@
     "totalDistance": "Toplam Mesafe",
     "totalEarnings": "Toplam Kazanç"
   },
+  "senderPage": {
+    "title": "Gönderici Paneli",
+    "description": "Yük gönderme işlemlerinizi yönetin ve takip edin",
+    "createNewLoad": "Yeni Yük Oluştur",
+    "myLoads": "Yüklerim",
+    "pendingOffers": "Bekleyen Teklifler",
+    "activeShipments": "Aktif Gönderiler",
+    "loadHistory": "Yük Geçmişi",
+    "statistics": "İstatistikler",
+    "totalLoads": "Toplam Yükler",
+    "completedLoads": "Tamamlanan Yükler",
+    "pendingLoads": "Bekleyen Yükler",
+    "avgCarbonSaved": "Ortalama Karbon Tasarrufu"
+  },
   "carrierProfile": {
     "title": "Taşıyıcı Profilim",
     "save": "Profili Kaydet",
@@ -408,7 +422,7 @@
     "resetInstructions": "Lütfen e-postanızı kontrol edin ve şifrenizi sıfırlamak için bağlantıyı takip edin.",
     "resetPasswordDescription": "E-posta adresinizi girin, şifrenizi sıfırlamanız için size bir bağlantı gönderelim.",
     "ecoFriendlyTransport": "Çevre Dostu Taşımacılık",
-    "platformDescription": "EkoTaşıma ile karbon ayak izinizi azaltın ve sürdürülebilir lojistik çözümlerine katkıda bulunun.",
+    "platformDescription": "Transyük ile karbon ayak izinizi azaltın ve sürdürülebilir lojistik çözümlerine katkıda bulunun.",
 
     "errors": {
       "resetFailed": "Şifre sıfırlama başarısız oldu",

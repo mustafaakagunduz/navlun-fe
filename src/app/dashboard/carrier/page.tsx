@@ -1,18 +1,57 @@
 "use client"
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Package, TruckIcon, Calendar, Settings, BarChart3, CheckCircle, MapPin } from "lucide-react";
-import Sidebar from "@/app/dashboard/Sidebar";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import {
+    Loader2,
+    Package,
+    TruckIcon,
+    Calendar,
+    Settings,
+    BarChart3,
+    CheckCircle,
+    MapPin,
+    TrendingUp,
+    TrendingDown,
+    Activity,
+    Target,
+    Award,
+    Star,
+    Globe,
+    DollarSign,
+    Fuel,
+    Route,
+    Clock,
+    Leaf,
+    Shield,
+    Zap,
+    Navigation,
+    Phone,
+    Mail,
+    Users,
+    AlertTriangle
+} from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 
 export default function CarrierDashboard() {
     const { user, isAuthenticated, isLoading } = useAuth();
     const router = useRouter();
     const { t } = useLanguage();
+    const [currentTime, setCurrentTime] = useState(new Date());
+
+    // Gerçek zamanlı saat güncellemesi
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 1000);
+        return () => clearInterval(timer);
+    }, []);
 
     // Giriş yapmamış veya carrier olmayan kullanıcıları yönlendir
     useEffect(() => {
@@ -20,6 +59,54 @@ export default function CarrierDashboard() {
             router.push('/dashboard');
         }
     }, [isLoading, isAuthenticated, user, router]);
+
+    // Dummy data - yatırımcı sunumu için
+    const carrierStats = {
+        totalEarnings: 247650,
+        monthlyGrowth: 22.8,
+        activeDeliveries: 17,
+        completionRate: 98.4,
+        avgDeliveryTime: 1.8,
+        fuelEfficiency: 15.7,
+        customerRating: 4.93,
+        ecoScore: 94
+    };
+
+    const activeDeliveries = [
+        { id: 'DEL001', route: 'İstanbul → Ankara', cargo: 'Elektronik', status: 'in_transit', progress: 75, eta: '2 saat', value: '₺3,400', eco: true },
+        { id: 'DEL002', route: 'Bursa → İzmir', cargo: 'Tekstil', status: 'loading', progress: 10, eta: '6 saat', value: '₺2,100', eco: true },
+        { id: 'DEL003', route: 'Ankara → Antalya', cargo: 'Gıda', status: 'in_transit', progress: 45, eta: '4 saat', value: '₺2,850', eco: false },
+        { id: 'DEL004', route: 'İzmir → Adana', cargo: 'İnşaat', status: 'pickup', progress: 5, eta: '8 saat', value: '₺4,200', eco: true },
+        { id: 'DEL005', route: 'Konya → İstanbul', cargo: 'Tarım', status: 'in_transit', progress: 60, eta: '3 saat', value: '₺1,750', eco: true }
+    ];
+
+    const topRoutes = [
+        { route: 'İstanbul → Ankara', count: 47, earnings: '₺48,500', rating: 4.9, efficiency: 96 },
+        { route: 'Bursa → İzmir', count: 38, earnings: '₺32,400', rating: 4.8, efficiency: 94 },
+        { route: 'Ankara → İzmir', count: 34, earnings: '₺29,800', rating: 4.9, efficiency: 92 },
+        { route: 'İstanbul → İzmir', count: 29, earnings: '₺35,600', rating: 4.7, efficiency: 90 },
+        { route: 'Ankara → Antalya', count: 25, earnings: '₺28,300', rating: 4.8, efficiency: 88 }
+    ];
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'in_transit': return 'bg-blue-100 text-blue-800';
+            case 'loading': return 'bg-purple-100 text-purple-800';
+            case 'pickup': return 'bg-yellow-100 text-yellow-800';
+            case 'delivered': return 'bg-green-100 text-green-800';
+            default: return 'bg-gray-100 text-gray-800';
+        }
+    };
+
+    const getStatusText = (status: string) => {
+        switch (status) {
+            case 'in_transit': return 'Yolda';
+            case 'loading': return 'Yükleniyor';
+            case 'pickup': return 'Alım Bekliyor';
+            case 'delivered': return 'Teslim Edildi';
+            default: return status;
+        }
+    };
 
     // Yükleme durumunda gösterilecek içerik
     if (isLoading) {
@@ -36,110 +123,441 @@ export default function CarrierDashboard() {
     return (
         <ProtectedRoute allowedRoles={['CARRIER']}>
             <div className="flex h-[calc(100vh-4rem)]">
-                {/* Sidebar */}
-                <Sidebar />
+
 
                 {/* Main Content */}
-                <div className="flex-1 overflow-auto bg-gray-50 p-8">
+                <div className="flex-1 overflow-auto bg-gradient-to-br from-gray-50 to-purple-50 p-8">
                     <div className="max-w-7xl mx-auto">
-                        <h1 className="text-3xl font-bold mb-4">{t("carrierPage.title")}</h1>
-                        <p className="text-gray-600 mb-8">{t("carrierPage.description")}</p>
+                        {/* Header with Real-time Info */}
+                        <div className="flex justify-between items-center mb-8">
+                            <div>
+                                <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                                    Taşıyıcı Yönetim Paneli
+                                </h1>
+                                <p className="text-gray-600 mt-2 text-lg">Güvenli ve verimli taşımacılığın dijital platformu</p>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <div className="text-right">
+                                    <div className="text-2xl font-bold text-gray-900">
+                                        {currentTime.toLocaleTimeString('tr-TR')}
+                                    </div>
+                                    <div className="text-gray-600">
+                                        {currentTime.toLocaleDateString('tr-TR', {
+                                            weekday: 'long',
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric'
+                                        })}
+                                    </div>
+                                </div>
+                                <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg">
+                                    <Route className="h-4 w-4 mr-2" />
+                                    Yeni Rota Planla
+                                </Button>
+                            </div>
+                        </div>
 
-                        {/* Quick Action Cards */}
+                        {/* Key Performance Indicators */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                            <Card className="shadow-md">
+                            <Card className="shadow-lg border-l-4 border-l-purple-500 bg-gradient-to-r from-purple-50 to-white">
                                 <CardContent className="p-6">
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-3 rounded-full bg-blue-100">
-                                            <Package className="h-6 w-6 text-blue-600" />
-                                        </div>
+                                    <div className="flex items-center justify-between">
                                         <div>
-                                            <h3 className="font-bold text-lg">{t("carrierPage.availableLoads")}</h3>
-                                            <span className="text-gray-500">42</span>
+                                            <p className="text-sm font-medium text-gray-600">Toplam Kazanç</p>
+                                            <p className="text-3xl font-bold text-purple-600">
+                                                ₺{carrierStats.totalEarnings.toLocaleString()}
+                                            </p>
+                                            <div className="flex items-center mt-2">
+                                                <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
+                                                <span className="text-sm text-green-600 font-medium">
+                                                    +{carrierStats.monthlyGrowth}% bu ay
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <DollarSign className="h-12 w-12 text-purple-600 opacity-20" />
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            <Card className="shadow-lg border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-white">
+                                <CardContent className="p-6">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-600">Aktif Teslimatlar</p>
+                                            <p className="text-3xl font-bold text-blue-600">{carrierStats.activeDeliveries}</p>
+                                            <div className="flex items-center mt-2">
+                                                <Activity className="h-4 w-4 text-blue-600 mr-1" />
+                                                <span className="text-sm text-blue-600 font-medium">
+                                                    12 yeni teklif
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <TruckIcon className="h-12 w-12 text-blue-600 opacity-20" />
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            <Card className="shadow-lg border-l-4 border-l-green-500 bg-gradient-to-r from-green-50 to-white">
+                                <CardContent className="p-6">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-600">Tamamlanma Oranı</p>
+                                            <p className="text-3xl font-bold text-green-600">{carrierStats.completionRate}%</p>
+                                            <div className="flex items-center mt-2">
+                                                <Target className="h-4 w-4 text-green-600 mr-1" />
+                                                <span className="text-sm text-green-600 font-medium">
+                                                    Sektör ort: 91%
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <CheckCircle className="h-12 w-12 text-green-600 opacity-20" />
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            <Card className="shadow-lg border-l-4 border-l-emerald-500 bg-gradient-to-r from-emerald-50 to-white">
+                                <CardContent className="p-6">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-600">Çevreci Skor</p>
+                                            <p className="text-3xl font-bold text-emerald-600">{carrierStats.ecoScore}</p>
+                                            <div className="flex items-center mt-2">
+                                                <Leaf className="h-4 w-4 text-emerald-600 mr-1" />
+                                                <span className="text-sm text-emerald-600 font-medium">
+                                                    Excellent seviye
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <Leaf className="h-12 w-12 text-emerald-600 opacity-20" />
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+
+                        {/* Performance Dashboard */}
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                            {/* Carrier Performance Metrics */}
+                            <Card className="lg:col-span-2 shadow-lg">
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <BarChart3 className="h-5 w-5 text-purple-600" />
+                                        Taşımacılık Performansı
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-6">
+                                    <div className="space-y-4">
+                                        <div>
+                                            <div className="flex justify-between text-sm mb-2">
+                                                <span>Müşteri Memnuniyeti</span>
+                                                <span className="font-bold text-green-600">{carrierStats.customerRating}/5.0</span>
+                                            </div>
+                                            <Progress value={(carrierStats.customerRating / 5) * 100} className="h-3" />
+                                        </div>
+
+                                        <div>
+                                            <div className="flex justify-between text-sm mb-2">
+                                                <span>Yakıt Verimliliği</span>
+                                                <span className="font-bold text-green-600">{carrierStats.fuelEfficiency} km/L</span>
+                                            </div>
+                                            <Progress value={85} className="h-3" />
+                                        </div>
+
+                                        <div>
+                                            <div className="flex justify-between text-sm mb-2">
+                                                <span>Zamanında Teslimat</span>
+                                                <span className="font-bold text-blue-600">96%</span>
+                                            </div>
+                                            <Progress value={96} className="h-3" />
+                                        </div>
+
+                                        <div>
+                                            <div className="flex justify-between text-sm mb-2">
+                                                <span>Güvenlik Skoru</span>
+                                                <span className="font-bold text-purple-600">99%</span>
+                                            </div>
+                                            <Progress value={99} className="h-3" />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-3 gap-4 pt-4 border-t">
+                                        <div className="text-center">
+                                            <div className="text-2xl font-bold text-purple-600">{carrierStats.avgDeliveryTime}</div>
+                                            <div className="text-sm text-gray-600">Ort. Teslimat Süresi (gün)</div>
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="text-2xl font-bold text-green-600">2,847</div>
+                                            <div className="text-sm text-gray-600">Toplam KM Bu Ay</div>
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="text-2xl font-bold text-blue-600">43</div>
+                                            <div className="text-sm text-gray-600">Tamamlanan İş</div>
                                         </div>
                                     </div>
                                 </CardContent>
                             </Card>
 
-                            <Card className="shadow-md">
-                                <CardContent className="p-6">
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-3 rounded-full bg-green-100">
-                                            <TruckIcon className="h-6 w-6 text-green-600" />
-                                        </div>
-                                        <div>
-                                            <h3 className="font-bold text-lg">{t("carrierPage.myDeliveries")}</h3>
-                                            <span className="text-gray-500">8</span>
-                                        </div>
+                            {/* Active Deliveries */}
+                            <Card className="shadow-lg">
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <Navigation className="h-5 w-5 text-blue-600" />
+                                        Aktif Teslimatlar
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="space-y-4">
+                                        {activeDeliveries.slice(0, 4).map((delivery, index) => (
+                                            <div key={index} className="p-3 bg-gradient-to-r from-gray-50 to-purple-50 rounded-lg border border-purple-100">
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-sm font-medium text-gray-900">{delivery.cargo}</span>
+                                                        {delivery.eco && (
+                                                            <Leaf className="h-3 w-3 text-green-600" />
+                                                        )}
+                                                    </div>
+                                                    <Badge className={getStatusColor(delivery.status)} variant="outline">
+                                                        {getStatusText(delivery.status)}
+                                                    </Badge>
+                                                </div>
+                                                <p className="text-xs text-gray-600 mb-2 flex items-center gap-1">
+                                                    <MapPin className="h-3 w-3" />
+                                                    {delivery.route}
+                                                </p>
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <span className="text-sm font-bold text-purple-600">{delivery.value}</span>
+                                                    <span className="text-xs text-gray-500 flex items-center gap-1">
+                                                        <Clock className="h-3 w-3" />
+                                                        ETA: {delivery.eta}
+                                                    </span>
+                                                </div>
+                                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                                    <div
+                                                        className="bg-gradient-to-r from-purple-600 to-blue-600 h-2 rounded-full transition-all duration-300"
+                                                        style={{width: `${delivery.progress}%`}}
+                                                    ></div>
+                                                </div>
+                                                <p className="text-xs text-gray-500 mt-1 text-right">{delivery.progress}% tamamlandı</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+
+                        {/* Top Routes & Vehicle Analytics */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                            {/* Top Performing Routes */}
+                            <Card className="shadow-lg">
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <Award className="h-5 w-5 text-yellow-600" />
+                                        En Karlı Rotalar
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="space-y-4">
+                                        {topRoutes.map((route, index) => (
+                                            <div key={index} className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-purple-50 rounded-lg border border-purple-100">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                                                        {index + 1}
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-semibold text-gray-900">{route.route}</p>
+                                                        <div className="flex items-center gap-4 text-sm text-gray-600">
+                                                            <span>{route.count} sefer</span>
+                                                            <span className="flex items-center gap-1">
+                                                                <Star className="h-3 w-3 text-yellow-500" />
+                                                                {route.rating}
+                                                            </span>
+                                                            <span className="flex items-center gap-1">
+                                                                <Fuel className="h-3 w-3 text-green-600" />
+                                                                {route.efficiency}%
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="font-bold text-purple-600">{route.earnings}</p>
+                                                    <Badge variant="outline" className="text-xs mt-1">
+                                                        Verimli Rota
+                                                    </Badge>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
                                 </CardContent>
                             </Card>
 
-                            <Card className="shadow-md">
-                                <CardContent className="p-6">
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-3 rounded-full bg-amber-100">
-                                            <Calendar className="h-6 w-6 text-amber-600" />
-                                        </div>
-                                        <div>
-                                            <h3 className="font-bold text-lg">{t("carrierPage.schedule")}</h3>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                            {/* Fleet & Operations Analytics */}
+                            <Card className="shadow-lg">
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <Globe className="h-5 w-5 text-blue-600" />
+                                        Filo & Operasyon Analizi
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="space-y-6">
+                                        {/* Fleet Efficiency */}
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
+                                                <CardContent className="p-4 text-center">
+                                                    <Fuel className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                                                    <p className="text-sm text-green-800 font-medium">Yakıt Tasarrufu</p>
+                                                    <p className="text-2xl font-bold text-green-600">₺12.4K</p>
+                                                </CardContent>
+                                            </Card>
 
-                            <Card className="shadow-md">
-                                <CardContent className="p-6">
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-3 rounded-full bg-purple-100">
-                                            <Settings className="h-6 w-6 text-purple-600" />
+                                            <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
+                                                <CardContent className="p-4 text-center">
+                                                    <Zap className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                                                    <p className="text-sm text-blue-800 font-medium">Operasyon Verimliliği</p>
+                                                    <p className="text-2xl font-bold text-blue-600">94%</p>
+                                                </CardContent>
+                                            </Card>
                                         </div>
+
+                                        {/* Vehicle Status */}
                                         <div>
-                                            <h3 className="font-bold text-lg">{t("carrierPage.vehicleManagement")}</h3>
+                                            <h4 className="font-semibold mb-3 flex items-center gap-2">
+                                                <TruckIcon className="h-4 w-4" />
+                                                Araç Durumu
+                                            </h4>
+                                            <div className="space-y-3">
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-sm">Aktif Araçlar</span>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-20 bg-gray-200 rounded-full h-2">
+                                                            <div className="bg-green-600 h-2 rounded-full" style={{width: '95%'}}></div>
+                                                        </div>
+                                                        <span className="text-sm font-bold">4/4</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-sm">Bakım Durumu</span>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-20 bg-gray-200 rounded-full h-2">
+                                                            <div className="bg-blue-600 h-2 rounded-full" style={{width: '88%'}}></div>
+                                                        </div>
+                                                        <span className="text-sm font-bold">88%</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-sm">Güvenlik Skoru</span>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-20 bg-gray-200 rounded-full h-2">
+                                                            <div className="bg-purple-600 h-2 rounded-full" style={{width: '99%'}}></div>
+                                                        </div>
+                                                        <span className="text-sm font-bold">99%</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Eco Performance */}
+                                        <div className="p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border border-green-200">
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <h4 className="font-semibold text-green-800">Çevresel Performans</h4>
+                                                    <p className="text-sm text-green-600">CO₂ emisyon azaltımı</p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <div className="text-3xl font-bold text-green-600">-23%</div>
+                                                    <div className="text-sm text-green-700">Bu yıl</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Quick Actions */}
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <Button variant="outline" size="sm" className="text-xs">
+                                                <Phone className="h-3 w-3 mr-1" />
+                                                Destek
+                                            </Button>
+                                            <Button variant="outline" size="sm" className="text-xs">
+                                                <Mail className="h-3 w-3 mr-1" />
+                                                Rapor
+                                            </Button>
                                         </div>
                                     </div>
                                 </CardContent>
                             </Card>
                         </div>
 
-                        {/* Statistics */}
-                        <h2 className="text-2xl font-bold mb-4">{t("carrierPage.statistics")}</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <Card className="shadow-md">
+                        {/* Enhanced Statistics Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                            <Card className="shadow-md bg-gradient-to-br from-white to-purple-50">
                                 <CardHeader className="pb-2">
-                                    <CardTitle className="text-lg font-semibold">{t("carrierPage.activeDeliveries")}</CardTitle>
+                                    <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                                        <Package className="h-5 w-5 text-purple-600" />
+                                        Müsait Yükler
+                                    </CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-3xl font-bold">8</div>
+                                    <div className="text-3xl font-bold text-purple-600">67</div>
+                                    <div className="text-sm text-gray-600 mt-1">
+                                        <TrendingUp className="inline h-4 w-4 text-green-600 mr-1" />
+                                        +18% bu hafta
+                                    </div>
                                 </CardContent>
                             </Card>
 
-                            <Card className="shadow-md">
+                            <Card className="shadow-md bg-gradient-to-br from-white to-blue-50">
                                 <CardHeader className="pb-2">
-                                    <CardTitle className="text-lg font-semibold">{t("carrierPage.completedDeliveries")}</CardTitle>
+                                    <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                                        <Route className="h-5 w-5 text-blue-600" />
+                                        Toplam Mesafe
+                                    </CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-3xl font-bold">142</div>
+                                    <div className="text-3xl font-bold text-blue-600">47,850 km</div>
+                                    <div className="text-sm text-gray-600 mt-1">Bu ay: 3,247 km</div>
                                 </CardContent>
                             </Card>
 
-                            <Card className="shadow-md">
+                            <Card className="shadow-md bg-gradient-to-br from-white to-green-50">
                                 <CardHeader className="pb-2">
-                                    <CardTitle className="text-lg font-semibold">{t("carrierPage.totalDistance")}</CardTitle>
+                                    <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                                        <Shield className="h-5 w-5 text-green-600" />
+                                        Güvenlik Rekorları
+                                    </CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-3xl font-bold">24,850 km</div>
+                                    <div className="text-3xl font-bold text-green-600">247</div>
+                                    <div className="text-sm text-gray-600 mt-1">Kaza-sız gün</div>
                                 </CardContent>
                             </Card>
 
-                            <Card className="shadow-md">
+                            <Card className="shadow-md bg-gradient-to-br from-white to-emerald-50">
                                 <CardHeader className="pb-2">
-                                    <CardTitle className="text-lg font-semibold">{t("carrierPage.totalEarnings")}</CardTitle>
+                                    <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                                        <Users className="h-5 w-5 text-emerald-600" />
+                                        Müşteri Puanı
+                                    </CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-3xl font-bold">₺187,320</div>
+                                    <div className="text-3xl font-bold text-emerald-600">{carrierStats.customerRating}/5</div>
+                                    <div className="text-sm text-gray-600 mt-1">
+                                        <Star className="inline h-4 w-4 text-yellow-500 mr-1" />
+                                        347 değerlendirme
+                                    </div>
                                 </CardContent>
                             </Card>
+                        </div>
+
+                        {/* Success Story Footer */}
+                        <div className="mt-8 p-6 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg text-white">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-xl font-bold">🚛 Güvenilir Taşımacılık Partneri</h3>
+                                    <p className="text-purple-100 mt-1">Teknoloji ile desteklenen akıllı lojistik çözümleri</p>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-2xl font-bold">{carrierStats.completionRate}%</div>
+                                    <div className="text-purple-100">tamamlanma oranı</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

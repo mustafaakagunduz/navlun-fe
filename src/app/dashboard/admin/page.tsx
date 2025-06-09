@@ -6,7 +6,6 @@ import { useAuth } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Users, Package, Settings, CheckCircle, Clock } from "lucide-react";
-import Sidebar from "@/app/dashboard/Sidebar";
 import { useLanguage } from "@/context/LanguageContext";
 
 export default function AdminDashboard() {
@@ -36,8 +35,7 @@ export default function AdminDashboard() {
     return (
         <ProtectedRoute allowedRoles={['ADMIN']}>
             <div className="flex h-[calc(100vh-4rem)]">
-                {/* Sidebar */}
-                <Sidebar />
+
 
                 {/* Main Content */}
                 <div className="flex-1 overflow-auto bg-gray-50 p-8">

@@ -116,7 +116,7 @@ const HeroSection = () => {
                         <div className="space-y-6">
                             {/* İstatistik kartları */}
                             <motion.div
-                                className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20"
+                                className="bg-white/10  rounded-2xl p-6 border border-white/20"
                                 whileHover={{ scale: 1.02 }}
                                 transition={{ duration: 0.2 }}
                             >
@@ -132,7 +132,7 @@ const HeroSection = () => {
                             </motion.div>
 
                             <motion.div
-                                className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20"
+                                className="bg-white/10  rounded-2xl p-6 border border-white/20"
                                 whileHover={{ scale: 1.02 }}
                                 transition={{ duration: 0.2 }}
                             >
@@ -148,7 +148,7 @@ const HeroSection = () => {
                             </motion.div>
 
                             <motion.div
-                                className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20"
+                                className="bg-white/10  rounded-2xl p-6 border border-white/20"
                                 whileHover={{ scale: 1.02 }}
                                 transition={{ duration: 0.2 }}
                             >

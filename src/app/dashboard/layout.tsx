@@ -58,7 +58,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                         <Link href="/dashboard">
                             <div className="flex items-center gap-2">
                                 <Leaf className="h-6 w-6 text-green-600" />
-                                <span className="text-xl font-bold">EkoTaşıma</span>
+                                <span className="text-xl font-bold">Transyük</span>
                             </div>
                         </Link>
                     </div>
@@ -97,7 +97,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             <footer className="bg-white border-t py-4">
                 <div className="container mx-auto px-4">
                     <p className="text-center text-sm text-gray-500">
-                        &copy; {new Date().getFullYear()} EkoTaşıma. {t("dashboard.layout.footerText")}
+                        &copy; {new Date().getFullYear()} Transyük. {t("dashboard.layout.footerText")}
                     </p>
                 </div>
             </footer>

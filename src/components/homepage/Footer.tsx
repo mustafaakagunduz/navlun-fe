@@ -18,7 +18,7 @@ const Footer = () => {
                     <div className="space-y-4">
                         <div className="flex items-center gap-2">
                             <Leaf className="h-6 w-6 text-green-600" />
-                            <span className="text-xl font-bold">EkoTaşıma</span>
+                            <span className="text-xl font-bold">Transyük</span>
                         </div>
                         <p className="text-sm text-muted-foreground">
                             {t("footer.description")}
@@ -75,7 +75,7 @@ const Footer = () => {
 
                 <div className="mt-8 border-t pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <p className="text-xs text-muted-foreground">
-                        &copy; {new Date().getFullYear()} EkoTaşıma. {t("footer.copyright")}
+                        &copy; {new Date().getFullYear()} Transyük. {t("footer.copyright")}
                     </p>
                     <div className="flex gap-4">
                         <Link href="#" className="text-xs hover:text-green-600 transition-colors">{t("footer.privacyPolicy")}</Link>
