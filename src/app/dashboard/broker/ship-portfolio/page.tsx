@@ -34,6 +34,7 @@ import {
     setEcoFriendlyFilter,
     setAvailableFilter
 } from '@/store/slices/shipsSlice';
+import AddShipDialog from "@/app/dashboard/broker/ship-portfolio/AddShipDialog";
 
 export default function ShipPortfolio() {
     const { user, isAuthenticated, isLoading } = useAuth();
@@ -74,7 +75,6 @@ export default function ShipPortfolio() {
     }, [dispatch, profile]);
 
     // Filter ships
-    // Filter ships kısmını şu şekilde değiştir:
     const filteredShips = brokerShips.filter(ship => {
         const matchesSearch = ship.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             ship.shipType.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -135,13 +135,13 @@ export default function ShipPortfolio() {
                             Gemi filonuzu yönetin ve takip edin
                         </p>
                     </div>
-                    <Button
-                        onClick={() => router.push('/dashboard/broker/ships/create')}
-                        className="bg-blue-600 hover:bg-blue-700"
-                    >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Yeni Gemi Ekle
-                    </Button>
+
+                    <AddShipDialog>
+                        <Button className="bg-blue-600 hover:bg-blue-700">
+                            <Plus className="h-4 w-4 mr-2" />
+                            Yeni Gemi Ekle
+                        </Button>
+                    </AddShipDialog>
                 </div>
 
                 {/* Stats Cards */}
@@ -196,6 +196,7 @@ export default function ShipPortfolio() {
                         </CardContent>
                     </Card>
                 </div>
+
                 {/* Search and Filters */}
                 <Card>
                     <CardHeader>
@@ -305,25 +306,24 @@ export default function ShipPortfolio() {
                             <CardContent className="flex flex-col items-center justify-center py-12">
                                 <Ship className="h-12 w-12 text-gray-400 mb-4" />
                                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                                    {searchTerm || Object.values(filters).some(f => f) ?
+                                    {searchTerm || Object.values(filters).some(f => f !== 'all' && f !== '') ?
                                         "Arama kriterlerinize uygun gemi bulunamadı" :
                                         "Henüz hiç geminiz yok"
                                     }
                                 </h3>
                                 <p className="text-gray-600 text-center mb-4">
-                                    {searchTerm || Object.values(filters).some(f => f) ?
+                                    {searchTerm || Object.values(filters).some(f => f !== 'all' && f !== '') ?
                                         "Farklı arama kriterleri deneyin veya filtreleri temizleyin" :
-                                        "İlk geminizi eklemek için aşağıdaki butona tıklayın"
+                                        "İlk geminizi eklemek için yukarıdaki butona tıklayın"
                                     }
                                 </p>
-                                {!searchTerm && !Object.values(filters).some(f => f) && (
-                                    <Button
-                                        onClick={() => router.push('/dashboard/broker/ships/create')}
-                                        className="bg-blue-600 hover:bg-blue-700"
-                                    >
-                                        <Plus className="h-4 w-4 mr-2" />
-                                        İlk Geminizi Ekleyin
-                                    </Button>
+                                {!searchTerm && !Object.values(filters).some(f => f !== 'all' && f !== '') && (
+                                    <AddShipDialog>
+                                        <Button className="bg-blue-600 hover:bg-blue-700">
+                                            <Plus className="h-4 w-4 mr-2" />
+                                            İlk Geminizi Ekleyin
+                                        </Button>
+                                    </AddShipDialog>
                                 )}
                             </CardContent>
                         </Card>
@@ -432,3 +432,4 @@ export default function ShipPortfolio() {
         </ProtectedRoute>
     );
 }
+
