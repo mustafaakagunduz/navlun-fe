@@ -486,8 +486,6 @@
 
 
   },
-
-
   "newLoad": {
     "title": "Add New Load",
     "description": "Enter load information and start searching for carriers",
@@ -607,6 +605,51 @@
     "cancel": "Cancel",
     "continue": "Continue",
     "required": "Required"
+  },
+  "shipPortfolio": {
+    "title": "Ship Portfolio",
+    "description": "Manage and track your fleet",
+    "addNewShip": "Add New Ship",
+    "addFirstShip": "Add Your First Ship",
+    "searchPlaceholder": "Search ships...",
+    "noShipsFound": "No ships found matching your criteria",
+    "noShipsYet": "You don't have any ships yet",
+    "tryDifferentFilter": "Try different search criteria or clear filters",
+    "createFirstShip": "Click the button below to add your first ship",
+    "shipsShowing": "ships showing",
+    "totalShips": "total",
+    "clearFilters": "Clear Filters",
+    "loading": "Loading ships...",
+    "stats": {
+      "totalShips": "Total Ships",
+      "available": "Available",
+      "ecoFriendly": "Eco-Friendly",
+      "totalDWT": "Total DWT",
+      "averageAge": "Avg. Age",
+      "years": "years"
+    },
+    "filters": {
+      "title": "Search and Filters",
+      "shipType": "Ship Type",
+      "all": "All",
+      "ecoFriendly": "Eco-Friendly",
+      "standard": "Standard",
+      "status": "Status",
+      "available": "Available",
+      "busy": "Busy",
+      "minDWT": "Min DWT",
+      "maxDWT": "Max DWT"
+    },
+    "shipCard": {
+      "imo": "IMO",
+      "available": "Available",
+      "busy": "Busy",
+      "ecoFriendly": "Eco-Friendly",
+      "dwt": "DWT",
+      "nextAvailable": "Available",
+      "viewDetails": "Details",
+      "edit": "Edit"
+    }
   }
 
 

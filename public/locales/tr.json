@@ -500,7 +500,6 @@
       }
     }
   },
-
   "newLoad": {
     "title": "Yeni Yük Ekle",
     "description": "Yük bilgilerini girin ve taşıyıcı aramaya başlayın",
@@ -620,6 +619,51 @@
     "cancel": "İptal",
     "continue": "Devam Et",
     "required": "Zorunlu"
+  },
+  "shipPortfolio": {
+    "title": "Gemi Portföyü",
+    "description": "Gemi filonuzu yönetin ve takip edin",
+    "addNewShip": "Yeni Gemi Ekle",
+    "addFirstShip": "İlk Geminizi Ekleyin",
+    "searchPlaceholder": "Gemi ara...",
+    "noShipsFound": "Arama kriterlerinize uygun gemi bulunamadı",
+    "noShipsYet": "Henüz hiç geminiz yok",
+    "tryDifferentFilter": "Farklı arama kriterleri deneyin veya filtreleri temizleyin",
+    "createFirstShip": "İlk geminizi eklemek için aşağıdaki butona tıklayın",
+    "shipsShowing": "gemi gösteriliyor",
+    "totalShips": "toplam",
+    "clearFilters": "Filtreleri Temizle",
+    "loading": "Gemiler yükleniyor...",
+    "stats": {
+      "totalShips": "Toplam Gemi",
+      "available": "Müsait",
+      "ecoFriendly": "Çevreci",
+      "totalDWT": "Toplam DWT",
+      "averageAge": "Ort. Yaş",
+      "years": "yıl"
+    },
+    "filters": {
+      "title": "Arama ve Filtreler",
+      "shipType": "Gemi Tipi",
+      "all": "Tümü",
+      "ecoFriendly": "Çevreci",
+      "standard": "Standart",
+      "status": "Durum",
+      "available": "Müsait",
+      "busy": "Meşgul",
+      "minDWT": "Min DWT",
+      "maxDWT": "Max DWT"
+    },
+    "shipCard": {
+      "imo": "IMO",
+      "available": "Müsait",
+      "busy": "Meşgul",
+      "ecoFriendly": "Çevreci",
+      "dwt": "DWT",
+      "nextAvailable": "Müsait",
+      "viewDetails": "Detay",
+      "edit": "Düzenle"
+    }
   }
 
 

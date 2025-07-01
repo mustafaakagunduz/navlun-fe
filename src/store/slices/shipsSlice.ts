@@ -75,9 +75,9 @@ const initialState: ShipsState = {
     updateShipError: null,
 
     filters: {
-        shipType: '',
-        ecoFriendly: '',
-        available: '',
+        shipType: 'all',
+        ecoFriendly: 'all',
+        available: 'all',
         port: '',
         minCapacity: '',
         maxCapacity: ''
