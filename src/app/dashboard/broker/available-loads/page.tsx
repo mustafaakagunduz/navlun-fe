@@ -1,0 +1,570 @@
+"use client"
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from "@/context/AuthContext";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+    Search,
+    Filter,
+    MapPin,
+    Package,
+    Calendar,
+    Weight,
+    Truck,
+    DollarSign,
+    Clock,
+    Shield,
+    Leaf,
+    Eye,
+    HandshakeIcon,
+    SlidersHorizontal,
+    RefreshCcw,
+    TrendingUp,
+    Building2,
+    Route,
+    AlertCircle
+} from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
+import { Load, LoadStatus } from "@/services/loadService";
+import { useAppDispatch, useAppSelector } from '@/hooks/redux';
+import {
+    fetchAvailableLoadsForBroker,
+    setSearchQuery,
+    setGoodsTypeFilter,
+    setInsuranceFilter,
+    setEcoFriendlyFilter,
+    setSortBy,
+    setSortDirection,
+    setAvailableLoadsPage,
+    resetFilters,
+    clearAvailableLoadsError
+} from '@/store/slices/brokerSlice';
+
+export default function BrokerAvailableLoads() {
+    const { user, isAuthenticated, isLoading } = useAuth();
+    const router = useRouter();
+    const { t } = useLanguage();
+    const dispatch = useAppDispatch();
+
+    // Redux state
+    const {
+        availableLoads,
+        availableLoadsLoading,
+        availableLoadsError,
+        availableLoadsPage,
+        availableLoadsTotalPages,
+        availableLoadsTotalElements,
+        filters
+    } = useAppSelector(state => state.broker);
+
+    // Local state
+    const [showFilters, setShowFilters] = useState(false);
+    const [selectedLoad, setSelectedLoad] = useState<Load | null>(null);
+    const pageSize = 12;
+
+    // Redirect non-broker users
+    useEffect(() => {
+        if (!isLoading && (!isAuthenticated || user?.role !== 'BROKER')) {
+            router.push('/dashboard');
+        }
+    }, [isLoading, isAuthenticated, user, router]);
+
+    // Fetch available loads on mount and page change
+    useEffect(() => {
+        if (isAuthenticated && user?.role === 'BROKER') {
+            dispatch(fetchAvailableLoadsForBroker({ page: availableLoadsPage, size: pageSize }));
+        }
+    }, [dispatch, availableLoadsPage, isAuthenticated, user]);
+
+    // Clear errors on unmount
+    useEffect(() => {
+        return () => {
+            dispatch(clearAvailableLoadsError());
+        };
+    }, [dispatch]);
+
+    // Filter and search logic
+    const filteredLoads = availableLoads.filter((load) => {
+        const matchesSearch = filters.searchQuery === '' ||
+            load.goodsType.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
+            load.loadingAddress.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
+            load.deliveryAddress.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
+            load.sender?.companyName?.toLowerCase().includes(filters.searchQuery.toLowerCase());
+
+        const matchesGoodsType = filters.goodsType === '' || load.goodsType === filters.goodsType;
+        const matchesInsurance = filters.insurance === '' ||
+            (filters.insurance === 'true' && load.insuranceRequested) ||
+            (filters.insurance === 'false' && !load.insuranceRequested);
+        const matchesEcoFriendly = filters.ecoFriendly === '' ||
+            (filters.ecoFriendly === 'true' && load.ecoTransportRequested) ||
+            (filters.ecoFriendly === 'false' && !load.ecoTransportRequested);
+
+        return matchesSearch && matchesGoodsType && matchesInsurance && matchesEcoFriendly;
+    });
+
+    // Sort loads
+    const sortedLoads = [...filteredLoads].sort((a, b) => {
+        let aValue: any, bValue: any;
+
+        switch (filters.sortBy) {
+            case 'createdAt':
+                aValue = new Date(a.createdAt);
+                bValue = new Date(b.createdAt);
+                break;
+            case 'loadingDate':
+                aValue = new Date(a.loadingDate);
+                bValue = new Date(b.loadingDate);
+                break;
+            case 'netWeight':
+                aValue = a.netWeight;
+                bValue = b.netWeight;
+                break;
+            case 'estimatedPrice':
+                aValue = a.estimatedPrice;
+                bValue = b.estimatedPrice;
+                break;
+            default:
+                return 0;
+        }
+
+        if (filters.sortDirection === 'asc') {
+            return aValue > bValue ? 1 : -1;
+        } else {
+            return aValue < bValue ? 1 : -1;
+        }
+    });
+
+    // Get unique goods types for filter
+    const uniqueGoodsTypes = Array.from(new Set(availableLoads.map(load => load.goodsType)));
+
+    // Event handlers
+    const handleRefresh = () => {
+        dispatch(fetchAvailableLoadsForBroker({ page: availableLoadsPage, size: pageSize }));
+    };
+
+    const handleSearchChange = (value: string) => {
+        dispatch(setSearchQuery(value));
+    };
+
+    const handleGoodsTypeChange = (value: string) => {
+        dispatch(setGoodsTypeFilter(value));
+    };
+
+    const handleInsuranceChange = (value: string) => {
+        dispatch(setInsuranceFilter(value));
+    };
+
+    const handleEcoFriendlyChange = (value: string) => {
+        dispatch(setEcoFriendlyFilter(value));
+    };
+
+    const handleSortChange = (value: string) => {
+        const [field, direction] = value.split('-');
+        dispatch(setSortBy(field));
+        dispatch(setSortDirection(direction as 'asc' | 'desc'));
+    };
+
+    const handlePageChange = (newPage: number) => {
+        dispatch(setAvailableLoadsPage(newPage));
+    };
+
+    const handleResetFilters = () => {
+        dispatch(resetFilters());
+    };
+
+    // Format functions
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleDateString('tr-TR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+    };
+
+    const formatPrice = (price: number) => {
+        return new Intl.NumberFormat('tr-TR', {
+            style: 'currency',
+            currency: 'TRY'
+        }).format(price);
+    };
+
+    const getStatusBadgeColor = (status: LoadStatus) => {
+        switch (status) {
+            case 'PENDING':
+                return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+            case 'ACTIVE':
+                return 'bg-blue-100 text-blue-800 border-blue-300';
+            case 'COMPLETED':
+                return 'bg-green-100 text-green-800 border-green-300';
+            case 'CANCELLED':
+                return 'bg-red-100 text-red-800 border-red-300';
+            default:
+                return 'bg-gray-100 text-gray-800 border-gray-300';
+        }
+    };
+
+    const getStatusText = (status: LoadStatus) => {
+        switch (status) {
+            case 'PENDING':
+                return 'Beklemede';
+            case 'ACTIVE':
+                return 'Aktif';
+            case 'COMPLETED':
+                return 'Tamamlandı';
+            case 'CANCELLED':
+                return 'İptal Edildi';
+            default:
+                return status;
+        }
+    };
+
+    const handleOfferClick = (load: Load) => {
+        setSelectedLoad(load);
+        router.push(`/dashboard/broker/offers/create?loadId=${load.id}`);
+    };
+
+    const handleViewDetails = (load: Load) => {
+        setSelectedLoad(load);
+        router.push(`/dashboard/broker/loads/${load.id}`);
+    };
+
+    if (isLoading || availableLoadsLoading) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <div className="text-center">
+                    <RefreshCcw className="h-8 w-8 animate-spin mx-auto mb-4" />
+                    <p>Yükler yükleniyor...</p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <ProtectedRoute allowedRoles={['BROKER']}>
+            <div className="container mx-auto p-6 space-y-6">
+                {/* Header */}
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900">Açık Yük Talepleri</h1>
+                        <p className="text-gray-600 mt-1">
+                            Teklif verebileceğiniz açık yükleri görüntüleyin ve değerlendirin
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                            <Package className="h-4 w-4 mr-1" />
+                            {availableLoadsTotalElements} yük
+                        </Badge>
+                        <Button
+                            onClick={handleRefresh}
+                            variant="outline"
+                            size="sm"
+                            className="flex items-center gap-2"
+                        >
+                            <RefreshCcw className="h-4 w-4" />
+                            Yenile
+                        </Button>
+                    </div>
+                </div>
+
+                {/* Search and Filter Bar */}
+                <Card>
+                    <CardContent className="p-4">
+                        <div className="flex flex-col lg:flex-row gap-4">
+                            {/* Search */}
+                            <div className="flex-1">
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                    <Input
+                                        placeholder="Mal türü, şirket adı, konum ile arama yapın..."
+                                        value={filters.searchQuery}
+                                        onChange={(e) => handleSearchChange(e.target.value)}
+                                        className="pl-10"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Filter Toggle */}
+                            <Button
+                                variant="outline"
+                                onClick={() => setShowFilters(!showFilters)}
+                                className="flex items-center gap-2"
+                            >
+                                <SlidersHorizontal className="h-4 w-4" />
+                                Filtreler
+                                {(filters.goodsType || filters.insurance || filters.ecoFriendly) && (
+                                    <Badge variant="secondary" className="ml-1">
+                                        {[filters.goodsType, filters.insurance, filters.ecoFriendly].filter(Boolean).length}
+                                    </Badge>
+                                )}
+                            </Button>
+                        </div>
+
+                        {/* Advanced Filters */}
+                        {showFilters && (
+                            <div className="mt-4 pt-4 border-t grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Mal Türü
+                                    </label>
+                                    <Select value={filters.goodsType} onValueChange={handleGoodsTypeChange}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Tüm türler" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="">Tüm türler</SelectItem>
+                                            {uniqueGoodsTypes.map((type) => (
+                                                <SelectItem key={type} value={type}>
+                                                    {type}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Sigorta Durumu
+                                    </label>
+                                    <Select value={filters.insurance} onValueChange={handleInsuranceChange}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Tümü" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="">Tümü</SelectItem>
+                                            <SelectItem value="true">Sigortalı</SelectItem>
+                                            <SelectItem value="false">Sigortasız</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Çevreci Taşıma
+                                    </label>
+                                    <Select value={filters.ecoFriendly} onValueChange={handleEcoFriendlyChange}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Tümü" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="">Tümü</SelectItem>
+                                            <SelectItem value="true">Çevreci talep edilen</SelectItem>
+                                            <SelectItem value="false">Standart</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Sıralama
+                                    </label>
+                                    <Select value={`${filters.sortBy}-${filters.sortDirection}`}
+                                            onValueChange={handleSortChange}>
+                                        <SelectTrigger>
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="createdAt-desc">En yeni</SelectItem>
+                                            <SelectItem value="createdAt-asc">En eski</SelectItem>
+                                            <SelectItem value="loadingDate-asc">Yükleme tarihi (yakın)</SelectItem>
+                                            <SelectItem value="loadingDate-desc">Yükleme tarihi (uzak)</SelectItem>
+                                            <SelectItem value="estimatedPrice-desc">Fiyat (yüksek)</SelectItem>
+                                            <SelectItem value="estimatedPrice-asc">Fiyat (düşük)</SelectItem>
+                                            <SelectItem value="netWeight-desc">Ağırlık (ağır)</SelectItem>
+                                            <SelectItem value="netWeight-asc">Ağırlık (hafif)</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {/* Error State */}
+                {availableLoadsError && (
+                    <Card className="border-red-200 bg-red-50">
+                        <CardContent className="p-4">
+                            <div className="flex items-center gap-2 text-red-800">
+                                <AlertCircle className="h-4 w-4" />
+                                <span>{availableLoadsError}</span>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Loads Grid */}
+                {sortedLoads.length === 0 ? (
+                    <Card>
+                        <CardContent className="p-8 text-center">
+                            <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">
+                                Henüz açık yük bulunamadı
+                            </h3>
+                            <p className="text-gray-600">
+                                Filtreleri değiştirerek farklı yükler arayabilirsiniz.
+                            </p>
+                        </CardContent>
+                    </Card>
+                ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                        {sortedLoads.map((load) => (
+                            <Card key={load.id} className="hover:shadow-lg transition-shadow border-l-4 border-l-amber-500">
+                                <CardHeader className="pb-3">
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex-1">
+                                            <CardTitle className="text-lg font-semibold text-gray-900 mb-1">
+                                                {load.goodsType}
+                                            </CardTitle>
+                                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                <Building2 className="h-4 w-4" />
+                                                {load.sender?.companyName || 'Şirket bilgisi yok'}
+                                            </div>
+                                        </div>
+                                        <Badge className={`${getStatusBadgeColor(load.status)} border`}>
+                                            {getStatusText(load.status)}
+                                        </Badge>
+                                    </div>
+                                </CardHeader>
+
+                                <CardContent className="space-y-4">
+                                    {/* Route */}
+                                    <div className="flex items-start gap-3">
+                                        <Route className="h-4 w-4 text-gray-400 mt-0.5" />
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 text-sm">
+                                                <span className="font-medium text-green-600">
+                                                    {load.loadingAddress?.split(',')[0] || 'Yükleme yeri'}
+                                                </span>
+                                                <span className="text-gray-400">→</span>
+                                                <span className="font-medium text-red-600">
+                                                    {load.deliveryAddress?.split(',')[0] || 'Teslimat yeri'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Load Details */}
+                                    <div className="grid grid-cols-2 gap-4 text-sm">
+                                        <div className="flex items-center gap-2">
+                                            <Weight className="h-4 w-4 text-gray-400" />
+                                            <span className="text-gray-600">
+                                                {load.netWeight?.toLocaleString()} kg
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <Calendar className="h-4 w-4 text-gray-400" />
+                                            <span className="text-gray-600">
+                                                {formatDate(load.loadingDate)}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Features */}
+                                    <div className="flex flex-wrap gap-2">
+                                        {load.insuranceRequested && (
+                                            <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200">
+                                                <Shield className="h-3 w-3 mr-1" />
+                                                Sigortalı
+                                            </Badge>
+                                        )}
+                                        {load.ecoTransportRequested && (
+                                            <Badge variant="secondary" className="bg-green-50 text-green-700 border-green-200">
+                                                <Leaf className="h-3 w-3 mr-1" />
+                                                Çevreci
+                                            </Badge>
+                                        )}
+                                    </div>
+
+                                    {/* Price */}
+                                    {load.estimatedPrice && (
+                                        <div className="flex items-center justify-between pt-2 border-t">
+                                            <span className="text-sm text-gray-600">Tahmini Fiyat:</span>
+                                            <span className="font-semibold text-lg text-amber-600">
+                                                {formatPrice(load.estimatedPrice)}
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {/* Action Buttons */}
+                                    <div className="flex gap-2 pt-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => handleViewDetails(load)}
+                                            className="flex-1"
+                                        >
+                                            <Eye className="h-4 w-4 mr-1" />
+                                            Detay
+                                        </Button>
+                                        <Button
+                                            onClick={() => handleOfferClick(load)}
+                                            size="sm"
+                                            className="flex-1 bg-amber-600 hover:bg-amber-700"
+                                        >
+                                            <HandshakeIcon className="h-4 w-4 mr-1" />
+                                            Teklif Ver
+                                        </Button>
+                                    </div>
+
+                                    {/* Time indicator */}
+                                    <div className="flex items-center justify-center pt-2 text-xs text-gray-500">
+                                        <Clock className="h-3 w-3 mr-1" />
+                                        {Math.ceil((new Date(load.loadingDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} gün kaldı
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                )}
+
+                {/* Pagination */}
+                {availableLoadsTotalPages > 1 && (
+                    <div className="flex items-center justify-center gap-2 pt-6">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePageChange(Math.max(0, availableLoadsPage - 1))}
+                            disabled={availableLoadsPage === 0}
+                        >
+                            Önceki
+                        </Button>
+
+                        <div className="flex items-center gap-1">
+                            {Array.from({ length: Math.min(5, availableLoadsTotalPages) }, (_, i) => {
+                                const pageNum = availableLoadsPage <= 2 ? i : availableLoadsPage - 2 + i;
+                                if (pageNum >= availableLoadsTotalPages) return null;
+
+                                return (
+                                    <Button
+                                        key={pageNum}
+                                        variant={pageNum === availableLoadsPage ? "default" : "outline"}
+                                        size="sm"
+                                        onClick={() => handlePageChange(pageNum)}
+                                        className={pageNum === availableLoadsPage ? "bg-amber-600 hover:bg-amber-700" : ""}
+                                    >
+                                        {pageNum + 1}
+                                    </Button>
+                                );
+                            })}
+                        </div>
+
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePageChange(Math.min(availableLoadsTotalPages - 1, availableLoadsPage + 1))}
+                            disabled={availableLoadsPage >= availableLoadsTotalPages - 1}
+                        >
+                            Sonraki
+                        </Button>
+                    </div>
+                )}
+            </div>
+        </ProtectedRoute>
+    );
+}

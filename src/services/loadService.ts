@@ -6,28 +6,36 @@ export enum LoadStatus {
     ASSIGNED = 'ASSIGNED',
     IN_TRANSIT = 'IN_TRANSIT',
     DELIVERED = 'DELIVERED',
-    COMPLETED = 'COMPLETED'
+    COMPLETED = 'COMPLETED',
+    CANCELLED = 'CANCELLED',
+    ACTIVE = 'ACTIVE',
 }
 
 // Tip tanımlamaları
 export type Load = {
     id: string;
     title: string;
+    estimatedCarbonFootprint : number
+    sender?: {
+        id: string;
+        companyName: string;
+        contactPerson: string;
+    };
     goodsType: string;
+    description?: string;
     netWeight: number;
+    grossWeight: number;
+    isCompleted: boolean;
     loadingAddress: string;
     deliveryAddress: string;
     loadingDate: string;
     deliveryDate: string;
-    selectedInsurancePolicy?: string;
-    insurancePolicyDetails?: string;
-    description?: string;
-    insuranceRequested: boolean;
-    estimatedCarbonFootprint: number;
+    estimatedPrice?: number;
     status: LoadStatus;
-    isCompleted: boolean;
-    senderId: string;
-    createdAt?: string;
+    insuranceRequested: boolean;
+    ecoTransportRequested?: boolean; // Bu satırı ekle
+    active: boolean;
+    createdAt: string;
     updatedAt?: string;
 };
 
@@ -193,6 +201,8 @@ const loadService = {
             throw error;
         }
     },
+
+
 
     // Sayfalandırılmış yükleri getirir
     getAllLoadsPaginated: async (
@@ -638,7 +648,80 @@ const loadService = {
             priceComparison: comparison.ecoAdvantage,
             environmentalBenefit: comparison.carbonSavingsEstimate
         };
-    }
+    },
+
+    // Broker için açık yükleri getir (sayfalandırılmış)
+    getOpenLoadsForBrokersPaginated: async (
+        page: number = 0,
+        size: number = 20
+    ): Promise<PageResponse<Load>> => {
+        try {
+            return await apiService.get<PageResponse<Load>>('/loads/broker/open-loads/paginated', { page, size });
+        } catch (error) {
+            console.error('Get open loads for brokers paginated error:', error);
+            throw error;
+        }
+    },
+
+// Broker için açık yükleri getir (liste)
+    getOpenLoadsForBrokers: async (): Promise<Load[]> => {
+        try {
+            return await apiService.get<Load[]>('/loads/broker/open-loads');
+        } catch (error) {
+            console.error('Get open loads for brokers error:', error);
+            throw error;
+        }
+    },
+
+// Mal türüne göre yükleri getir
+    getLoadsByGoodsType: async (goodsType: string): Promise<Load[]> => {
+        try {
+            return await apiService.get<Load[]>('/loads/broker/by-goods-type', { goodsType });
+        } catch (error) {
+            console.error(`Get loads by goods type (${goodsType}) error:`, error);
+            throw error;
+        }
+    },
+
+// Ağırlık aralığına göre yükleri getir
+    getLoadsByWeightRange: async (minWeight: number, maxWeight: number): Promise<Load[]> => {
+        try {
+            return await apiService.get<Load[]>('/loads/broker/by-weight-range', { minWeight, maxWeight });
+        } catch (error) {
+            console.error(`Get loads by weight range (${minWeight}-${maxWeight}) error:`, error);
+            throw error;
+        }
+    },
+
+// Rota'ya göre yükleri getir
+    getLoadsByRoute: async (loadingCity: string, deliveryCity: string): Promise<Load[]> => {
+        try {
+            return await apiService.get<Load[]>('/loads/broker/by-route', { loadingCity, deliveryCity });
+        } catch (error) {
+            console.error(`Get loads by route (${loadingCity}-${deliveryCity}) error:`, error);
+            throw error;
+        }
+    },
+
+// Sigortalı yükleri getir
+    getLoadsWithInsurance: async (): Promise<Load[]> => {
+        try {
+            return await apiService.get<Load[]>('/loads/broker/with-insurance');
+        } catch (error) {
+            console.error('Get loads with insurance error:', error);
+            throw error;
+        }
+    },
+
+// Çevreci taşıma talep eden yükleri getir
+    getLoadsRequestingEcoTransport: async (): Promise<Load[]> => {
+        try {
+            return await apiService.get<Load[]>('/loads/broker/eco-transport');
+        } catch (error) {
+            console.error('Get loads requesting eco transport error:', error);
+            throw error;
+        }
+    },
 
 
 };

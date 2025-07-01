@@ -19,6 +19,66 @@ export type BrokerProfile = {
     updatedAt?: string;
 };
 
+export enum OfferStatus {
+    PENDING = 'PENDING',
+    ACCEPTED = 'ACCEPTED',
+    REJECTED = 'REJECTED',
+    CANCELLED = 'CANCELLED'
+}
+
+export interface BrokerOfferResponse {
+    id: string;
+    loadId: string;
+    loadTitle?: string;
+    loadGoodsType?: string;
+    loadWeight?: number;
+    brokerProfileId: string;
+    brokerName?: string;
+    brokerEcoFriendlyCertified?: boolean;
+    shipId: string;
+    shipName?: string;
+    shipType?: string;
+    shipDeadweightTonnage?: number;
+    shipEcoFriendly?: boolean;
+    shipImoNumber?: string;
+    freightRate: number;
+    demurrageRate?: number;
+    despatchRate?: number;
+    estimatedLoadingDate: string;
+    estimatedDeliveryDate: string;
+    terms?: string;
+    notes?: string;
+    status: OfferStatus;
+    insuranceAccepted: boolean;
+    ecoFriendly: boolean;
+    commissionRate: number;
+    commissionAmount?: number;
+    totalAmount?: number;
+    validUntil: string;
+    validOffer?: boolean;
+    acceptedAt?: string;
+    rejectedAt?: string;
+    createdAt: string;
+    updatedAt?: string;
+}
+
+export interface BrokerOfferRequest {
+    loadId: string;
+    brokerProfileId: string;
+    shipId: string;
+    freightRate: number;
+    demurrageRate?: number;
+    despatchRate?: number;
+    estimatedLoadingDate: string;
+    estimatedDeliveryDate: string;
+    terms?: string;
+    notes?: string;
+    insuranceAccepted: boolean;
+    ecoFriendly: boolean;
+    commissionRate: number;
+    validUntil: string;
+}
+
 export type BrokerProfileRequest = {
     userId: string;
     company: boolean;
@@ -400,7 +460,60 @@ const brokerService = {
             console.error(`Get top senders (limit: ${limit}) error:`, error);
             throw error;
         }
-    }
+    },
+
+    // Broker offers için gerekli metodlar:
+    getOffersByBrokerPaginated: async (
+        brokerProfileId: string,
+        page: number = 0,
+        size: number = 20
+    ): Promise<PageResponse<BrokerOfferResponse>> => {
+        try {
+            return await apiService.get<PageResponse<BrokerOfferResponse>>(`/broker-offers/broker/${brokerProfileId}/paginated`, { page, size });
+        } catch (error) {
+            console.error(`Get paginated offers by broker (${brokerProfileId}) error:`, error);
+            throw error;
+        }
+    },
+
+    getOffersByBrokerAndStatus: async (brokerProfileId: string, status: OfferStatus): Promise<BrokerOfferResponse[]> => {
+        try {
+            return await apiService.get<BrokerOfferResponse[]>(`/broker-offers/broker/${brokerProfileId}/status`, { status });
+        } catch (error) {
+            console.error(`Get offers by broker and status error:`, error);
+            throw error;
+        }
+    },
+
+    // Broker Offer işlemleri
+    createBrokerOffer: async (offerData: BrokerOfferRequest): Promise<BrokerOfferResponse> => {
+        try {
+            return await apiService.post<BrokerOfferResponse, BrokerOfferRequest>('/broker-offers', offerData);
+        } catch (error) {
+            console.error('Create broker offer error:', error);
+            throw error;
+        }
+    },
+
+// Broker'ın tekliflerini getir
+    getOffersByBroker: async (brokerProfileId: string): Promise<BrokerOfferResponse[]> => {
+        try {
+            return await apiService.get<BrokerOfferResponse[]>(`/broker-offers/broker/${brokerProfileId}`);
+        } catch (error) {
+            console.error(`Get offers by broker (${brokerProfileId}) error:`, error);
+            throw error;
+        }
+    },
+
+// Teklif detayını getir
+    getBrokerOfferById: async (offerId: string): Promise<BrokerOfferResponse> => {
+        try {
+            return await apiService.get<BrokerOfferResponse>(`/broker-offers/${offerId}`);
+        } catch (error) {
+            console.error(`Get broker offer by ID (${offerId}) error:`, error);
+            throw error;
+        }
+    },
 };
 
 export default brokerService;

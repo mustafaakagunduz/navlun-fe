@@ -15,7 +15,7 @@ import {
     FileText,
     DollarSign,
     HandshakeIcon,
-    Leaf, MapPin
+    Leaf, MapPin, MessageSquare
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
@@ -90,7 +90,9 @@ export default function Sidebar() {
     const brokerMenuItems = [
         { href: "/dashboard", label: t("dashboard.sidebar.home"), icon: Home },
         { href: "/dashboard/broker/available-loads", label: t("dashboard.sidebar.availableLoads"), icon: Package },
-        { href: "/dashboard/broker/deals", label: t("dashboard.sidebar.deals"), icon: HandshakeIcon },
+        { href: "/dashboard/broker/offers", label: t("dashboard.sidebar.offers"), icon: HandshakeIcon },
+        { href: "/dashboard/broker/messages", label: t("dashboard.sidebar.messages"), icon: MessageSquare },
+        { href: "/dashboard/broker/ship-portfolio", label: t("dashboard.sidebar.shipPortfolio"), icon: Truck },
         { href: "/dashboard/broker/commissions", label: t("dashboard.sidebar.commissions"), icon: DollarSign },
         { href: "/dashboard/broker/broker-profile", label: t("dashboard.sidebar.profile"), icon: Users },
     ];
