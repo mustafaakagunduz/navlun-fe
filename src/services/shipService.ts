@@ -32,7 +32,7 @@ export interface ShipRequest {
     brokerProfileId: string;
     name: string;
     shipType: string;
-    imoNumber: string;
+    imoNumber?: string;
     deadweightTonnage: number;
     grossTonnage: number;
     lengthOverall: number;
@@ -40,9 +40,9 @@ export interface ShipRequest {
     draught: number;
     buildYear: number;
     flag: string;
-    classificationSociety: string;
+    classificationSociety?: string;
     currentPort: string;
-    nextAvailableDate: string;
+    nextAvailableDate?: string;
     ecoFriendly: boolean;
 }
 

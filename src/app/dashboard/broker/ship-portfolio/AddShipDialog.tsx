@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Plus, AlertCircle, Leaf } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Loader2, Plus, AlertCircle, Leaf, Ship, Building2, Shield, Calendar } from "lucide-react";
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { createShip, clearCreateShipError } from '@/store/slices/shipsSlice';
 import { ShipRequest } from '@/services/shipService';
@@ -17,37 +18,67 @@ interface AddShipDialogProps {
 }
 
 interface ShipFormData {
+    // Temel Bilgiler (Zorunlu)
     name: string;
     shipType: string;
-    imoNumber: string;
+    flag: string;
+    currentPort: string;
     deadweightTonnage: string;
     grossTonnage: string;
+
+    // Opsiyonel Bilgiler
+    imoNumber: string;
+    buildYear: string;
+    builder: string;
+    classificationSociety: string;
+
+    // Boyutlar (Opsiyonel)
     lengthOverall: string;
     beam: string;
     draught: string;
-    buildYear: string;
-    flag: string;
-    classificationSociety: string;
-    currentPort: string;
-    nextAvailableDate: string;
+    maxSpeed: string;
+
+    // Çevreci Bilgileri
     ecoFriendly: boolean;
+    ecoClassification: string;
+    ecoValidUntil: string;
+
+    // Sigorta ve Sertifikalar
+    insuranceProvider: string;
+    insuranceValidUntil: string;
+    classValidUntil: string;
+
+    // Operasyonel
+    nextAvailableDate: string;
+    notes: string;
 }
 
 const initialFormData: ShipFormData = {
+    // Zorunlu
     name: '',
     shipType: '',
-    imoNumber: '',
+    flag: '',
+    currentPort: '',
     deadweightTonnage: '',
     grossTonnage: '',
+
+    // Opsiyonel
+    imoNumber: '',
+    buildYear: '',
+    builder: '',
+    classificationSociety: '',
     lengthOverall: '',
     beam: '',
     draught: '',
-    buildYear: '',
-    flag: '',
-    classificationSociety: '',
-    currentPort: '',
+    maxSpeed: '',
+    ecoFriendly: false,
+    ecoClassification: '',
+    ecoValidUntil: '',
+    insuranceProvider: '',
+    insuranceValidUntil: '',
+    classValidUntil: '',
     nextAvailableDate: '',
-    ecoFriendly: false
+    notes: ''
 };
 
 export default function AddShipDialog({ children }: AddShipDialogProps) {
@@ -76,10 +107,10 @@ export default function AddShipDialog({ children }: AddShipDialogProps) {
     const isFormValid = () => {
         return formData.name.trim() !== '' &&
             formData.shipType.trim() !== '' &&
-            formData.deadweightTonnage.trim() !== '' &&
-            formData.grossTonnage.trim() !== '' &&
+            formData.flag.trim() !== '' &&
             formData.currentPort.trim() !== '' &&
-            formData.flag.trim() !== '';
+            formData.deadweightTonnage.trim() !== '' &&
+            formData.grossTonnage.trim() !== '';
     };
 
     const handleCreateShip = async () => {
@@ -89,7 +120,7 @@ export default function AddShipDialog({ children }: AddShipDialogProps) {
             brokerProfileId: profile.id,
             name: formData.name,
             shipType: formData.shipType,
-            imoNumber: formData.imoNumber,
+            imoNumber: formData.imoNumber || undefined,
             deadweightTonnage: Number(formData.deadweightTonnage),
             grossTonnage: Number(formData.grossTonnage),
             lengthOverall: Number(formData.lengthOverall) || 0,
@@ -97,9 +128,9 @@ export default function AddShipDialog({ children }: AddShipDialogProps) {
             draught: Number(formData.draught) || 0,
             buildYear: Number(formData.buildYear) || new Date().getFullYear(),
             flag: formData.flag,
-            classificationSociety: formData.classificationSociety,
+            classificationSociety: formData.classificationSociety || undefined,
             currentPort: formData.currentPort,
-            nextAvailableDate: formData.nextAvailableDate,
+            nextAvailableDate: formData.nextAvailableDate || undefined,
             ecoFriendly: formData.ecoFriendly
         };
 
@@ -117,12 +148,18 @@ export default function AddShipDialog({ children }: AddShipDialogProps) {
             <DialogTrigger asChild>
                 {children}
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>Yeni Gemi Ekle</DialogTitle>
+                    <DialogTitle className="flex items-center gap-2">
+                        <Ship className="h-5 w-5" />
+                        Yeni Gemi Ekle
+                    </DialogTitle>
+                    <p className="text-sm text-gray-600">
+                        <span className="text-red-500">*</span> ile işaretli alanlar zorunludur
+                    </p>
                 </DialogHeader>
 
-                <div className="space-y-4">
+                <div className="space-y-6">
                     {/* Error Message */}
                     {createShipError && (
                         <div className="p-3 bg-red-50 border border-red-200 rounded-md">
@@ -133,181 +170,390 @@ export default function AddShipDialog({ children }: AddShipDialogProps) {
                         </div>
                     )}
 
-                    {/* Basic Information */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <Label htmlFor="name">Gemi Adı *</Label>
-                            <Input
-                                id="name"
-                                value={formData.name}
-                                onChange={(e) => handleFormChange('name', e.target.value)}
-                                placeholder="Gemi adını girin"
-                            />
-                        </div>
+                    {/* Temel Bilgiler */}
+                    <div className="space-y-4">
+                        <h3 className="text-lg font-medium flex items-center gap-2">
+                            <Ship className="h-4 w-4" />
+                            Temel Bilgiler
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <Label htmlFor="name" className="text-sm font-medium">
+                                    Gemi Adı <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    id="name"
+                                    value={formData.name}
+                                    onChange={(e) => handleFormChange('name', e.target.value)}
+                                    placeholder="MV ISTANBUL"
+                                    className="mt-1"
+                                />
+                            </div>
 
-                        <div>
-                            <Label htmlFor="shipType">Gemi Tipi *</Label>
-                            <Select
-                                value={formData.shipType}
-                                onValueChange={(value) => handleFormChange('shipType', value)}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Gemi tipi seçin" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Bulk Carrier">Bulk Carrier</SelectItem>
-                                    <SelectItem value="Container Ship">Container Ship</SelectItem>
-                                    <SelectItem value="General Cargo">General Cargo</SelectItem>
-                                    <SelectItem value="Tanker">Tanker</SelectItem>
-                                    <SelectItem value="RoRo">RoRo</SelectItem>
-                                    <SelectItem value="Ferry">Ferry</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
+                            <div>
+                                <Label htmlFor="shipType" className="text-sm font-medium">
+                                    Gemi Tipi <span className="text-red-500">*</span>
+                                </Label>
+                                <Select
+                                    value={formData.shipType}
+                                    onValueChange={(value) => handleFormChange('shipType', value)}
+                                >
+                                    <SelectTrigger className="mt-1">
+                                        <SelectValue placeholder="Gemi tipi seçin" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Bulk Carrier">Bulk Carrier</SelectItem>
+                                        <SelectItem value="Container Ship">Container Ship</SelectItem>
+                                        <SelectItem value="General Cargo">General Cargo</SelectItem>
+                                        <SelectItem value="Tanker">Tanker</SelectItem>
+                                        <SelectItem value="RoRo">RoRo</SelectItem>
+                                        <SelectItem value="Ferry">Ferry</SelectItem>
+                                        <SelectItem value="Crude Oil Tanker">Crude Oil Tanker</SelectItem>
+                                        <SelectItem value="Chemical Tanker">Chemical Tanker</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
 
-                        <div>
-                            <Label htmlFor="imoNumber">IMO Numarası</Label>
-                            <Input
-                                id="imoNumber"
-                                value={formData.imoNumber}
-                                onChange={(e) => handleFormChange('imoNumber', e.target.value)}
-                                placeholder="IMO numarasını girin"
-                            />
-                        </div>
+                            <div>
+                                <Label htmlFor="flag" className="text-sm font-medium">
+                                    Bayrak Ülkesi <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    id="flag"
+                                    value={formData.flag}
+                                    onChange={(e) => handleFormChange('flag', e.target.value)}
+                                    placeholder="Turkey"
+                                    className="mt-1"
+                                />
+                            </div>
 
-                        <div>
-                            <Label htmlFor="flag">Bayrak *</Label>
-                            <Input
-                                id="flag"
-                                value={formData.flag}
-                                onChange={(e) => handleFormChange('flag', e.target.value)}
-                                placeholder="Bayrak ülkesi"
-                            />
-                        </div>
-                    </div>
+                            <div>
+                                <Label htmlFor="currentPort" className="text-sm font-medium">
+                                    Mevcut Liman <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    id="currentPort"
+                                    value={formData.currentPort}
+                                    onChange={(e) => handleFormChange('currentPort', e.target.value)}
+                                    placeholder="İstanbul Port"
+                                    className="mt-1"
+                                />
+                            </div>
 
-                    {/* Technical Specifications */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <Label htmlFor="deadweightTonnage">DWT (ton) *</Label>
-                            <Input
-                                id="deadweightTonnage"
-                                type="number"
-                                value={formData.deadweightTonnage}
-                                onChange={(e) => handleFormChange('deadweightTonnage', e.target.value)}
-                                placeholder="0"
-                            />
-                        </div>
+                            <div>
+                                <Label htmlFor="imoNumber" className="text-sm font-medium">
+                                    IMO Numarası
+                                </Label>
+                                <Input
+                                    id="imoNumber"
+                                    value={formData.imoNumber}
+                                    onChange={(e) => handleFormChange('imoNumber', e.target.value)}
+                                    placeholder="IMO1234567"
+                                    className="mt-1"
+                                />
+                            </div>
 
-                        <div>
-                            <Label htmlFor="grossTonnage">GT (ton) *</Label>
-                            <Input
-                                id="grossTonnage"
-                                type="number"
-                                value={formData.grossTonnage}
-                                onChange={(e) => handleFormChange('grossTonnage', e.target.value)}
-                                placeholder="0"
-                            />
-                        </div>
-
-                        <div>
-                            <Label htmlFor="buildYear">İnşa Yılı</Label>
-                            <Input
-                                id="buildYear"
-                                type="number"
-                                value={formData.buildYear}
-                                onChange={(e) => handleFormChange('buildYear', e.target.value)}
-                                placeholder="2020"
-                                min="1900"
-                                max="2030"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Dimensions */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <Label htmlFor="lengthOverall">Uzunluk (m)</Label>
-                            <Input
-                                id="lengthOverall"
-                                type="number"
-                                step="0.1"
-                                value={formData.lengthOverall}
-                                onChange={(e) => handleFormChange('lengthOverall', e.target.value)}
-                                placeholder="0.0"
-                            />
-                        </div>
-
-                        <div>
-                            <Label htmlFor="beam">Genişlik (m)</Label>
-                            <Input
-                                id="beam"
-                                type="number"
-                                step="0.1"
-                                value={formData.beam}
-                                onChange={(e) => handleFormChange('beam', e.target.value)}
-                                placeholder="0.0"
-                            />
-                        </div>
-
-                        <div>
-                            <Label htmlFor="draught">Draft (m)</Label>
-                            <Input
-                                id="draught"
-                                type="number"
-                                step="0.1"
-                                value={formData.draught}
-                                onChange={(e) => handleFormChange('draught', e.target.value)}
-                                placeholder="0.0"
-                            />
+                            <div>
+                                <Label htmlFor="buildYear" className="text-sm font-medium">
+                                    İnşa Yılı
+                                </Label>
+                                <Input
+                                    id="buildYear"
+                                    type="number"
+                                    value={formData.buildYear}
+                                    onChange={(e) => handleFormChange('buildYear', e.target.value)}
+                                    placeholder="2020"
+                                    min="1900"
+                                    max="2030"
+                                    className="mt-1"
+                                />
+                            </div>
                         </div>
                     </div>
 
-                    {/* Classification and Port */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <Label htmlFor="classificationSociety">Klasifikasyon</Label>
-                            <Input
-                                id="classificationSociety"
-                                value={formData.classificationSociety}
-                                onChange={(e) => handleFormChange('classificationSociety', e.target.value)}
-                                placeholder="Lloyd's Register, DNV GL vs."
-                            />
-                        </div>
+                    <Separator />
 
-                        <div>
-                            <Label htmlFor="currentPort">Mevcut Liman *</Label>
-                            <Input
-                                id="currentPort"
-                                value={formData.currentPort}
-                                onChange={(e) => handleFormChange('currentPort', e.target.value)}
-                                placeholder="Mevcut liman adı"
-                            />
+                    {/* Kapasite Bilgileri */}
+                    <div className="space-y-4">
+                        <h3 className="text-lg font-medium flex items-center gap-2">
+                            📊 Kapasite Bilgileri
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <Label htmlFor="deadweightTonnage" className="text-sm font-medium">
+                                    DWT (Deadweight Tonnage) <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    id="deadweightTonnage"
+                                    type="number"
+                                    value={formData.deadweightTonnage}
+                                    onChange={(e) => handleFormChange('deadweightTonnage', e.target.value)}
+                                    placeholder="75000"
+                                    className="mt-1"
+                                />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="grossTonnage" className="text-sm font-medium">
+                                    GT (Gross Tonnage) <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    id="grossTonnage"
+                                    type="number"
+                                    value={formData.grossTonnage}
+                                    onChange={(e) => handleFormChange('grossTonnage', e.target.value)}
+                                    placeholder="45000"
+                                    className="mt-1"
+                                />
+                            </div>
                         </div>
                     </div>
 
-                    {/* Next Available Date */}
-                    <div>
-                        <Label htmlFor="nextAvailableDate">Sonraki Müsait Tarih</Label>
-                        <Input
-                            id="nextAvailableDate"
-                            type="date"
-                            value={formData.nextAvailableDate}
-                            onChange={(e) => handleFormChange('nextAvailableDate', e.target.value)}
-                        />
+                    <Separator />
+
+                    {/* Boyutlar */}
+                    <div className="space-y-4">
+                        <h3 className="text-lg font-medium flex items-center gap-2">
+                            📐 Boyutlar
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <Label htmlFor="lengthOverall" className="text-sm font-medium">
+                                    Uzunluk (m)
+                                </Label>
+                                <Input
+                                    id="lengthOverall"
+                                    type="number"
+                                    step="0.1"
+                                    value={formData.lengthOverall}
+                                    onChange={(e) => handleFormChange('lengthOverall', e.target.value)}
+                                    placeholder="180.5"
+                                    className="mt-1"
+                                />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="beam" className="text-sm font-medium">
+                                    Genişlik (m)
+                                </Label>
+                                <Input
+                                    id="beam"
+                                    type="number"
+                                    step="0.1"
+                                    value={formData.beam}
+                                    onChange={(e) => handleFormChange('beam', e.target.value)}
+                                    placeholder="32.2"
+                                    className="mt-1"
+                                />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="draught" className="text-sm font-medium">
+                                    Draft (m)
+                                </Label>
+                                <Input
+                                    id="draught"
+                                    type="number"
+                                    step="0.1"
+                                    value={formData.draught}
+                                    onChange={(e) => handleFormChange('draught', e.target.value)}
+                                    placeholder="12.8"
+                                    className="mt-1"
+                                />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="maxSpeed" className="text-sm font-medium">
+                                    Max Hız (knot)
+                                </Label>
+                                <Input
+                                    id="maxSpeed"
+                                    type="number"
+                                    step="0.1"
+                                    value={formData.maxSpeed}
+                                    onChange={(e) => handleFormChange('maxSpeed', e.target.value)}
+                                    placeholder="15.5"
+                                    className="mt-1"
+                                />
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Eco Friendly Switch */}
-                    <div className="flex items-center space-x-2">
-                        <Switch
-                            id="ecoFriendly"
-                            checked={formData.ecoFriendly}
-                            onCheckedChange={(checked) => handleFormChange('ecoFriendly', checked)}
-                        />
-                        <Label htmlFor="ecoFriendly" className="flex items-center gap-2">
-                            <Leaf className="h-4 w-4 text-green-600" />
-                            Çevre Dostu Gemi
-                        </Label>
+                    <Separator />
+
+                    {/* Sertifikasyon */}
+                    <div className="space-y-4">
+                        <h3 className="text-lg font-medium flex items-center gap-2">
+                            <Building2 className="h-4 w-4" />
+                            Sertifikasyon ve İnşa
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <Label htmlFor="classificationSociety" className="text-sm font-medium">
+                                    Klasifikasyon Kuruluşu
+                                </Label>
+                                <Input
+                                    id="classificationSociety"
+                                    value={formData.classificationSociety}
+                                    onChange={(e) => handleFormChange('classificationSociety', e.target.value)}
+                                    placeholder="Lloyd's Register, DNV GL, ABS"
+                                    className="mt-1"
+                                />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="builder" className="text-sm font-medium">
+                                    İnşaatçı
+                                </Label>
+                                <Input
+                                    id="builder"
+                                    value={formData.builder}
+                                    onChange={(e) => handleFormChange('builder', e.target.value)}
+                                    placeholder="Hyundai Heavy Industries"
+                                    className="mt-1"
+                                />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="classValidUntil" className="text-sm font-medium">
+                                    Klasifikasyon Geçerlilik Tarihi
+                                </Label>
+                                <Input
+                                    id="classValidUntil"
+                                    type="date"
+                                    value={formData.classValidUntil}
+                                    onChange={(e) => handleFormChange('classValidUntil', e.target.value)}
+                                    className="mt-1"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <Separator />
+
+                    {/* Sigorta */}
+                    <div className="space-y-4">
+                        <h3 className="text-lg font-medium flex items-center gap-2">
+                            <Shield className="h-4 w-4" />
+                            Sigorta Bilgileri
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <Label htmlFor="insuranceProvider" className="text-sm font-medium">
+                                    Sigorta Şirketi
+                                </Label>
+                                <Input
+                                    id="insuranceProvider"
+                                    value={formData.insuranceProvider}
+                                    onChange={(e) => handleFormChange('insuranceProvider', e.target.value)}
+                                    placeholder="Axa Sigorta, Allianz"
+                                    className="mt-1"
+                                />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="insuranceValidUntil" className="text-sm font-medium">
+                                    Sigorta Geçerlilik Tarihi
+                                </Label>
+                                <Input
+                                    id="insuranceValidUntil"
+                                    type="date"
+                                    value={formData.insuranceValidUntil}
+                                    onChange={(e) => handleFormChange('insuranceValidUntil', e.target.value)}
+                                    className="mt-1"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <Separator />
+
+                    {/* Çevreci Bilgiler */}
+                    <div className="space-y-4">
+                        <h3 className="text-lg font-medium flex items-center gap-2">
+                            <Leaf className="h-4 w-4" />
+                            Çevre Dostu Özellikler
+                        </h3>
+
+                        <div className="flex items-center space-x-2">
+                            <Switch
+                                id="ecoFriendly"
+                                checked={formData.ecoFriendly}
+                                onCheckedChange={(checked) => handleFormChange('ecoFriendly', checked)}
+                            />
+                            <Label htmlFor="ecoFriendly" className="flex items-center gap-2">
+                                <Leaf className="h-4 w-4 text-green-600" />
+                                Bu gemi çevre dostu sertifikasına sahip
+                            </Label>
+                        </div>
+
+                        {formData.ecoFriendly && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                <div>
+                                    <Label htmlFor="ecoClassification" className="text-sm font-medium">
+                                        Çevre Sertifikası Türü
+                                    </Label>
+                                    <Input
+                                        id="ecoClassification"
+                                        value={formData.ecoClassification}
+                                        onChange={(e) => handleFormChange('ecoClassification', e.target.value)}
+                                        placeholder="Green Ship, Eco-Ship"
+                                        className="mt-1"
+                                    />
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="ecoValidUntil" className="text-sm font-medium">
+                                        Çevre Sertifikası Geçerlilik Tarihi
+                                    </Label>
+                                    <Input
+                                        id="ecoValidUntil"
+                                        type="date"
+                                        value={formData.ecoValidUntil}
+                                        onChange={(e) => handleFormChange('ecoValidUntil', e.target.value)}
+                                        className="mt-1"
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <Separator />
+
+                    {/* Operasyonel Bilgiler */}
+                    <div className="space-y-4">
+                        <h3 className="text-lg font-medium flex items-center gap-2">
+                            <Calendar className="h-4 w-4" />
+                            Operasyonel Bilgiler
+                        </h3>
+                        <div className="grid grid-cols-1 gap-4">
+                            <div>
+                                <Label htmlFor="nextAvailableDate" className="text-sm font-medium">
+                                    Sonraki Müsait Tarih
+                                </Label>
+                                <Input
+                                    id="nextAvailableDate"
+                                    type="date"
+                                    value={formData.nextAvailableDate}
+                                    onChange={(e) => handleFormChange('nextAvailableDate', e.target.value)}
+                                    className="mt-1"
+                                />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="notes" className="text-sm font-medium">
+                                    Notlar
+                                </Label>
+                                <textarea
+                                    id="notes"
+                                    value={formData.notes}
+                                    onChange={(e) => handleFormChange('notes', e.target.value)}
+                                    placeholder="Gemi hakkında ek bilgiler, özel durumlar..."
+                                    className="mt-1 min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    rows={3}
+                                />
+                            </div>
+                        </div>
                     </div>
 
                     {/* Form Actions */}
