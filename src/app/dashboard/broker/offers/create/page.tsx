@@ -118,6 +118,19 @@ function BrokerOfferCreate() {
         }
     }, [loadId, router]);
 
+    const getDateString = (dateStr: string) => {
+        try {
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) {
+                // Invalid date, use today
+                return new Date().toISOString().split('T')[0];
+            }
+            return date.toISOString().split('T')[0];
+        } catch {
+            return new Date().toISOString().split('T')[0];
+        }
+    };
+
     // Fetch load details and broker data
     useEffect(() => {
         const fetchData = async () => {
@@ -140,15 +153,13 @@ function BrokerOfferCreate() {
                 dispatch(fetchAvailableShipsByBroker());
 
                 // Default dates
-                const loadingDate = new Date(loadData.loadingDate);
-                const deliveryDate = new Date(loadData.deliveryDate);
                 const validUntilDate = new Date();
-                validUntilDate.setDate(validUntilDate.getDate() + 7); // 7 gün geçerli
+                validUntilDate.setDate(validUntilDate.getDate() + 7);
 
                 setFormData(prev => ({
                     ...prev,
-                    estimatedLoadingDate: loadingDate.toISOString().split('T')[0],
-                    estimatedDeliveryDate: deliveryDate.toISOString().split('T')[0],
+                    estimatedLoadingDate: getDateString(loadData.loadingDate),
+                    estimatedDeliveryDate: getDateString(loadData.deliveryDate),
                     validUntil: validUntilDate.toISOString().split('T')[0],
                     insuranceAccepted: loadData.insuranceRequested,
                     ecoFriendly: loadData.ecoTransportRequested || false
