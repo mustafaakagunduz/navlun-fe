@@ -6,6 +6,7 @@ import deliveryReducer from './slices/deliverySlice'
 import brokerReducer from './slices/brokerSlice'
 import shipsReducer from './slices/shipsSlice'
 import brokerOffersReducer from './slices/brokerOffersSlice'
+import messagesReducer from './slices/messagesSlice'
 
 export const store = configureStore({
     reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
         broker: brokerReducer,
         ships: shipsReducer,
         brokerOffers: brokerOffersReducer,
+        messages: messagesReducer,
     },
 })
 

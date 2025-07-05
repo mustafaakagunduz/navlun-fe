@@ -19,6 +19,7 @@ export type Load = {
     sender?: {
         id: string;
         companyName: string;
+        userId?: string;
         contactPerson: string;
     };
     goodsType: string;

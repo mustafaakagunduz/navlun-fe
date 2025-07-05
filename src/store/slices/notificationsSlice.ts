@@ -75,6 +75,18 @@ const notificationsSlice = createSlice({
         resetLoadCount: (state) => {
             state.counts.loads = 0
         },
+        updateMessageCount: (state, action: PayloadAction<number>) => {
+            state.counts.messages = action.payload
+        },
+        incrementMessageCount: (state) => {
+            state.counts.messages += 1
+        },
+        decrementMessageCount: (state) => {
+            state.counts.messages = Math.max(0, state.counts.messages - 1)
+        },
+        resetMessageCount: (state) => {
+            state.counts.messages = 0
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -99,6 +111,10 @@ export const {
     decrementOfferCount,
     resetOfferCount,
     resetLoadCount,
+    updateMessageCount,
+    incrementMessageCount,
+    decrementMessageCount,
+    resetMessageCount,
 } = notificationsSlice.actions
 
 export default notificationsSlice.reducer

@@ -67,35 +67,57 @@ export default function Sidebar() {
             icon: FileText,
             badge: notificationCounts.offers
         },
-        { href: "/dashboard/sender/delivery-status", label: "Teslimat Takibi", icon: MapPin },  //buraya türkçe ve ingilizce dil desteği ekle
+        {
+            href: "/dashboard/messages",
+            label: t("dashboard.sidebar.messages"),
+            icon: MessageSquare,
+            badge: notificationCounts.messages || 0  // 👈 YENİ EKLENEN
+        },
+        { href: "/dashboard/sender/delivery-status", label: "Teslimat Takibi", icon: MapPin },
         { href: "/dashboard/carrier/sender-completed-deliveries", label: t("dashboard.sidebar.completed"), icon: CheckCheck },
         { href: "/dashboard/carrier/environmental-effect", label: t("dashboard.sidebar.environmental"), icon: Leaf },
         { href: "/dashboard/sender/sender-profile", label: t("dashboard.sidebar.profile"), icon: Users },
     ];
 
+// 2. carrierMenuItems güncelleme:
     const carrierMenuItems = [
         { href: "/dashboard", label: t("dashboard.sidebar.home"), icon: Home },
         { href: "/dashboard/carrier/available-loads", label: t("dashboard.sidebar.availableLoads"), icon: Package },
         {
             href: "/dashboard/carrier/my-loads",
-            label: "Tekliflerim", //buraya türkçe ve ingilizce dil desteği ekle
+            label: "Tekliflerim",
             icon: Truck,
             badge: notificationCounts.loads
         },
-        { href: "/dashboard/carrier/delivery-tracking", label: "Teslimat Takibi", icon: MapPin },  //buraya türkçe ve ingilizce dil desteği ekle
+        {
+            href: "/dashboard/messages",
+            label: t("dashboard.sidebar.messages"),
+            icon: MessageSquare,
+            badge: notificationCounts.messages || 0  // 👈 YENİ EKLENEN
+        },
+        { href: "/dashboard/carrier/delivery-tracking", label: "Teslimat Takibi", icon: MapPin },
         { href: "/dashboard/carrier/carrier-completed-deliveries", label: t("dashboard.sidebar.completed"), icon: CheckCheck },
         { href: "/dashboard/carrier/carrier-profile", label: t("dashboard.sidebar.profile"), icon: Users },
     ];
 
+// 3. brokerMenuItems güncelleme:
     const brokerMenuItems = [
         { href: "/dashboard", label: t("dashboard.sidebar.home"), icon: Home },
         { href: "/dashboard/broker/available-loads", label: t("dashboard.sidebar.availableLoads"), icon: Package },
         { href: "/dashboard/broker/offers", label: t("dashboard.sidebar.offers"), icon: HandshakeIcon },
-        { href: "/dashboard/broker/messages", label: t("dashboard.sidebar.messages"), icon: MessageSquare },
+        {
+            href: "/dashboard/messages",
+            label: t("dashboard.sidebar.messages"),
+            icon: MessageSquare,
+            badge: notificationCounts.messages || 0  // 👈 YENİ EKLENEN
+        },
         { href: "/dashboard/broker/ship-portfolio", label: t("dashboard.sidebar.shipPortfolio"), icon: Truck },
         { href: "/dashboard/broker/commissions", label: t("dashboard.sidebar.commissions"), icon: DollarSign },
         { href: "/dashboard/broker/broker-profile", label: t("dashboard.sidebar.profile"), icon: Users },
     ];
+
+// NOT: Mevcut Sidebar.tsx dosyasında bu değişiklikleri yapman gerekiyor.
+// Her role için "Mesajlar" sekmesi eklendi ve notification badge'i hazır.
 
     const adminMenuItems = [
         { href: "/dashboard", label: t("dashboard.sidebar.home"), icon: Home },

@@ -31,6 +31,7 @@ export type OfferRequest = {
     price: number;
     insuranceAccepted: boolean;
     isEcoFriendly: boolean;
+    note?: string; // Opsiyonel not alanı
 };
 export type OfferUpdateRequest = {
     price?: number;

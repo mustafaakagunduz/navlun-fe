@@ -1,3 +1,4 @@
+// src/app/dashboard/broker/available-loads/page.tsx
 "use client"
 
 import { useEffect, useState } from 'react';
@@ -9,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from '@/hooks/use-toast';
 import {
     Search,
     Filter,
@@ -28,7 +30,9 @@ import {
     TrendingUp,
     Building2,
     Route,
-    AlertCircle
+    AlertCircle,
+    MessageSquare,
+    Loader2
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { Load, LoadStatus } from "@/services/loadService";
@@ -51,6 +55,7 @@ export default function BrokerAvailableLoads() {
     const router = useRouter();
     const { t } = useLanguage();
     const dispatch = useAppDispatch();
+    const { toast } = useToast();
 
     // Redux state
     const {
@@ -97,22 +102,26 @@ export default function BrokerAvailableLoads() {
             load.deliveryAddress.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
             load.sender?.companyName?.toLowerCase().includes(filters.searchQuery.toLowerCase());
 
-        const matchesGoodsType = filters.goodsType === '' || load.goodsType === filters.goodsType;
-        const matchesInsurance = filters.insurance === '' ||
-            (filters.insurance === 'true' && load.insuranceRequested) ||
-            (filters.insurance === 'false' && !load.insuranceRequested);
-        const matchesEcoFriendly = filters.ecoFriendly === '' ||
-            (filters.ecoFriendly === 'true' && load.ecoTransportRequested) ||
-            (filters.ecoFriendly === 'false' && !load.ecoTransportRequested);
+        const matchesGoodsType = filters.goodsType === '' || filters.goodsType === 'all' ||
+            load.goodsType === filters.goodsType;
+
+        const matchesInsurance = filters.insurance === '' || filters.insurance === 'all' ||
+            (filters.insurance === 'insured' && load.insuranceRequested) ||
+            (filters.insurance === 'not_insured' && !load.insuranceRequested);
+
+        const matchesEcoFriendly = filters.ecoFriendly === '' || filters.ecoFriendly === 'all' ||
+            (filters.ecoFriendly === 'eco' && load.ecoTransportRequested) ||
+            (filters.ecoFriendly === 'standard' && !load.ecoTransportRequested);
 
         return matchesSearch && matchesGoodsType && matchesInsurance && matchesEcoFriendly;
     });
 
     // Sort loads
     const sortedLoads = [...filteredLoads].sort((a, b) => {
+        const { sortBy, sortDirection } = filters;
         let aValue: any, bValue: any;
 
-        switch (filters.sortBy) {
+        switch (sortBy) {
             case 'createdAt':
                 aValue = new Date(a.createdAt);
                 bValue = new Date(b.createdAt);
@@ -126,27 +135,19 @@ export default function BrokerAvailableLoads() {
                 bValue = b.netWeight;
                 break;
             case 'estimatedPrice':
-                aValue = a.estimatedPrice;
-                bValue = b.estimatedPrice;
+                aValue = a.estimatedPrice || 0;
+                bValue = b.estimatedPrice || 0;
                 break;
             default:
                 return 0;
         }
 
-        if (filters.sortDirection === 'asc') {
+        if (sortDirection === 'asc') {
             return aValue > bValue ? 1 : -1;
         } else {
             return aValue < bValue ? 1 : -1;
         }
     });
-
-    // Get unique goods types for filter
-    const uniqueGoodsTypes = Array.from(new Set(availableLoads.map(load => load.goodsType)));
-
-    // Event handlers
-    const handleRefresh = () => {
-        dispatch(fetchAvailableLoadsForBroker({ page: availableLoadsPage, size: pageSize }));
-    };
 
     const handleSearchChange = (value: string) => {
         dispatch(setSearchQuery(value));
@@ -165,9 +166,9 @@ export default function BrokerAvailableLoads() {
     };
 
     const handleSortChange = (value: string) => {
-        const [field, direction] = value.split('-');
-        dispatch(setSortBy(field));
-        dispatch(setSortDirection(direction as 'asc' | 'desc'));
+        const [sortBy, sortDirection] = value.split('-');
+        dispatch(setSortBy(sortBy));
+        dispatch(setSortDirection(sortDirection as 'asc' | 'desc'));
     };
 
     const handlePageChange = (newPage: number) => {
@@ -178,20 +179,8 @@ export default function BrokerAvailableLoads() {
         dispatch(resetFilters());
     };
 
-    // Format functions
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('tr-TR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
-    };
-
-    const formatPrice = (price: number) => {
-        return new Intl.NumberFormat('tr-TR', {
-            style: 'currency',
-            currency: 'TRY'
-        }).format(price);
+        return new Date(dateString).toLocaleDateString('tr-TR');
     };
 
     const getStatusBadgeColor = (status: LoadStatus) => {
@@ -199,9 +188,9 @@ export default function BrokerAvailableLoads() {
             case 'PENDING':
                 return 'bg-yellow-100 text-yellow-800 border-yellow-300';
             case 'ACTIVE':
-                return 'bg-blue-100 text-blue-800 border-blue-300';
-            case 'COMPLETED':
                 return 'bg-green-100 text-green-800 border-green-300';
+            case 'COMPLETED':
+                return 'bg-blue-100 text-blue-800 border-blue-300';
             case 'CANCELLED':
                 return 'bg-red-100 text-red-800 border-red-300';
             default:
@@ -234,11 +223,24 @@ export default function BrokerAvailableLoads() {
         router.push(`/dashboard/broker/loads/${load.id}`);
     };
 
+    const handleMessageSender = (load: Load) => {
+        // Backend'den gelen Load objesinde sender.id'yi kullan
+        if (load.sender?.id) {
+            router.push(`/dashboard/messages/load/${load.id}?senderProfileId=${load.sender.id}`);
+        } else {
+            toast({
+                title: 'Hata',
+                description: 'Gönderici bilgisi bulunamadı.',
+                variant: 'destructive',
+            });
+        }
+    };
+
     if (isLoading || availableLoadsLoading) {
         return (
             <div className="flex items-center justify-center h-screen">
                 <div className="text-center">
-                    <RefreshCcw className="h-8 w-8 animate-spin mx-auto mb-4" />
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
                     <p>Yükler yükleniyor...</p>
                 </div>
             </div>
@@ -259,38 +261,32 @@ export default function BrokerAvailableLoads() {
                     <div className="flex items-center gap-3">
                         <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
                             <Package className="h-4 w-4 mr-1" />
-                            {availableLoadsTotalElements} yük
+                            {availableLoadsTotalElements} toplam yük
                         </Badge>
                         <Button
-                            onClick={handleRefresh}
                             variant="outline"
                             size="sm"
-                            className="flex items-center gap-2"
+                            onClick={() => dispatch(fetchAvailableLoadsForBroker({ page: 0, size: pageSize }))}
                         >
-                            <RefreshCcw className="h-4 w-4" />
+                            <RefreshCcw className="h-4 w-4 mr-2" />
                             Yenile
                         </Button>
                     </div>
                 </div>
 
-                {/* Search and Filter Bar */}
+                {/* Search and Filters */}
                 <Card>
                     <CardContent className="p-4">
                         <div className="flex flex-col lg:flex-row gap-4">
-                            {/* Search */}
-                            <div className="flex-1">
-                                <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                    <Input
-                                        placeholder="Mal türü, şirket adı, konum ile arama yapın..."
-                                        value={filters.searchQuery}
-                                        onChange={(e) => handleSearchChange(e.target.value)}
-                                        className="pl-10"
-                                    />
-                                </div>
+                            <div className="flex-1 relative">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                                <Input
+                                    placeholder="Mal türü, şirket adı, konum ile arama yapın..."
+                                    value={filters.searchQuery}
+                                    onChange={(e) => handleSearchChange(e.target.value)}
+                                    className="pl-10"
+                                />
                             </div>
-
-                            {/* Filter Toggle */}
                             <Button
                                 variant="outline"
                                 onClick={() => setShowFilters(!showFilters)}
@@ -298,88 +294,86 @@ export default function BrokerAvailableLoads() {
                             >
                                 <SlidersHorizontal className="h-4 w-4" />
                                 Filtreler
-                                {(filters.goodsType || filters.insurance || filters.ecoFriendly) && (
-                                    <Badge variant="secondary" className="ml-1">
-                                        {[filters.goodsType, filters.insurance, filters.ecoFriendly].filter(Boolean).length}
-                                    </Badge>
-                                )}
+                            </Button>
+                            <Button
+                                variant="outline"
+                                onClick={handleResetFilters}
+                                className="flex items-center gap-2"
+                            >
+                                <RefreshCcw className="h-4 w-4" />
+                                Temizle
                             </Button>
                         </div>
 
-                        {/* Advanced Filters */}
                         {showFilters && (
-                            <div className="mt-4 pt-4 border-t grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Mal Türü
-                                    </label>
-                                    <Select value={filters.goodsType} onValueChange={handleGoodsTypeChange}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Tüm türler" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="">Tüm türler</SelectItem>
-                                            {uniqueGoodsTypes.map((type) => (
-                                                <SelectItem key={type} value={type}>
-                                                    {type}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
+                            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">Mal Türü</label>
+                                        <Select value={filters.goodsType} onValueChange={handleGoodsTypeChange}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Tüm türler" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="all">Tüm türler</SelectItem>
+                                                <SelectItem value="Gıda Ürünleri">Gıda Ürünleri</SelectItem>
+                                                <SelectItem value="Elektronik Cihazlar">Elektronik Cihazlar</SelectItem>
+                                                <SelectItem value="Tekstil Ürünleri">Tekstil Ürünleri</SelectItem>
+                                                <SelectItem value="İnşaat Malzemeleri">İnşaat Malzemeleri</SelectItem>
+                                                <SelectItem value="Otomotiv Parçaları">Otomotiv Parçaları</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Sigorta Durumu
-                                    </label>
-                                    <Select value={filters.insurance} onValueChange={handleInsuranceChange}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Tümü" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="">Tümü</SelectItem>
-                                            <SelectItem value="true">Sigortalı</SelectItem>
-                                            <SelectItem value="false">Sigortasız</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">Sigorta Durumu</label>
+                                        <Select value={filters.insurance} onValueChange={handleInsuranceChange}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Tümü" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="all">Tümü</SelectItem>
+                                                <SelectItem value="insured">Sigortalı</SelectItem>
+                                                <SelectItem value="not_insured">Sigortasız</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Çevreci Taşıma
-                                    </label>
-                                    <Select value={filters.ecoFriendly} onValueChange={handleEcoFriendlyChange}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Tümü" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="">Tümü</SelectItem>
-                                            <SelectItem value="true">Çevreci talep edilen</SelectItem>
-                                            <SelectItem value="false">Standart</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">Çevreci Taşıma</label>
+                                        <Select value={filters.ecoFriendly} onValueChange={handleEcoFriendlyChange}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Tümü" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="all">Tümü</SelectItem>
+                                                <SelectItem value="eco">Çevreci talep edilen</SelectItem>
+                                                <SelectItem value="standard">Standart</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Sıralama
-                                    </label>
-                                    <Select value={`${filters.sortBy}-${filters.sortDirection}`}
-                                            onValueChange={handleSortChange}>
-                                        <SelectTrigger>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="createdAt-desc">En yeni</SelectItem>
-                                            <SelectItem value="createdAt-asc">En eski</SelectItem>
-                                            <SelectItem value="loadingDate-asc">Yükleme tarihi (yakın)</SelectItem>
-                                            <SelectItem value="loadingDate-desc">Yükleme tarihi (uzak)</SelectItem>
-                                            <SelectItem value="estimatedPrice-desc">Fiyat (yüksek)</SelectItem>
-                                            <SelectItem value="estimatedPrice-asc">Fiyat (düşük)</SelectItem>
-                                            <SelectItem value="netWeight-desc">Ağırlık (ağır)</SelectItem>
-                                            <SelectItem value="netWeight-asc">Ağırlık (hafif)</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">Sıralama</label>
+                                        <Select
+                                            value={`${filters.sortBy}-${filters.sortDirection}`}
+                                            onValueChange={handleSortChange}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="createdAt-desc">En yeni</SelectItem>
+                                                <SelectItem value="createdAt-asc">En eski</SelectItem>
+                                                <SelectItem value="loadingDate-asc">Yükleme tarihi (yakın)</SelectItem>
+                                                <SelectItem value="loadingDate-desc">Yükleme tarihi (uzak)</SelectItem>
+                                                <SelectItem value="estimatedPrice-desc">Fiyat (yüksek)</SelectItem>
+                                                <SelectItem value="estimatedPrice-asc">Fiyat (düşük)</SelectItem>
+                                                <SelectItem value="netWeight-desc">Ağırlık (ağır)</SelectItem>
+                                                <SelectItem value="netWeight-asc">Ağırlık (hafif)</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -397,6 +391,21 @@ export default function BrokerAvailableLoads() {
                         </CardContent>
                     </Card>
                 )}
+
+                {/* Results Info */}
+                <div className="flex items-center justify-between">
+                    <p className="text-sm text-gray-600">
+                        <span className="font-medium">{sortedLoads.length}</span> yük bulundu
+                        {availableLoadsTotalElements > 0 && (
+                            <span> (toplam {availableLoadsTotalElements})</span>
+                        )}
+                    </p>
+                    {sortedLoads.length > 0 && (
+                        <div className="text-sm text-gray-500">
+                            Sayfa {availableLoadsPage + 1} / {availableLoadsTotalPages}
+                        </div>
+                    )}
+                </div>
 
                 {/* Loads Grid */}
                 {sortedLoads.length === 0 ? (
@@ -438,84 +447,84 @@ export default function BrokerAvailableLoads() {
                                         <Route className="h-4 w-4 text-gray-400 mt-0.5" />
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 text-sm">
-                                                <span className="font-medium text-green-600">
-                                                    {load.loadingAddress?.split(',')[0] || 'Yükleme yeri'}
-                                                </span>
-                                                <span className="text-gray-400">→</span>
-                                                <span className="font-medium text-red-600">
-                                                    {load.deliveryAddress?.split(',')[0] || 'Teslimat yeri'}
-                                                </span>
+                                                <span className="font-medium text-green-600">Yükleme:</span>
+                                                <span className="truncate text-gray-600">{load.loadingAddress}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-sm mt-1">
+                                                <span className="font-medium text-red-600">Teslimat:</span>
+                                                <span className="truncate text-gray-600">{load.deliveryAddress}</span>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Load Details */}
-                                    <div className="grid grid-cols-2 gap-4 text-sm">
+                                    <div className="grid grid-cols-2 gap-3 text-sm">
                                         <div className="flex items-center gap-2">
                                             <Weight className="h-4 w-4 text-gray-400" />
-                                            <span className="text-gray-600">
-                                                {load.netWeight?.toLocaleString()} kg
-                                            </span>
+                                            <span>{load.netWeight} kg</span>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <Calendar className="h-4 w-4 text-gray-400" />
-                                            <span className="text-gray-600">
-                                                {formatDate(load.loadingDate)}
-                                            </span>
+                                            <span>{formatDate(load.loadingDate)}</span>
                                         </div>
                                     </div>
 
-                                    {/* Features */}
+                                    {/* Price */}
+                                    {load.estimatedPrice && (
+                                        <div className="flex items-center gap-2 text-lg font-semibold text-amber-600">
+                                            <DollarSign className="h-5 w-5" />
+                                            ₺{load.estimatedPrice.toLocaleString()}
+                                        </div>
+                                    )}
+
+                                    {/* Badges */}
                                     <div className="flex flex-wrap gap-2">
                                         {load.insuranceRequested && (
-                                            <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200">
+                                            <Badge variant="secondary" className="text-xs">
                                                 <Shield className="h-3 w-3 mr-1" />
                                                 Sigortalı
                                             </Badge>
                                         )}
                                         {load.ecoTransportRequested && (
-                                            <Badge variant="secondary" className="bg-green-50 text-green-700 border-green-200">
+                                            <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">
                                                 <Leaf className="h-3 w-3 mr-1" />
                                                 Çevreci
                                             </Badge>
                                         )}
                                     </div>
 
-                                    {/* Price */}
-                                    {load.estimatedPrice && (
-                                        <div className="flex items-center justify-between pt-2 border-t">
-                                            <span className="text-sm text-gray-600">Tahmini Fiyat:</span>
-                                            <span className="font-semibold text-lg text-amber-600">
-                                                {formatPrice(load.estimatedPrice)}
-                                            </span>
+                                    {/* Actions */}
+                                    <div className="flex items-center justify-between pt-4 border-t">
+                                        <div className="flex items-center gap-2">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => handleViewDetails(load)}
+                                            >
+                                                <Eye className="h-4 w-4 mr-1" />
+                                                Detay
+                                            </Button>
+
+                                            <Button
+                                                size="sm"
+                                                onClick={() => handleOfferClick(load)}
+                                                className="bg-amber-600 hover:bg-amber-700 text-white"
+                                            >
+                                                <HandshakeIcon className="h-4 w-4 mr-1" />
+                                                Teklif Ver
+                                            </Button>
+
+                                            {/* Mesajlaş Butonu */}
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => handleMessageSender(load)}
+                                                className="border-blue-200 text-blue-600 hover:bg-blue-50"
+                                            >
+                                                <MessageSquare className="h-4 w-4 mr-1" />
+                                                Mesajlaş
+                                            </Button>
                                         </div>
-                                    )}
-
-                                    {/* Action Buttons */}
-                                    <div className="flex gap-2 pt-2">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => handleViewDetails(load)}
-                                            className="flex-1"
-                                        >
-                                            <Eye className="h-4 w-4 mr-1" />
-                                            Detay
-                                        </Button>
-                                        <Button
-                                            onClick={() => handleOfferClick(load)}
-                                            size="sm"
-                                            className="flex-1 bg-amber-600 hover:bg-amber-700"
-                                        >
-                                            <HandshakeIcon className="h-4 w-4 mr-1" />
-                                            Teklif Ver
-                                        </Button>
-                                    </div>
-
-                                    {/* Time indicator */}
-                                    <div className="flex items-center justify-center pt-2 text-xs text-gray-500">
-                                        <Clock className="h-3 w-3 mr-1" />
-                                        {Math.ceil((new Date(load.loadingDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} gün kaldı
                                     </div>
                                 </CardContent>
                             </Card>
@@ -525,11 +534,11 @@ export default function BrokerAvailableLoads() {
 
                 {/* Pagination */}
                 {availableLoadsTotalPages > 1 && (
-                    <div className="flex items-center justify-center gap-2 pt-6">
+                    <div className="flex items-center justify-center gap-2">
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handlePageChange(Math.max(0, availableLoadsPage - 1))}
+                            onClick={() => handlePageChange(availableLoadsPage - 1)}
                             disabled={availableLoadsPage === 0}
                         >
                             Önceki
@@ -537,18 +546,26 @@ export default function BrokerAvailableLoads() {
 
                         <div className="flex items-center gap-1">
                             {Array.from({ length: Math.min(5, availableLoadsTotalPages) }, (_, i) => {
-                                const pageNum = availableLoadsPage <= 2 ? i : availableLoadsPage - 2 + i;
-                                if (pageNum >= availableLoadsTotalPages) return null;
+                                let pageNumber;
+                                if (availableLoadsTotalPages <= 5) {
+                                    pageNumber = i;
+                                } else if (availableLoadsPage < 3) {
+                                    pageNumber = i;
+                                } else if (availableLoadsPage > availableLoadsTotalPages - 3) {
+                                    pageNumber = availableLoadsTotalPages - 5 + i;
+                                } else {
+                                    pageNumber = availableLoadsPage - 2 + i;
+                                }
 
                                 return (
                                     <Button
-                                        key={pageNum}
-                                        variant={pageNum === availableLoadsPage ? "default" : "outline"}
+                                        key={pageNumber}
+                                        variant={pageNumber === availableLoadsPage ? "default" : "outline"}
                                         size="sm"
-                                        onClick={() => handlePageChange(pageNum)}
-                                        className={pageNum === availableLoadsPage ? "bg-amber-600 hover:bg-amber-700" : ""}
+                                        onClick={() => handlePageChange(pageNumber)}
+                                        className="w-10"
                                     >
-                                        {pageNum + 1}
+                                        {pageNumber + 1}
                                     </Button>
                                 );
                             })}
@@ -557,7 +574,7 @@ export default function BrokerAvailableLoads() {
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handlePageChange(Math.min(availableLoadsTotalPages - 1, availableLoadsPage + 1))}
+                            onClick={() => handlePageChange(availableLoadsPage + 1)}
                             disabled={availableLoadsPage >= availableLoadsTotalPages - 1}
                         >
                             Sonraki
