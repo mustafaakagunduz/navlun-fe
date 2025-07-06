@@ -15,7 +15,8 @@ export enum LoadStatus {
 export type Load = {
     id: string;
     title: string;
-    estimatedCarbonFootprint : number
+    estimatedCarbonFootprint: number;
+    senderId: string;
     sender?: {
         id: string;
         companyName: string;
@@ -34,7 +35,7 @@ export type Load = {
     estimatedPrice?: number;
     status: LoadStatus;
     insuranceRequested: boolean;
-    ecoTransportRequested?: boolean; // Bu satırı ekle
+    ecoTransportRequested?: boolean;
     active: boolean;
     createdAt: string;
     updatedAt?: string;
@@ -134,7 +135,12 @@ const loadService = {
     // Belirli bir yükü ID'ye göre getirir
     getLoadById: async (id: string): Promise<Load> => {
         try {
-            return await apiService.get<Load>(`/loads/${id}`);
+            const response = await apiService.get<Load>(`/loads/${id}`);
+            console.log('Load service response:', response);
+            console.log('Load service response sender:', response.sender); // YENİ SATIR
+            console.log('Load service response senderId:', response.senderId); // YENİ SATIR
+            console.log('Response keys:', Object.keys(response)); // YENİ SATIR
+            return response;
         } catch (error) {
             console.error(`Get load by ID (${id}) error:`, error);
             throw error;

@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from '@/hooks/use-toast';
+
 import {
     Search,
     Filter,
@@ -221,6 +222,35 @@ export default function BrokerAvailableLoads() {
     const handleViewDetails = (load: Load) => {
         setSelectedLoad(load);
         router.push(`/dashboard/broker/loads/${load.id}`);
+    };
+
+    const handleMessageClick = async (load: Load) => {
+        try {
+            console.log('Load object:', load);
+
+            // senderId varsa bunu kullan
+            if (!load.senderId) {
+                console.log('Sender ID missing. Load object:', load);
+                toast({
+                    title: "Hata",
+                    description: "Gönderici bilgisi bulunamadı.",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            console.log('Redirecting to:', `/dashboard/messages/load/${load.id}`);
+
+            // senderId'yi query parameter olarak ekle
+            router.push(`/dashboard/messages/load/${load.id}?senderId=${load.senderId}`);
+        } catch (error) {
+            console.error('Mesajlaşma hatası:', error);
+            toast({
+                title: "Hata",
+                description: "Mesajlaşma başlatılırken bir hata oluştu.",
+                variant: "destructive",
+            });
+        }
     };
 
     const handleMessageSender = (load: Load) => {
@@ -495,34 +525,33 @@ export default function BrokerAvailableLoads() {
 
                                     {/* Actions */}
                                     <div className="flex items-center justify-between pt-4 border-t">
-                                        <div className="flex items-center gap-2">
+                                        {/* Action Buttons */}
+                                        <div className="flex gap-2 pt-4 border-t">
                                             <Button
                                                 variant="outline"
                                                 size="sm"
+                                                className="flex-1"
                                                 onClick={() => handleViewDetails(load)}
                                             >
                                                 <Eye className="h-4 w-4 mr-1" />
                                                 Detay
                                             </Button>
-
-                                            <Button
-                                                size="sm"
-                                                onClick={() => handleOfferClick(load)}
-                                                className="bg-amber-600 hover:bg-amber-700 text-white"
-                                            >
-                                                <HandshakeIcon className="h-4 w-4 mr-1" />
-                                                Teklif Ver
-                                            </Button>
-
-                                            {/* Mesajlaş Butonu */}
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                onClick={() => handleMessageSender(load)}
-                                                className="border-blue-200 text-blue-600 hover:bg-blue-50"
+                                                className="flex-1"
+                                                onClick={() => handleMessageClick(load)}
                                             >
                                                 <MessageSquare className="h-4 w-4 mr-1" />
                                                 Mesajlaş
+                                            </Button>
+                                            <Button
+                                                onClick={() => handleOfferClick(load)}
+                                                size="sm"
+                                                className="flex-1 bg-amber-600 hover:bg-amber-700"
+                                            >
+                                                <HandshakeIcon className="h-4 w-4 mr-1" />
+                                                Teklif Ver
                                             </Button>
                                         </div>
                                     </div>

@@ -41,7 +41,7 @@ import {
     setMessageTypeFilter,
     resetMessageCount
 } from '@/store/slices/messagesSlice';
-// NOT: date-fns kurulu değilse, bu import'ları kaldırıp basit formatDate fonksiyonu kullanabilirsiniz
+
 
 export default function MessagesPage() {
     const { user, isAuthenticated, isLoading } = useAuth();
@@ -285,7 +285,8 @@ export default function MessagesPage() {
                                                     <div className="flex-1">
                                                         <div className="flex items-center gap-2 mb-2">
                                                             <Package className="h-4 w-4 text-blue-600" />
-                                                            <span className="font-medium">{conversation.loadTitle}</span>
+                                                            <span className="font-medium">{conversation.loadTitle || "Yük Başlığı Yok"}</span>
+
                                                             {conversation.unreadCount > 0 && (
                                                                 <Badge className="bg-red-100 text-red-600 border-red-200">
                                                                     {conversation.unreadCount} yeni

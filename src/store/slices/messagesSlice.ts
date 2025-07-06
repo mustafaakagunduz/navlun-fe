@@ -258,8 +258,12 @@ const messagesSlice = createSlice({
             })
             .addCase(fetchConversations.fulfilled, (state, action) => {
                 state.conversationsLoading = false
-                state.conversations = action.payload
+                state.conversations = action.payload.map((c: ConversationResponse) => ({
+                    ...c,
+                    loadTitle: c.loadTitle ?? "Yük Başlığı Yok"
+                }))
             })
+
             .addCase(fetchConversations.rejected, (state, action) => {
                 state.conversationsLoading = false
                 state.conversationsError = action.payload as string
@@ -385,9 +389,3 @@ export const {
 } = messagesSlice.actions
 
 export default messagesSlice.reducer
-
-// NOT: src/store/index.ts dosyasına da eklenmelidir:
-// import messagesReducer from './slices/messagesSlice'
-//
-// store yapılandırmasında:
-// messages: messagesReducer,

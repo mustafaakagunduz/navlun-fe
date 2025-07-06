@@ -14,6 +14,7 @@ export interface MessageRequest {
     attachments?: string[];
 }
 
+
 export interface MessageResponse {
     id: string;
     loadId?: string;
@@ -60,13 +61,16 @@ export interface ConversationResponse {
 }
 
 export enum MessageType {
-    GENERAL_MESSAGE = 'GENERAL_MESSAGE',
-    OFFER_NOTIFICATION = 'OFFER_NOTIFICATION',
-    OFFER_ACCEPTED = 'OFFER_ACCEPTED',
-    OFFER_REJECTED = 'OFFER_REJECTED',
-    LOAD_UPDATE = 'LOAD_UPDATE',
-    DELIVERY_UPDATE = 'DELIVERY_UPDATE',
-    SYSTEM_MESSAGE = 'SYSTEM_MESSAGE'
+    GENERAL = "GENERAL",
+    OFFER_NOTIFICATION = "OFFER_NOTIFICATION",
+    OFFER_ACCEPTED = "OFFER_ACCEPTED",
+    OFFER_REJECTED = "OFFER_REJECTED",
+    LOAD_UPDATE = "LOAD_UPDATE",
+    DELIVERY_UPDATE = "DELIVERY_UPDATE",
+    SYSTEM_MESSAGE = "SYSTEM_MESSAGE",
+    CONTRACT_MESSAGE = "CONTRACT_MESSAGE",
+    PAYMENT_MESSAGE = "PAYMENT_MESSAGE",
+    COMPLAINT = "COMPLAINT"
 }
 
 export enum MessagePriority {
