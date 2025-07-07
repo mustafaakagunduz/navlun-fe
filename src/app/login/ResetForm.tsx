@@ -1,4 +1,4 @@
-// /components/auth/forms/ResetForm.tsx
+// src/app/login/ResetForm.tsx
 "use client"
 
 import React from "react"
@@ -31,13 +31,20 @@ const ResetForm = ({
                 <p className="text-gray-600 mt-4">
                     {t("auth.resetInstructions")}
                 </p>
-                <Button
+                <button
                     type="button"
-                    className={styleClasses.button}
+                    className={`${styleClasses.button} mt-8`}
                     onClick={toggleResetMode}
+                    style={{
+                        WebkitBackfaceVisibility: 'hidden',
+                        backfaceVisibility: 'hidden',
+                        WebkitTransform: 'translate3d(0, 0, 0)',
+                        transform: 'translate3d(0, 0, 0)',
+                        willChange: 'auto'
+                    }}
                 >
                     {t("auth.backToLogin")}
-                </Button>
+                </button>
             </div>
         ) : (
             <form onSubmit={handleResetSubmit} className="space-y-6">
@@ -53,10 +60,17 @@ const ResetForm = ({
                     error={formErrors.email}
                 />
 
-                <Button
+                <button
                     type="submit"
                     className={`${styleClasses.button} mt-8`}
                     disabled={isLoading}
+                    style={{
+                        WebkitBackfaceVisibility: 'hidden',
+                        backfaceVisibility: 'hidden',
+                        WebkitTransform: 'translate3d(0, 0, 0)',
+                        transform: 'translate3d(0, 0, 0)',
+                        willChange: 'auto'
+                    }}
                 >
                     {isLoading ? (
                         <>
@@ -66,13 +80,20 @@ const ResetForm = ({
                     ) : (
                         t("auth.sendResetLink")
                     )}
-                </Button>
+                </button>
 
                 <Button
                     type="button"
                     variant="outline"
-                    className="w-full h-12 rounded-lg font-medium border-gray-300 hover:bg-gray-50 mt-4 transition-all shadow-sm"
+                    className="w-full h-12 rounded-lg font-medium border-gray-300 hover:bg-gray-50 mt-4 transition-colors duration-200 shadow-sm"
                     onClick={toggleResetMode}
+                    style={{
+                        WebkitBackfaceVisibility: 'hidden',
+                        backfaceVisibility: 'hidden',
+                        WebkitTransform: 'translate3d(0, 0, 0)',
+                        transform: 'translate3d(0, 0, 0)',
+                        willChange: 'auto'
+                    }}
                 >
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     {t("auth.backToLogin")}

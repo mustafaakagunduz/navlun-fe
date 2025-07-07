@@ -1,4 +1,4 @@
-// /components/auth/forms/FormInput.tsx
+// src/app/login/FormInput.tsx
 "use client"
 
 import React from "react"
@@ -21,7 +21,9 @@ const FormInput = ({
                        rightIcon = null
                    }: FormInputProps) => (
     <div className="space-y-2">
-        <Label htmlFor={id} className={styleClasses.label}>{label}</Label>
+        <Label htmlFor={id} className={styleClasses.label}>
+            {label}
+        </Label>
         <div className={styleClasses.inputContainer}>
             {icon}
             <Input

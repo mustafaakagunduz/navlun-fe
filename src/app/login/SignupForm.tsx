@@ -1,3 +1,4 @@
+// src/app/login/SignupForm.tsx
 "use client"
 
 import React from "react"
@@ -30,7 +31,9 @@ const SignupForm = ({
                     }: SignupFormProps) => (
     <form onSubmit={handleSignupSubmit} className="space-y-6">
         <div className="space-y-2">
-            <Label className={styleClasses.label}>{t("auth.accountType") || "Hesap Türü"}</Label>
+            <Label className={styleClasses.label}>
+                {t("auth.accountType") || "Hesap Türü"}
+            </Label>
             <RadioGroup
                 defaultValue={signupData.role}
                 onValueChange={(value) => handleRoleChange(value as 'SENDER' | 'CARRIER' | 'BROKER')}
@@ -135,14 +138,16 @@ const SignupForm = ({
             }
         />
 
-        <Button
+        <button
             type="submit"
-            className={`${styleClasses.button} mt-8 transform-none hover:transform-none active:transform-none focus:transform-none`}
+            className={`${styleClasses.button} mt-8`}
             disabled={isLoading}
             style={{
-                willChange: 'auto',
+                WebkitBackfaceVisibility: 'hidden',
                 backfaceVisibility: 'hidden',
-                WebkitBackfaceVisibility: 'hidden'
+                WebkitTransform: 'translate3d(0, 0, 0)',
+                transform: 'translate3d(0, 0, 0)',
+                willChange: 'auto'
             }}
         >
             <span className="flex items-center justify-center w-full">
@@ -155,7 +160,7 @@ const SignupForm = ({
                     t("auth.signup") || "Kayıt Ol"
                 )}
             </span>
-        </Button>
+        </button>
     </form>
 )
 

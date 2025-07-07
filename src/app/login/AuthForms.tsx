@@ -1,3 +1,4 @@
+// src/app/login/AuthForms.tsx
 "use client"
 
 import { useState, useEffect } from "react"
@@ -67,21 +68,34 @@ const AuthForms = () => {
     // Reset errors when switching tabs or modes
     useEffect(() => {
         if (error) clearError()
-    }, [activeTab, isResetMode, clearError, error])
+    }, [activeTab, isResetMode, clearError])
 
-    // Check password matching
+    // Clear errors when data changes
+    useEffect(() => {
+        setFormErrors(prev => ({ ...prev, login: {} }))
+    }, [loginData])
+
+    useEffect(() => {
+        setFormErrors(prev => ({ ...prev, signup: {} }))
+    }, [signupData])
+
+    useEffect(() => {
+        setFormErrors(prev => ({ ...prev, reset: {} }))
+    }, [resetEmail])
+
+    // Check password match
     useEffect(() => {
         if (signupData.confirmPassword) {
             setPasswordsMatch(signupData.password === signupData.confirmPassword)
+        } else {
+            setPasswordsMatch(true)
         }
     }, [signupData.password, signupData.confirmPassword])
 
-    // Form change handlers
+    // Form handlers
     const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
         setLoginData(prev => ({ ...prev, [name]: value }))
-
-        // Clear error for this field if exists
         if (formErrors.login[name]) {
             setFormErrors(prev => ({
                 ...prev,
@@ -93,8 +107,6 @@ const AuthForms = () => {
     const handleSignupChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
         setSignupData(prev => ({ ...prev, [name]: value }))
-
-        // Clear error for this field if exists
         if (formErrors.signup[name]) {
             setFormErrors(prev => ({
                 ...prev,
@@ -103,10 +115,12 @@ const AuthForms = () => {
         }
     }
 
+    const handleRoleChange = (value: 'SENDER' | 'CARRIER' | 'BROKER') => {
+        setSignupData(prev => ({ ...prev, role: value }))
+    }
+
     const handleResetEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setResetEmail(e.target.value)
-
-        // Clear error if exists
         if (formErrors.reset.email) {
             setFormErrors(prev => ({
                 ...prev,
@@ -115,83 +129,83 @@ const AuthForms = () => {
         }
     }
 
-    const handleRoleChange = (value: 'SENDER' | 'CARRIER' | 'BROKER') => {
-        setSignupData(prev => ({ ...prev, role: value }))
+    // Validation functions
+    const validateEmail = (email: string): string => {
+        if (!email) return t("auth.errors.emailRequired")
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!emailRegex.test(email)) return t("auth.errors.emailInvalid")
+        return ""
     }
 
-    // Form validations
-    const validateLoginForm = () => {
-        const errors: FormErrorsType = {}
-
-        if (!loginData.email) {
-            errors.email = t("auth.errors.emailRequired")
-        } else if (!/\S+@\S+\.\S+/.test(loginData.email)) {
-            errors.email = t("auth.errors.emailInvalid")
-        }
-
-        if (!loginData.password) {
-            errors.password = t("auth.errors.passwordRequired")
-        }
-
-        setFormErrors(prev => ({ ...prev, login: errors }))
-        return Object.keys(errors).length === 0
+    const validatePassword = (password: string): string => {
+        if (!password) return t("auth.errors.passwordRequired")
+        if (password.length < 6) return t("auth.errors.passwordTooShort")
+        return ""
     }
 
-    const validateSignupForm = () => {
+    const validateSignupForm = (): boolean => {
         const errors: FormErrorsType = {}
 
-        if (!signupData.firstName) {
-            errors.firstName = t("auth.errors.firstNameRequired")
+        // Required fields
+        if (!signupData.firstName.trim()) errors.firstName = t("auth.errors.firstNameRequired")
+        if (!signupData.lastName.trim()) errors.lastName = t("auth.errors.lastNameRequired")
+
+        // Email validation
+        const emailError = validateEmail(signupData.email)
+        if (emailError) errors.email = emailError
+
+        // Phone validation
+        if (!signupData.phone || signupData.phone.trim() === "+90") {
+            errors.phone = t("auth.errors.phoneRequired")
         }
 
-        if (!signupData.lastName) {
-            errors.lastName = t("auth.errors.lastNameRequired")
-        }
+        // Password validation
+        const passwordError = validatePassword(signupData.password)
+        if (passwordError) errors.password = passwordError
 
-        if (!signupData.email) {
-            errors.email = t("auth.errors.emailRequired")
-        } else if (!/\S+@\S+\.\S+/.test(signupData.email)) {
-            errors.email = t("auth.errors.emailInvalid")
-        }
-
-        if (!signupData.password) {
-            errors.password = t("auth.errors.passwordRequired")
-        } else if (signupData.password.length < 8) {
-            errors.password = t("auth.errors.passwordLength")
-        }
-
+        // Confirm password
         if (!signupData.confirmPassword) {
             errors.confirmPassword = t("auth.errors.confirmPasswordRequired")
         } else if (signupData.password !== signupData.confirmPassword) {
-            errors.confirmPassword = t("auth.errors.passwordsNotMatch")
+            errors.confirmPassword = t("auth.errors.passwordMismatch")
         }
 
         setFormErrors(prev => ({ ...prev, signup: errors }))
         return Object.keys(errors).length === 0
     }
 
-    const validateResetForm = () => {
+    const validateLoginForm = (): boolean => {
         const errors: FormErrorsType = {}
 
-        if (!resetEmail) {
-            errors.email = t("auth.errors.emailRequired")
-        } else if (!/\S+@\S+\.\S+/.test(resetEmail)) {
-            errors.email = t("auth.errors.emailInvalid")
-        }
+        const emailError = validateEmail(loginData.email)
+        if (emailError) errors.email = emailError
+
+        const passwordError = validatePassword(loginData.password)
+        if (passwordError) errors.password = passwordError
+
+        setFormErrors(prev => ({ ...prev, login: errors }))
+        return Object.keys(errors).length === 0
+    }
+
+    const validateResetForm = (): boolean => {
+        const errors: FormErrorsType = {}
+
+        const emailError = validateEmail(resetEmail)
+        if (emailError) errors.email = emailError
 
         setFormErrors(prev => ({ ...prev, reset: errors }))
         return Object.keys(errors).length === 0
     }
 
-    // Form submissions
+    // Submit handlers
     const handleLoginSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!validateLoginForm()) return
 
         try {
             await login(loginData.email, loginData.password)
-        } catch (error) {
-            // Error handled in AuthContext
+        } catch (error: any) {
+            console.error("Login error:", error)
         }
     }
 
@@ -200,11 +214,16 @@ const AuthForms = () => {
         if (!validateSignupForm()) return
 
         try {
-            const { confirmPassword, ...signupDataToSend } = signupData
-            const result = await signup(signupDataToSend)
-            // Email doğrulama sayfasına yönlendirilecek (AuthContext'te needsVerification true olacak)
-        } catch (error) {
-            // Error handled in AuthContext
+            await signup({
+                firstName: signupData.firstName.trim(),
+                lastName: signupData.lastName.trim(),
+                email: signupData.email.trim(),
+                password: signupData.password,
+                phone: signupData.phone.trim(),
+                role: signupData.role
+            })
+        } catch (error: any) {
+            console.error("Signup error:", error)
         }
     }
 
@@ -216,150 +235,132 @@ const AuthForms = () => {
             await authService.requestPasswordReset(resetEmail)
             setResetSuccess(true)
         } catch (error: any) {
+            console.error("Reset error:", error)
             setFormErrors(prev => ({
                 ...prev,
-                reset: {
-                    email: error.response?.data?.message || t("auth.errors.resetFailed")
-                }
+                reset: { email: error.response?.data?.message || t("auth.errors.resetFailed") }
             }))
         }
     }
 
-    // Mode toggles
+    // Toggle functions
     const toggleResetMode = () => {
         setIsResetMode(!isResetMode)
         setResetSuccess(false)
-        clearError()
+        setResetEmail("")
+        setFormErrors(prev => ({ ...prev, reset: {} }))
+        if (error) clearError()
     }
 
-    const handleTabChange = (value: string) => {
-        setActiveTab(value as "login" | "signup")
-        clearError()
+    // Email verification handlers
+    const handleVerificationSuccess = () => {
+        completeEmailVerification()
     }
 
-    // E-posta doğrulama tamamlandı - otomatik login yap
-    const handleVerificationSuccess = async () => {
-        // AuthContext'teki completeEmailVerification fonksiyonu
-        // otomatik login yapacak ve role göre yönlendirecek
-        completeEmailVerification();
-    }
-
-    // E-posta doğrulama iptal edildi
     const handleVerificationCancel = () => {
         cancelEmailVerification()
-        setActiveTab("login")
     }
 
-    // Doğrulama ihtiyacı varsa doğrulama formunu göster
+    // If email verification is needed
     if (needsVerification && verificationUserId && verificationEmail) {
         return (
-            <div className="w-full max-w-md mx-auto">
-                <EmailVerificationForm
-                    userId={verificationUserId}
-                    email={verificationEmail}
-                    onVerificationSuccess={handleVerificationSuccess}
-                    onCancel={handleVerificationCancel}
-                    t={t}
-                />
-            </div>
-        );
+            <EmailVerificationForm
+                userId={verificationUserId}
+                email={verificationEmail}
+                onVerificationSuccess={handleVerificationSuccess}
+                onCancel={handleVerificationCancel}
+                t={t}
+            />
+        )
     }
 
-    // Main render
+    // Reset password form
+    if (isResetMode) {
+        return (
+            <Card className="border border-gray-200 shadow-xl rounded-xl bg-white overflow-hidden">
+                <CardHeader className="p-6 pb-4">
+                    <CardTitle className="text-xl font-semibold text-gray-900">
+                        {t("auth.resetPassword")}
+                    </CardTitle>
+                    <CardDescription className="text-gray-600">
+                        {t("auth.resetPasswordDescription")}
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="p-6 pt-2">
+                    <ResetForm
+                        resetEmail={resetEmail}
+                        formErrors={formErrors.reset}
+                        isLoading={isLoading}
+                        resetSuccess={resetSuccess}
+                        handleResetEmailChange={handleResetEmailChange}
+                        handleResetSubmit={handleResetSubmit}
+                        toggleResetMode={toggleResetMode}
+                        t={t}
+                    />
+                </CardContent>
+            </Card>
+        )
+    }
+
+    // Main login/signup forms
     return (
-        <div className="w-full max-w-md mx-auto">
-            <div className="transition-all duration-300 ease-in-out">
-                {!isResetMode ? (
-                    <Tabs
-                        value={activeTab}
-                        onValueChange={handleTabChange}
-                        className="w-full"
+        <div className="w-full space-y-4">
+            {error && (
+                <Alert className="bg-red-50 border-red-200 text-red-800">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{error}</AlertDescription>
+                </Alert>
+            )}
+
+            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "login" | "signup")} className="w-full">
+                <TabsList className="grid w-full grid-cols-2 bg-gray-100 rounded-lg p-1 h-12">
+                    <TabsTrigger
+                        value="login"
+                        className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-200 font-medium"
                     >
-                        <TabsList className="bg-gray-100 p-1.5 rounded-xl mb-6 gap-2 w-full">
-                            <TabsTrigger
-                                value="login"
-                                className="rounded-lg py-3 px-6 transition-all data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-green-600 data-[state=active]:font-semibold flex-1"
-                            >
-                                {t("auth.login")}
-                            </TabsTrigger>
-                            <TabsTrigger
-                                value="signup"
-                                className="rounded-lg py-3 px-6 transition-all data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-green-600 data-[state=active]:font-semibold flex-1"
-                            >
-                                {t("auth.signup")}
-                            </TabsTrigger>
-                        </TabsList>
+                        {t("auth.login")}
+                    </TabsTrigger>
+                    <TabsTrigger
+                        value="signup"
+                        className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-200 font-medium"
+                    >
+                        {t("auth.signup")}
+                    </TabsTrigger>
+                </TabsList>
 
-                        {error && (
-                            <Alert variant="destructive" className="mb-6 bg-red-50 border border-red-200 text-red-800 rounded-lg">
-                                <AlertCircle className="h-4 w-4" />
-                                <AlertDescription>{error}</AlertDescription>
-                            </Alert>
-                        )}
-
-                        <TabsContent value="login" className="mt-0">
-                            <Card className="border border-gray-200 shadow-xl rounded-xl bg-white overflow-hidden">
-                                <CardContent className="p-6 pt-6">
-                                    <LoginForm
-                                        loginData={loginData}
-                                        formErrors={formErrors.login}
-                                        isLoading={isLoading}
-                                        handleLoginChange={handleLoginChange}
-                                        handleLoginSubmit={handleLoginSubmit}
-                                        toggleResetMode={toggleResetMode}
-                                        t={t}
-                                    />
-                                </CardContent>
-                            </Card>
-                        </TabsContent>
-
-                        <TabsContent value="signup" className="mt-0">
-                            <Card className="border border-gray-200 shadow-xl rounded-xl bg-white overflow-hidden">
-                                <CardContent className="p-6 pt-6">
-                                    <SignupForm
-                                        signupData={signupData}
-                                        formErrors={formErrors.signup}
-                                        isLoading={isLoading}
-                                        passwordsMatch={passwordsMatch}
-                                        handleSignupChange={handleSignupChange}
-                                        handleRoleChange={handleRoleChange}
-                                        handleSignupSubmit={handleSignupSubmit}
-                                        t={t}
-                                    />
-                                </CardContent>
-                            </Card>
-                        </TabsContent>
-                    </Tabs>
-                ) : (
+                <TabsContent value="login" className="mt-0">
                     <Card className="border border-gray-200 shadow-xl rounded-xl bg-white overflow-hidden">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-2xl font-bold text-green-700">{t("auth.resetPassword")}</CardTitle>
-                            <CardDescription>
-                                {t("auth.resetPasswordDescription")}
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="p-6">
-                            {error && (
-                                <Alert variant="destructive" className="mb-6 bg-red-50 border border-red-200 text-red-800 rounded-lg">
-                                    <AlertCircle className="h-4 w-4" />
-                                    <AlertDescription>{error}</AlertDescription>
-                                </Alert>
-                            )}
-
-                            <ResetForm
-                                resetEmail={resetEmail}
-                                formErrors={formErrors.reset}
+                        <CardContent className="p-6 pt-6">
+                            <LoginForm
+                                loginData={loginData}
+                                formErrors={formErrors.login}
                                 isLoading={isLoading}
-                                resetSuccess={resetSuccess}
-                                handleResetEmailChange={handleResetEmailChange}
-                                handleResetSubmit={handleResetSubmit}
+                                handleLoginChange={handleLoginChange}
+                                handleLoginSubmit={handleLoginSubmit}
                                 toggleResetMode={toggleResetMode}
                                 t={t}
                             />
                         </CardContent>
                     </Card>
-                )}
-            </div>
+                </TabsContent>
+
+                <TabsContent value="signup" className="mt-0">
+                    <Card className="border border-gray-200 shadow-xl rounded-xl bg-white overflow-hidden">
+                        <CardContent className="p-6 pt-6">
+                            <SignupForm
+                                signupData={signupData}
+                                formErrors={formErrors.signup}
+                                isLoading={isLoading}
+                                passwordsMatch={passwordsMatch}
+                                handleSignupChange={handleSignupChange}
+                                handleRoleChange={handleRoleChange}
+                                handleSignupSubmit={handleSignupSubmit}
+                                t={t}
+                            />
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
         </div>
     )
 }

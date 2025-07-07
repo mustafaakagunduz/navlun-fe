@@ -1,4 +1,4 @@
-// /components/auth/forms/LoginForm.tsx
+// src/app/login/LoginForm.tsx
 "use client"
 
 import React from "react"
@@ -34,7 +34,9 @@ const LoginForm = ({
 
         <div className="space-y-2">
             <div className="flex justify-between items-center">
-                <Label htmlFor="login-password" className={styleClasses.label}>{t("auth.password")}</Label>
+                <Label htmlFor="login-password" className={styleClasses.label}>
+                    {t("auth.password")}
+                </Label>
                 <Button
                     type="button"
                     variant="link"
@@ -66,14 +68,16 @@ const LoginForm = ({
             )}
         </div>
 
-        <Button
+        <button
             type="submit"
-            className={`${styleClasses.button} mt-8 transform-none hover:transform-none active:transform-none focus:transform-none`}
+            className={`${styleClasses.button} mt-8`}
             disabled={isLoading}
             style={{
-                willChange: 'auto',
+                WebkitBackfaceVisibility: 'hidden',
                 backfaceVisibility: 'hidden',
-                WebkitBackfaceVisibility: 'hidden'
+                WebkitTransform: 'translate3d(0, 0, 0)',
+                transform: 'translate3d(0, 0, 0)',
+                willChange: 'auto'
             }}
         >
             <span className="flex items-center justify-center w-full">
@@ -86,7 +90,7 @@ const LoginForm = ({
                     t("auth.login")
                 )}
             </span>
-        </Button>
+        </button>
     </form>
 )
 

@@ -1,9 +1,9 @@
+// src/app/login/page.tsx
 "use client"
 
 import { useEffect } from "react"
 import { Leaf } from "lucide-react"
 import Link from "next/link"
-import Image from "next/image"
 import AuthForms from "./AuthForms"
 import { useLanguage } from "@/context/LanguageContext"
 import { useAuth } from "@/context/AuthContext"
@@ -27,19 +27,17 @@ const LoginPage = () => {
             <header className="w-full py-5 bg-white border-b border-gray-100 shadow-sm">
                 <div className="container mx-auto px-4 md:px-8 flex justify-between items-center">
                     <Link href="/" className="flex items-center gap-2.5 group">
-                        <div className="bg-green-50 p-2 rounded-lg group-hover:bg-green-100 transition-colors">
+                        <div className="bg-green-50 p-2 rounded-lg group-hover:bg-green-100 transition-colors duration-200">
                             <Leaf className="h-6 w-6 text-green-600" />
                         </div>
                         <span className="text-xl font-bold text-gray-800 tracking-tight">
                             Transyük
                         </span>
                     </Link>
-
-                    {/* Language switcher could go here */}
                 </div>
             </header>
 
-            {/* Main content without animations */}
+            {/* Main content */}
             <main className="flex-1 flex flex-col md:flex-row items-stretch">
                 {/* Left side with content and form */}
                 <div className="w-full md:w-1/2 flex items-center justify-center p-6 md:p-12 relative z-10">
@@ -57,7 +55,7 @@ const LoginPage = () => {
                     </div>
                 </div>
 
-                {/* Right side with illustration or image - simplified without animations */}
+                {/* Right side with illustration */}
                 <div className="hidden md:flex md:w-1/2 bg-green-50 relative overflow-hidden">
                     <div className="w-full h-full flex items-center justify-center">
                         <div className="max-w-lg p-8 text-center">
@@ -75,10 +73,17 @@ const LoginPage = () => {
                             </p>
                         </div>
                     </div>
+
+                    {/* Decorative background elements */}
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                        <div className="absolute -top-40 -right-40 w-80 h-80 bg-green-100 rounded-full opacity-50"></div>
+                        <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-green-200 rounded-full opacity-30"></div>
+                        <div className="absolute top-1/2 right-8 w-32 h-32 bg-green-300 rounded-full opacity-20"></div>
+                    </div>
                 </div>
             </main>
 
-            {/* Enhanced footer */}
+            {/* Footer */}
             <footer className="w-full py-6 border-t border-gray-200 bg-white">
                 <div className="container mx-auto px-4 md:px-8 flex flex-col md:flex-row justify-between items-center">
                     <p className="text-sm text-gray-600">
@@ -86,13 +91,13 @@ const LoginPage = () => {
                     </p>
 
                     <div className="flex gap-6 mt-4 md:mt-0">
-                        <Link href="/terms" className="text-sm text-gray-600 hover:text-green-600 transition-colors">
+                        <Link href="/terms" className="text-sm text-gray-600 hover:text-green-600 transition-colors duration-200">
                             {t("footer.terms")}
                         </Link>
-                        <Link href="/privacy" className="text-sm text-gray-600 hover:text-green-600 transition-colors">
+                        <Link href="/privacy" className="text-sm text-gray-600 hover:text-green-600 transition-colors duration-200">
                             {t("footer.privacy")}
                         </Link>
-                        <Link href="/contact" className="text-sm text-gray-600 hover:text-green-600 transition-colors">
+                        <Link href="/contact" className="text-sm text-gray-600 hover:text-green-600 transition-colors duration-200">
                             {t("footer.contact")}
                         </Link>
                     </div>
