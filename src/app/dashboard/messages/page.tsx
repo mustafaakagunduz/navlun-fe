@@ -9,62 +9,32 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
     MessageSquare,
     Search,
-    Mail,
-    Send,
     Loader2,
     Clock,
-    CheckCircle,
-    Circle,
     Package,
     User,
-    Calendar,
-    Filter,
     RefreshCcw,
-    Eye,
-    Trash2,
-    Reply,
-    MoreVertical
+    Mail
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
-import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import {
-    fetchInbox,
-    fetchSentMessages,
-    fetchConversations,
-    fetchUnreadCount,
-    markMessageAsRead,
-    setSearchQuery,
-    setMessageTypeFilter,
-    resetMessageCount
-} from '@/store/slices/messagesSlice';
-
+import { useToast } from '@/hooks/use-toast';
+import messageService, { ConversationResponse } from '@/services/messageService';
 
 export default function MessagesPage() {
     const { user, isAuthenticated, isLoading } = useAuth();
     const router = useRouter();
-    const { t, language } = useLanguage();
-    const dispatch = useAppDispatch();
+    const { t } = useLanguage();
+    const { toast } = useToast();
 
-    // Redux state
-    const {
-        inbox,
-        inboxLoading,
-        sent,
-        sentLoading,
-        conversations,
-        conversationsLoading,
-        unreadCount,
-        searchQuery,
-        messageTypeFilter
-    } = useAppSelector(state => state.messages);
-
-    // Local state
-    const [activeTab, setActiveTab] = useState('conversations');
-    const [showFilters, setShowFilters] = useState(false);
+    // State
+    const [conversations, setConversations] = useState<ConversationResponse[]>([]);
+    const [filteredConversations, setFilteredConversations] = useState<ConversationResponse[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [unreadCount, setUnreadCount] = useState(0);
 
     // Redirect unauthenticated users
     useEffect(() => {
@@ -73,75 +43,101 @@ export default function MessagesPage() {
         }
     }, [isLoading, isAuthenticated, router]);
 
-    // Load messages on mount
+    // Load conversations on mount
     useEffect(() => {
         if (isAuthenticated && user?.id) {
-            dispatch(fetchConversations(user.id));
-            dispatch(fetchInbox(user.id));
-            dispatch(fetchSentMessages(user.id));
-            dispatch(fetchUnreadCount(user.id));
+            loadConversations();
+            loadUnreadCount();
         }
-    }, [dispatch, isAuthenticated, user?.id]);
+    }, [isAuthenticated, user?.id]);
 
-    // Reset message notification count when visiting this page
+    // Filter conversations based on search
     useEffect(() => {
-        dispatch(resetMessageCount());
-    }, [dispatch]);
+        if (searchQuery.trim() === '') {
+            setFilteredConversations(conversations);
+        } else {
+            const filtered = conversations.filter(conversation =>
+                conversation.loadTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                conversation.otherUserName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                conversation.lastMessageContent.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+            setFilteredConversations(filtered);
+        }
+    }, [searchQuery, conversations]);
 
-    // Filter messages based on search and filters
-    const filterMessages = (messages: any[]) => {
-        return messages.filter(message => {
-            const matchesSearch = searchQuery === '' ||
-                message.subject?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                message.content?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                message.senderFirstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                message.senderLastName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                message.receiverFirstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                message.receiverLastName?.toLowerCase().includes(searchQuery.toLowerCase());
-
-            const matchesType = messageTypeFilter === 'all' ||
-                message.messageType === messageTypeFilter;
-
-            return matchesSearch && matchesType;
-        });
-    };
-
-    const handleMessageClick = (loadId: string, otherUserId: string) => {
-        if (loadId) {
-            router.push(`/dashboard/messages/load/${loadId}?otherUserId=${otherUserId}`);
+    const loadConversations = async () => {
+        try {
+            setLoading(true);
+            const data = await messageService.getUserConversations(user!.id);
+            setConversations(data);
+        } catch (error) {
+            console.error('Konuşmalar yüklenirken hata:', error);
+            toast({
+                title: "Hata",
+                description: "Konuşmalar yüklenirken bir hata oluştu.",
+                variant: "destructive",
+            });
+        } finally {
+            setLoading(false);
         }
     };
 
-    const handleMarkAsRead = async (messageId: string) => {
-        if (user?.id) {
-            await dispatch(markMessageAsRead({ messageId, userId: user.id }));
+    const loadUnreadCount = async () => {
+        try {
+            const count = await messageService.getUnreadCount(user!.id);
+            setUnreadCount(count);
+        } catch (error) {
+            console.error('Okunmamış sayı yüklenirken hata:', error);
         }
     };
 
-    const getMessagePreview = (content: string) => {
-        return content?.length > 100 ? content.substring(0, 100) + '...' : content;
+    const handleConversationClick = (loadId: string, otherUserId: string) => {
+        router.push(`/dashboard/messages/load/${loadId}?otherUserId=${otherUserId}`);
+    };
+
+    const handleRefresh = () => {
+        loadConversations();
+        loadUnreadCount();
     };
 
     const formatDate = (dateString: string) => {
-        // Basit tarih formatı (date-fns yerine)
         const date = new Date(dateString);
         const now = new Date();
         const diffInMs = now.getTime() - date.getTime();
-        const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+        const diffInHours = diffInMs / (1000 * 60 * 60);
+        const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
 
-        if (diffInDays === 0) {
-            return 'Bugün';
-        } else if (diffInDays === 1) {
-            return 'Dün';
+        if (diffInHours < 1) {
+            return 'Az önce';
+        } else if (diffInHours < 24) {
+            return `${Math.floor(diffInHours)} saat önce`;
         } else if (diffInDays < 7) {
-            return `${diffInDays} gün önce`;
+            return `${Math.floor(diffInDays)} gün önce`;
         } else {
             return date.toLocaleDateString('tr-TR');
         }
     };
 
-    const getStatusBadgeColor = (isRead: boolean) => {
-        return isRead ? 'bg-gray-100 text-gray-600' : 'bg-blue-100 text-blue-600';
+    const getRoleBadgeColor = (role: string) => {
+        switch (role) {
+            case 'SENDER':
+                return 'bg-blue-100 text-blue-800';
+            case 'BROKER':
+                return 'bg-green-100 text-green-800';
+            default:
+                return 'bg-gray-100 text-gray-800';
+        }
+    };
+
+    const getRoleText = (role: string) => {
+        switch (role) {
+            case 'SENDER':
+                return 'Gönderici';
+            case 'BROKER':
+                return 'Broker';
+            default:
+                return role;
+        }
     };
 
     if (isLoading) {
@@ -161,306 +157,138 @@ export default function MessagesPage() {
                 {/* Header */}
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                            <MessageSquare className="h-8 w-8 text-blue-600" />
-                            Mesajlar
-                        </h1>
+                        <h1 className="text-3xl font-bold text-gray-900">Mesajlarım</h1>
                         <p className="text-gray-600 mt-1">
-                            Yük bazlı mesajlaşma ve iletişim merkezi
+                            Yük bazlı konuşmalarınızı görüntüleyin ve yönetin
                         </p>
                     </div>
                     <div className="flex items-center gap-3">
-                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                            <Mail className="h-4 w-4 mr-1" />
-                            {unreadCount} okunmamış mesaj
-                        </Badge>
+                        {unreadCount > 0 && (
+                            <Badge variant="destructive" className="bg-red-500">
+                                <Mail className="h-4 w-4 mr-1" />
+                                {unreadCount} okunmamış
+                            </Badge>
+                        )}
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => {
-                                if (user?.id) {
-                                    dispatch(fetchConversations(user.id));
-                                    dispatch(fetchInbox(user.id));
-                                    dispatch(fetchUnreadCount(user.id));
-                                }
-                            }}
+                            onClick={handleRefresh}
+                            disabled={loading}
                         >
-                            <RefreshCcw className="h-4 w-4 mr-2" />
+                            <RefreshCcw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                             Yenile
                         </Button>
                     </div>
                 </div>
 
-                {/* Search and Filters */}
+                {/* Search */}
                 <Card>
                     <CardContent className="p-4">
-                        <div className="flex flex-col lg:flex-row gap-4">
-                            <div className="flex-1 relative">
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                                <Input
-                                    placeholder="Mesajlarda ara..."
-                                    value={searchQuery}
-                                    onChange={(e) => dispatch(setSearchQuery(e.target.value))}
-                                    className="pl-10"
-                                />
-                            </div>
-                            <Button
-                                variant="outline"
-                                onClick={() => setShowFilters(!showFilters)}
-                            >
-                                <Filter className="h-4 w-4 mr-2" />
-                                Filtreler
-                            </Button>
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <Input
+                                placeholder="Konuşmaları ara... (yük başlığı, kullanıcı adı, mesaj içeriği)"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="pl-10"
+                            />
                         </div>
+                    </CardContent>
+                </Card>
 
-                        {showFilters && (
-                            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium mb-2">Mesaj Türü</label>
-                                        <select
-                                            value={messageTypeFilter}
-                                            onChange={(e) => dispatch(setMessageTypeFilter(e.target.value))}
-                                            className="w-full p-2 border rounded-md"
-                                        >
-                                            <option value="all">Tümü</option>
-                                            <option value="GENERAL_MESSAGE">Genel Mesaj</option>
-                                            <option value="OFFER_NOTIFICATION">Teklif Bildirimi</option>
-                                            <option value="LOAD_UPDATE">Yük Güncellemesi</option>
-                                            <option value="DELIVERY_UPDATE">Teslimat Güncellemesi</option>
-                                        </select>
+                {/* Conversations */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <MessageSquare className="h-5 w-5" />
+                            Yük Bazlı Konuşmalar
+                            <Badge variant="outline" className="ml-auto">
+                                {filteredConversations.length} konuşma
+                            </Badge>
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        {loading ? (
+                            <div className="flex items-center justify-center py-8">
+                                <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                                Konuşmalar yükleniyor...
+                            </div>
+                        ) : filteredConversations.length === 0 ? (
+                            <div className="text-center py-8">
+                                <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                                {searchQuery ? (
+                                    <>
+                                        <p className="text-gray-500">Arama kriterlerinize uygun konuşma bulunamadı</p>
+                                        <p className="text-sm text-gray-400 mt-2">
+                                            Farklı anahtar kelimelerle tekrar deneyin
+                                        </p>
+                                    </>
+                                ) : (
+                                    <>
+                                        <p className="text-gray-500">Henüz konuşma bulunmuyor</p>
+                                        <p className="text-sm text-gray-400 mt-2">
+                                            Yük kartlarından "Mesajlaş" butonunu kullanarak mesajlaşma başlatabilirsiniz
+                                        </p>
+                                    </>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {filteredConversations.map((conversation) => (
+                                    <div
+                                        key={`${conversation.loadId}-${conversation.otherUserId}`}
+                                        className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                                        onClick={() => handleConversationClick(conversation.loadId, conversation.otherUserId)}
+                                    >
+                                        <div className="flex items-start justify-between">
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <Package className="h-4 w-4 text-blue-600" />
+                                                    <span className="font-semibold text-gray-900">
+                                                        {conversation.loadTitle}
+                                                    </span>
+                                                    {conversation.unreadCount > 0 && (
+                                                        <Badge variant="destructive" className="text-xs">
+                                                            {conversation.unreadCount} yeni
+                                                        </Badge>
+                                                    )}
+                                                </div>
+
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <User className="h-4 w-4 text-gray-500" />
+                                                    <span className="text-gray-700">
+                                                        {conversation.otherUserName}
+                                                    </span>
+                                                    <Badge
+                                                        variant="secondary"
+                                                        className={`text-xs ${getRoleBadgeColor(conversation.otherUserRole)}`}
+                                                    >
+                                                        {getRoleText(conversation.otherUserRole)}
+                                                    </Badge>
+                                                </div>
+
+                                                <p className="text-sm text-gray-600 line-clamp-2 mb-2">
+                                                    {conversation.lastMessageContent}
+                                                </p>
+
+                                                <div className="flex items-center justify-between text-xs text-gray-500">
+                                                    <div className="flex items-center gap-1">
+                                                        <Clock className="h-3 w-3" />
+                                                        {formatDate(conversation.lastMessageAt)}
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        <MessageSquare className="h-3 w-3" />
+                                                        {conversation.messageCount} mesaj
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
+                                ))}
                             </div>
                         )}
                     </CardContent>
                 </Card>
-
-                {/* Messages Tabs */}
-                <Tabs value={activeTab} onValueChange={setActiveTab}>
-                    <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="conversations" className="flex items-center gap-2">
-                            <MessageSquare className="h-4 w-4" />
-                            Konuşmalar
-                        </TabsTrigger>
-                        <TabsTrigger value="inbox" className="flex items-center gap-2">
-                            <Mail className="h-4 w-4" />
-                            Gelen Kutusu ({inbox.length})
-                        </TabsTrigger>
-                        <TabsTrigger value="sent" className="flex items-center gap-2">
-                            <Send className="h-4 w-4" />
-                            Gönderilenler ({sent.length})
-                        </TabsTrigger>
-                    </TabsList>
-
-                    {/* Conversations Tab */}
-                    <TabsContent value="conversations" className="space-y-4">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Yük Bazlı Konuşmalar</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                {conversationsLoading ? (
-                                    <div className="flex items-center justify-center py-8">
-                                        <Loader2 className="h-6 w-6 animate-spin mr-2" />
-                                        Konuşmalar yükleniyor...
-                                    </div>
-                                ) : conversations.length === 0 ? (
-                                    <div className="text-center py-8">
-                                        <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                                        <p className="text-gray-500">Henüz konuşma bulunmuyor</p>
-                                        <p className="text-sm text-gray-400 mt-2">
-                                            Yük kartlarından "Gönderici ile Mesajlaş" butonunu kullanarak mesajlaşma başlatabilirsiniz
-                                        </p>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-3">
-                                        {conversations.map((conversation) => (
-                                            <div
-                                                key={`${conversation.loadId}-${conversation.otherUserId}`}
-                                                className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                                                onClick={() => handleMessageClick(conversation.loadId, conversation.otherUserId)}
-                                            >
-                                                <div className="flex items-start justify-between">
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center gap-2 mb-2">
-                                                            <Package className="h-4 w-4 text-blue-600" />
-                                                            <span className="font-medium">{conversation.loadTitle || "Yük Başlığı Yok"}</span>
-
-                                                            {conversation.unreadCount > 0 && (
-                                                                <Badge className="bg-red-100 text-red-600 border-red-200">
-                                                                    {conversation.unreadCount} yeni
-                                                                </Badge>
-                                                            )}
-                                                        </div>
-                                                        <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                                                            <User className="h-3 w-3" />
-                                                            <span>{conversation.otherUserName}</span>
-                                                            <Badge variant="outline" className="text-xs">
-                                                                {conversation.otherUserRole}
-                                                            </Badge>
-                                                        </div>
-                                                        <p className="text-sm text-gray-700 mb-2">
-                                                            {getMessagePreview(conversation.lastMessage)}
-                                                        </p>
-                                                        <div className="flex items-center text-xs text-gray-500">
-                                                            <Calendar className="h-3 w-3 mr-1" />
-                                                            {formatDate(conversation.lastMessageAt)}
-                                                        </div>
-                                                    </div>
-                                                    <Button variant="ghost" size="sm">
-                                                        <Eye className="h-4 w-4" />
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-
-                    {/* Inbox Tab */}
-                    <TabsContent value="inbox" className="space-y-4">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Gelen Kutusu</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                {inboxLoading ? (
-                                    <div className="flex items-center justify-center py-8">
-                                        <Loader2 className="h-6 w-6 animate-spin mr-2" />
-                                        Gelen kutusu yükleniyor...
-                                    </div>
-                                ) : filterMessages(inbox).length === 0 ? (
-                                    <div className="text-center py-8">
-                                        <Mail className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                                        <p className="text-gray-500">Gelen mesaj bulunmuyor</p>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-3">
-                                        {filterMessages(inbox).map((message) => (
-                                            <div
-                                                key={message.id}
-                                                className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                                                    message.isRead ? 'hover:bg-gray-50' : 'bg-blue-50 hover:bg-blue-100'
-                                                }`}
-                                                onClick={() => {
-                                                    if (!message.isRead) {
-                                                        handleMarkAsRead(message.id);
-                                                    }
-                                                    if (message.loadId) {
-                                                        handleMessageClick(message.loadId, message.senderUserId);
-                                                    }
-                                                }}
-                                            >
-                                                <div className="flex items-start justify-between">
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center gap-2 mb-2">
-                                                            {message.isRead ? (
-                                                                <CheckCircle className="h-4 w-4 text-gray-400" />
-                                                            ) : (
-                                                                <Circle className="h-4 w-4 text-blue-600" />
-                                                            )}
-                                                            <span className={`font-medium ${!message.isRead ? 'font-bold' : ''}`}>
-                                                                {message.subject}
-                                                            </span>
-                                                            <Badge className={getStatusBadgeColor(message.isRead)}>
-                                                                {message.messageType}
-                                                            </Badge>
-                                                        </div>
-                                                        <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                                                            <User className="h-3 w-3" />
-                                                            <span>{message.senderFirstName} {message.senderLastName}</span>
-                                                            <Badge variant="outline" className="text-xs">
-                                                                {message.senderRole}
-                                                            </Badge>
-                                                        </div>
-                                                        <p className="text-sm text-gray-700 mb-2">
-                                                            {getMessagePreview(message.content)}
-                                                        </p>
-                                                        <div className="flex items-center text-xs text-gray-500">
-                                                            <Calendar className="h-3 w-3 mr-1" />
-                                                            {formatDate(message.createdAt)}
-                                                        </div>
-                                                    </div>
-                                                    <Button variant="ghost" size="sm">
-                                                        <Reply className="h-4 w-4" />
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-
-                    {/* Sent Tab */}
-                    <TabsContent value="sent" className="space-y-4">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Gönderilen Mesajlar</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                {sentLoading ? (
-                                    <div className="flex items-center justify-center py-8">
-                                        <Loader2 className="h-6 w-6 animate-spin mr-2" />
-                                        Gönderilen mesajlar yükleniyor...
-                                    </div>
-                                ) : filterMessages(sent).length === 0 ? (
-                                    <div className="text-center py-8">
-                                        <Send className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                                        <p className="text-gray-500">Gönderilen mesaj bulunmuyor</p>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-3">
-                                        {filterMessages(sent).map((message) => (
-                                            <div
-                                                key={message.id}
-                                                className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                                                onClick={() => {
-                                                    if (message.loadId) {
-                                                        handleMessageClick(message.loadId, message.receiverUserId);
-                                                    }
-                                                }}
-                                            >
-                                                <div className="flex items-start justify-between">
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center gap-2 mb-2">
-                                                            <Send className="h-4 w-4 text-green-600" />
-                                                            <span className="font-medium">{message.subject}</span>
-                                                            <Badge className="bg-green-100 text-green-600 border-green-200">
-                                                                {message.messageType}
-                                                            </Badge>
-                                                        </div>
-                                                        <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                                                            <User className="h-3 w-3" />
-                                                            <span>Kime: {message.receiverFirstName} {message.receiverLastName}</span>
-                                                            <Badge variant="outline" className="text-xs">
-                                                                {message.receiverRole}
-                                                            </Badge>
-                                                        </div>
-                                                        <p className="text-sm text-gray-700 mb-2">
-                                                            {getMessagePreview(message.content)}
-                                                        </p>
-                                                        <div className="flex items-center text-xs text-gray-500">
-                                                            <Calendar className="h-3 w-3 mr-1" />
-                                                            {formatDate(message.createdAt)}
-                                                        </div>
-                                                    </div>
-                                                    <Button variant="ghost" size="sm">
-                                                        <Eye className="h-4 w-4" />
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-                </Tabs>
             </div>
         </ProtectedRoute>
     );

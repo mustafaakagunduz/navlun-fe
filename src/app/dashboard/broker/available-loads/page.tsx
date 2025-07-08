@@ -224,40 +224,15 @@ export default function BrokerAvailableLoads() {
         router.push(`/dashboard/broker/loads/${load.id}`);
     };
 
-    const handleMessageClick = async (load: Load) => {
-        try {
-            console.log('Load object:', load);
-
-            // senderId varsa bunu kullan
-            if (!load.senderId) {
-                console.log('Sender ID missing. Load object:', load);
-                toast({
-                    title: "Hata",
-                    description: "Gönderici bilgisi bulunamadı.",
-                    variant: "destructive",
-                });
-                return;
-            }
-
-            console.log('Redirecting to:', `/dashboard/messages/load/${load.id}`);
-
-            // senderId'yi query parameter olarak ekle
-            router.push(`/dashboard/messages/load/${load.id}?senderId=${load.senderId}`);
-        } catch (error) {
-            console.error('Mesajlaşma hatası:', error);
-            toast({
-                title: "Hata",
-                description: "Mesajlaşma başlatılırken bir hata oluştu.",
-                variant: "destructive",
-            });
-        }
-    };
-
     const handleMessageSender = (load: Load) => {
-        // Backend'den gelen Load objesinde sender.id'yi kullan
-        if (load.sender?.id) {
-            router.push(`/dashboard/messages/load/${load.id}?senderProfileId=${load.sender.id}`);
+        // Sender bilgisini kontrol et
+        const senderId = load.sender?.id || load.senderId;
+
+        if (senderId) {
+            // Standart otherUserId parametresi kullan
+            router.push(`/dashboard/messages/load/${load.id}?otherUserId=${senderId}`);
         } else {
+            console.error('Sender bilgisi bulunamadı. Load object:', load);
             toast({
                 title: 'Hata',
                 description: 'Gönderici bilgisi bulunamadı.',
@@ -540,7 +515,7 @@ export default function BrokerAvailableLoads() {
                                                 variant="outline"
                                                 size="sm"
                                                 className="flex-1"
-                                                onClick={() => handleMessageClick(load)}
+                                                onClick={() => handleMessageSender(load)}
                                             >
                                                 <MessageSquare className="h-4 w-4 mr-1" />
                                                 Mesajlaş

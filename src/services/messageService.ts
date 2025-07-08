@@ -1,34 +1,32 @@
 // src/services/messageService.ts
 import apiService from '@/services/apiService';
 
-// Tip tanımlamaları
+// Temizlenmiş tip tanımları
 export interface MessageRequest {
-    loadId?: string;
+    loadId: string;
+    senderUserId: string;
     receiverUserId: string;
     subject: string;
     content: string;
-    messageType: MessageType;
+    messageType?: MessageType;
     priority?: MessagePriority;
     category?: MessageCategory;
-    parentMessageId?: string;
-    attachments?: string[];
 }
-
 
 export interface MessageResponse {
     id: string;
-    loadId?: string;
+    loadId: string;
     loadTitle?: string;
     loadGoodsType?: string;
     senderUserId: string;
     senderFirstName?: string;
     senderLastName?: string;
-    senderEmail: string;
+    senderEmail?: string;
     senderRole: string;
     receiverUserId: string;
     receiverFirstName?: string;
     receiverLastName?: string;
-    receiverEmail: string;
+    receiverEmail?: string;
     receiverRole: string;
     subject: string;
     content: string;
@@ -37,14 +35,6 @@ export interface MessageResponse {
     category: MessageCategory;
     isRead: boolean;
     readAt?: string;
-    parentMessageId?: string;
-    isReply: boolean;
-    hasReplies: boolean;
-    replyCount: number;
-    attachments: string[];
-    hasAttachments: boolean;
-    senderDeleted: boolean;
-    receiverDeleted: boolean;
     createdAt: string;
     updatedAt: string;
 }
@@ -55,9 +45,10 @@ export interface ConversationResponse {
     otherUserId: string;
     otherUserName: string;
     otherUserRole: string;
-    lastMessage: string;
-    lastMessageAt: string;
+    messageCount: number;
     unreadCount: number;
+    lastMessageAt: string;
+    lastMessageContent: string;
 }
 
 export enum MessageType {
@@ -66,11 +57,7 @@ export enum MessageType {
     OFFER_ACCEPTED = "OFFER_ACCEPTED",
     OFFER_REJECTED = "OFFER_REJECTED",
     LOAD_UPDATE = "LOAD_UPDATE",
-    DELIVERY_UPDATE = "DELIVERY_UPDATE",
-    SYSTEM_MESSAGE = "SYSTEM_MESSAGE",
-    CONTRACT_MESSAGE = "CONTRACT_MESSAGE",
-    PAYMENT_MESSAGE = "PAYMENT_MESSAGE",
-    COMPLAINT = "COMPLAINT"
+    DELIVERY_UPDATE = "DELIVERY_UPDATE"
 }
 
 export enum MessagePriority {
@@ -88,7 +75,7 @@ export enum MessageCategory {
 }
 
 const messageService = {
-    // Mesaj gönderme
+    // Mesaj gönder
     sendMessage: async (messageData: MessageRequest): Promise<MessageResponse> => {
         try {
             return await apiService.post<MessageResponse>('/messages', messageData);
@@ -98,63 +85,30 @@ const messageService = {
         }
     },
 
-    // Mesaja yanıt verme
-    replyToMessage: async (parentMessageId: string, messageData: MessageRequest): Promise<MessageResponse> => {
+    // Yük için konuşma getir
+    getLoadConversation: async (loadId: string, userId: string, otherUserId: string): Promise<MessageResponse[]> => {
         try {
-            return await apiService.post<MessageResponse>(`/messages/${parentMessageId}/reply`, messageData);
-        } catch (error) {
-            console.error('Reply to message error:', error);
-            throw error;
-        }
-    },
-
-    // Kullanıcının gelen kutusu
-    getInboxByUser: async (userId: string): Promise<MessageResponse[]> => {
-        try {
-            return await apiService.get<MessageResponse[]>(`/messages/user/${userId}/inbox`);
-        } catch (error) {
-            console.error('Get inbox error:', error);
-            throw error;
-        }
-    },
-
-
-
-    // Kullanıcının gönderilen mesajları
-    getSentByUser: async (userId: string): Promise<MessageResponse[]> => {
-        try {
-            return await apiService.get<MessageResponse[]>(`/messages/user/${userId}/sent`);
-        } catch (error) {
-            console.error('Get sent messages error:', error);
-            throw error;
-        }
-    },
-
-    // Kullanıcının tüm konuşmaları
-    getConversationsForUser: async (userId: string): Promise<ConversationResponse[]> => {
-        try {
-            return await apiService.get<ConversationResponse[]>(`/messages/user/${userId}/conversations`);
-        } catch (error) {
-            console.error('Get conversations error:', error);
-            throw error;
-        }
-    },
-
-    // Yük bazlı konuşma
-    getConversationForLoad: async (loadId: string, user1Id: string, user2Id: string): Promise<MessageResponse[]> => {
-        try {
-            return await apiService.get<MessageResponse[]>(`/messages/conversation/load/${loadId}`, {
-                user1Id,
-                user2Id
-            });
+            return await apiService.get<MessageResponse[]>(
+                `/messages/load/${loadId}/conversation?userId=${userId}&otherUserId=${otherUserId}`
+            );
         } catch (error) {
             console.error('Get load conversation error:', error);
             throw error;
         }
     },
 
+    // Kullanıcının konuşma listesi
+    getUserConversations: async (userId: string): Promise<ConversationResponse[]> => {
+        try {
+            return await apiService.get<ConversationResponse[]>(`/messages/user/${userId}/conversations`);
+        } catch (error) {
+            console.error('Get user conversations error:', error);
+            throw error;
+        }
+    },
+
     // Okunmamış mesaj sayısı
-    getUnreadMessageCount: async (userId: string): Promise<number> => {
+    getUnreadCount: async (userId: string): Promise<number> => {
         try {
             return await apiService.get<number>(`/messages/user/${userId}/unread-count`);
         } catch (error) {
@@ -163,52 +117,12 @@ const messageService = {
         }
     },
 
-    // Okunmamış mesajlar
-    getUnreadMessages: async (userId: string): Promise<MessageResponse[]> => {
-        try {
-            return await apiService.get<MessageResponse[]>(`/messages/user/${userId}/unread`);
-        } catch (error) {
-            console.error('Get unread messages error:', error);
-            throw error;
-        }
-    },
-
     // Mesajı okundu olarak işaretle
-    markMessageAsRead: async (messageId: string, userId: string): Promise<boolean> => {
+    markAsRead: async (messageId: string, userId: string): Promise<boolean> => {
         try {
             return await apiService.post<boolean>(`/messages/${messageId}/mark-read?userId=${userId}`);
         } catch (error) {
-            console.error('Mark message as read error:', error);
-            throw error;
-        }
-    },
-
-    // Tüm mesajları okundu işaretle
-    markAllMessagesAsRead: async (userId: string): Promise<boolean> => {
-        try {
-            return await apiService.post<boolean>(`/messages/user/${userId}/mark-all-read`);
-        } catch (error) {
-            console.error('Mark all messages as read error:', error);
-            throw error;
-        }
-    },
-
-    // Yük için mesajları getir
-    getMessagesByLoad: async (loadId: string): Promise<MessageResponse[]> => {
-        try {
-            return await apiService.get<MessageResponse[]>(`/messages/load/${loadId}`);
-        } catch (error) {
-            console.error('Get messages by load error:', error);
-            throw error;
-        }
-    },
-
-    // Mesaj sil
-    deleteMessageForUser: async (messageId: string, userId: string): Promise<boolean> => {
-        try {
-            return await apiService.delete<boolean>(`/messages/${messageId}/${ userId }`);
-        } catch (error) {
-            console.error('Delete message error:', error);
+            console.error('Mark as read error:', error);
             throw error;
         }
     }
