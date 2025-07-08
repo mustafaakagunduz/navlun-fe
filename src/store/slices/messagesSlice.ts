@@ -258,10 +258,12 @@ const messagesSlice = createSlice({
             })
             .addCase(fetchConversations.fulfilled, (state, action) => {
                 state.conversationsLoading = false
-                state.conversations = action.payload.map((c: ConversationResponse) => ({
-                    ...c,
-                    loadTitle: c.loadTitle ?? "Yük Başlığı Yok"
-                }))
+                state.conversations = action.payload
+                    .filter((c: ConversationResponse) => c.loadTitle != null) // null olanları filtrele
+                    .map((c: ConversationResponse) => ({
+                        ...c,
+                        loadTitle: c.loadTitle || "Yük Başlığı Yok"
+                    }))
             })
 
             .addCase(fetchConversations.rejected, (state, action) => {
@@ -297,6 +299,14 @@ const messagesSlice = createSlice({
                 // Eğer aktif konuşmadaysa, konuşmaya da ekle
                 if (state.activeLoadId === action.payload.loadId) {
                     state.activeConversation.push(action.payload)
+                }
+                // Conversations listesini güncelle
+                const conversationIndex = state.conversations.findIndex(
+                    conv => conv.loadId === action.payload.loadId
+                )
+                if (conversationIndex !== -1) {
+                    state.conversations[conversationIndex].lastMessage = action.payload.content
+                    state.conversations[conversationIndex].lastMessageAt = action.payload.createdAt
                 }
             })
             .addCase(sendMessage.rejected, (state, action) => {

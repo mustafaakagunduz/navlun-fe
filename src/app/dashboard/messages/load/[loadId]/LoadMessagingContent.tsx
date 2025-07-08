@@ -54,12 +54,11 @@ interface LoadInfo {
 }
 
 export default function LoadMessagingContent({ loadId }: LoadMessagingContentProps) {
+
     const { user } = useAuth();
     const { t } = useLanguage();
     const router = useRouter();
     const { toast } = useToast();
-
-
     const [messages, setMessages] = useState<Message[]>([]);
     const [loadInfo, setLoadInfo] = useState<LoadInfo | null>(null);
     const [newMessage, setNewMessage] = useState('');
@@ -71,12 +70,9 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
         loadData();
     }, [loadId]);
 
-
     const loadData = async () => {
         try {
             setLoading(true);
-
-
 
             // Load bilgilerini getir
             const loadData = await loadService.getLoadById(loadId);
@@ -96,8 +92,10 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
             });
 
             // Önce sender objesini kontrol et
+            let otherUserId: string;
             if (loadData.sender?.userId) {
                 console.log('Using sender object:', loadData.sender);
+                otherUserId = loadData.sender.userId;
                 setOtherUser({
                     id: loadData.sender.userId,
                     name: loadData.sender.companyName || 'Gönderici',
@@ -105,6 +103,7 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
                 });
             } else if (loadData.senderId) {
                 console.log('Using senderId fallback:', loadData.senderId);
+                otherUserId = loadData.senderId;
                 setOtherUser({
                     id: loadData.senderId,
                     name: 'Gönderici Şirketi',
@@ -120,23 +119,50 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
                 return;
             }
 
-            // Mesajları getir (şimdilik mock data)
-            const mockMessages: Message[] = [];
-            setMessages(mockMessages);
+            // Backend'den mesajları getir
+            if (user?.id && otherUserId) {
+                try {
+                    const response = await messageService.getConversationForLoad(
+                        loadId,
+                        user.id,
+                        otherUserId
+                    );
+
+                    const formattedMessages: Message[] = response.map(msg => ({
+                        id: msg.id,
+                        content: msg.content,
+                        senderUserId: msg.senderUserId,
+                        senderName: `${msg.senderFirstName} ${msg.senderLastName}`,
+                        senderRole: msg.senderRole,
+                        receiverUserId: msg.receiverUserId,
+                        receiverName: `${msg.receiverFirstName} ${msg.receiverLastName}`,
+                        receiverRole: msg.receiverRole,
+                        createdAt: msg.createdAt,
+                        isRead: msg.isRead
+                    }));
+
+                    setMessages(formattedMessages);
+                    console.log('Messages loaded:', formattedMessages);
+                } catch (messageError) {
+                    console.error('Mesaj yükleme hatası:', messageError);
+                    // Mesaj yükleme hatası olursa boş liste göster
+                    setMessages([]);
+                }
+            } else {
+                setMessages([]);
+            }
 
         } catch (error) {
             console.error('Veri yükleme hatası:', error);
             toast({
                 title: "Hata",
-                description: "Mesajlar yüklenirken bir hata oluştu.",
+                description: "Veriler yüklenirken bir hata oluştu.",
                 variant: "destructive",
             });
         } finally {
             setLoading(false);
         }
     };
-
-
 
     const handleSendMessage = async () => {
         if (!newMessage.trim() || !otherUser) return;
@@ -188,7 +214,6 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
             setSending(false);
         }
     };
-
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleString('tr-TR', {

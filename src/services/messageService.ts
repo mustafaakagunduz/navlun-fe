@@ -118,6 +118,8 @@ const messageService = {
         }
     },
 
+
+
     // Kullanıcının gönderilen mesajları
     getSentByUser: async (userId: string): Promise<MessageResponse[]> => {
         try {
@@ -171,10 +173,10 @@ const messageService = {
         }
     },
 
-    // Mesajı okundu işaretle
+    // Mesajı okundu olarak işaretle
     markMessageAsRead: async (messageId: string, userId: string): Promise<boolean> => {
         try {
-            return await apiService.post<boolean>(`/messages/${messageId}/mark-read`, { userId });
+            return await apiService.post<boolean>(`/messages/${messageId}/mark-read?userId=${userId}`);
         } catch (error) {
             console.error('Mark message as read error:', error);
             throw error;

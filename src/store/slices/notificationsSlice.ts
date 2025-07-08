@@ -1,5 +1,6 @@
 // src/store/slices/notificationsSlice.ts - YENİ DOSYA
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
+import messageService from "@/services/messageService";
 
 interface NotificationCounts {
     offers: number
@@ -53,6 +54,18 @@ export const fetchNotificationCounts = createAsyncThunk(
     }
 );
 
+export const updateMessageCountFromMessages = createAsyncThunk(
+    'notifications/updateMessageCountFromMessages',
+    async (userId: string, { rejectWithValue }) => {
+        try {
+            const count = await messageService.getUnreadMessageCount(userId);
+            return count;
+        } catch (error: any) {
+            return rejectWithValue(error.message || 'Mesaj sayısı güncellenemedi');
+        }
+    }
+);
+
 const notificationsSlice = createSlice({
     name: 'notifications',
     initialState,
@@ -99,6 +112,12 @@ const notificationsSlice = createSlice({
             })
             .addCase(fetchNotificationCounts.rejected, (state, action) => {
                 state.loading = false
+                state.error = action.payload as string
+            })
+            .addCase(updateMessageCountFromMessages.fulfilled, (state, action) => {
+                state.counts.messages = action.payload
+            })
+            .addCase(updateMessageCountFromMessages.rejected, (state, action) => {
                 state.error = action.payload as string
             })
     },
