@@ -1,5 +1,5 @@
 import { motion } from "framer-motion"
-import { CheckCircle, Leaf, Recycle, TruckIcon, Users, Building2 } from "lucide-react"
+import { CheckCircle, Leaf, Recycle, TruckIcon, Users, Building2, Handshake } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useLanguage } from "@/context/LanguageContext"
@@ -14,7 +14,7 @@ const HeroSection = () => {
         >
             {/* Ana içerik */}
             <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
                     {/* Sol taraf - Metin içeriği */}
                     <div className="text-white">
                         <motion.div
@@ -66,42 +66,64 @@ const HeroSection = () => {
 
                             {/* CTA Butonları */}
                             <motion.div
-                                className="flex flex-col sm:flex-row gap-4 pt-4"
+                                className="pt-4"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.6, delay: 0.8 }}
                             >
-                                <Link href="/auth/register">
-                                    <motion.div
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        className="w-full sm:w-auto"
-                                    >
-                                        <Button
-                                            size="lg"
-                                            className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white border-0 px-8 py-3 text-lg font-semibold"
+                                <div className="flex flex-col gap-3 sm:gap-4">
+                                    {/* İlk buton - Get Service */}
+                                    <Link href="/auth/register">
+                                        <motion.div
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            className="w-full"
                                         >
-                                            <TruckIcon className="mr-2 h-5 w-5" />
-                                            {t("hero.getService")}
-                                        </Button>
-                                    </motion.div>
-                                </Link>
+                                            <Button
+                                                size="lg"
+                                                className="w-full bg-green-600 hover:bg-green-700 text-white border-0 px-8 py-3 text-lg font-semibold"
+                                            >
+                                                <TruckIcon className="mr-2 h-5 w-5" />
+                                                {t("hero.getService")}
+                                            </Button>
+                                        </motion.div>
+                                    </Link>
 
-                                <Link href="/auth/login">
-                                    <motion.div
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        className="w-full sm:w-auto"
-                                    >
-                                        <Button
-                                            size="lg"
-                                            className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white border-0 px-8 py-3 text-lg font-semibold"
-                                        >
-                                            <Users className="mr-2 h-5 w-5" />
-                                            {t("hero.joinAsCarrier")}
-                                        </Button>
-                                    </motion.div>
-                                </Link>
+                                    {/* İkinci ve üçüncü butonlar - yan yana */}
+                                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                                        <Link href="/auth/login" className="flex-1">
+                                            <motion.div
+                                                whileHover={{ scale: 1.05 }}
+                                                whileTap={{ scale: 0.95 }}
+                                                className="w-full"
+                                            >
+                                                <Button
+                                                    size="lg"
+                                                    className="w-full bg-green-600 hover:bg-green-700 text-white border-0 px-6 py-3 text-base font-semibold"
+                                                >
+                                                    <Users className="mr-2 h-5 w-5" />
+                                                    {t("hero.joinAsCarrier")}
+                                                </Button>
+                                            </motion.div>
+                                        </Link>
+
+                                        <Link href="/auth/login" className="flex-1">
+                                            <motion.div
+                                                whileHover={{ scale: 1.05 }}
+                                                whileTap={{ scale: 0.95 }}
+                                                className="w-full"
+                                            >
+                                                <Button
+                                                    size="lg"
+                                                    className="w-full bg-green-600 hover:bg-green-700 text-white border-0 px-6 py-3 text-base font-semibold"
+                                                >
+                                                    <Handshake className="mr-2 h-5 w-5" />
+                                                    {t("hero.joinAsBroker")}
+                                                </Button>
+                                            </motion.div>
+                                        </Link>
+                                    </div>
+                                </div>
                             </motion.div>
                         </motion.div>
                     </div>
@@ -116,9 +138,11 @@ const HeroSection = () => {
                         <div className="space-y-6">
                             {/* İstatistik kartları */}
                             <motion.div
-                                className="bg-white/10  rounded-2xl p-6 border border-white/20"
+                                className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.6, delay: 0.6 }}
                                 whileHover={{ scale: 1.02 }}
-                                transition={{ duration: 0.2 }}
                             >
                                 <div className="flex items-center gap-4">
                                     <div className="p-3 bg-green-500/20 rounded-xl">
@@ -126,15 +150,17 @@ const HeroSection = () => {
                                     </div>
                                     <div className="text-white">
                                         <div className="text-2xl font-bold">1000+</div>
-                                        <div className="text-sm text-gray-300">Aktif Taşıyıcı</div>
+                                        <div className="text-sm text-gray-300">{t("hero.activeCarrier")}</div>
                                     </div>
                                 </div>
                             </motion.div>
 
                             <motion.div
-                                className="bg-white/10  rounded-2xl p-6 border border-white/20"
+                                className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.6, delay: 0.8 }}
                                 whileHover={{ scale: 1.02 }}
-                                transition={{ duration: 0.2 }}
                             >
                                 <div className="flex items-center gap-4">
                                     <div className="p-3 bg-blue-500/20 rounded-xl">
@@ -142,15 +168,17 @@ const HeroSection = () => {
                                     </div>
                                     <div className="text-white">
                                         <div className="text-2xl font-bold">500+</div>
-                                        <div className="text-sm text-gray-300">Güvenilir Firma</div>
+                                        <div className="text-sm text-gray-300">{t("hero.company")}</div>
                                     </div>
                                 </div>
                             </motion.div>
 
                             <motion.div
-                                className="bg-white/10  rounded-2xl p-6 border border-white/20"
+                                className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.6, delay: 1.0 }}
                                 whileHover={{ scale: 1.02 }}
-                                transition={{ duration: 0.2 }}
                             >
                                 <div className="flex items-center gap-4">
                                     <div className="p-3 bg-green-500/20 rounded-xl">
@@ -158,7 +186,7 @@ const HeroSection = () => {
                                     </div>
                                     <div className="text-white">
                                         <div className="text-2xl font-bold">%25</div>
-                                        <div className="text-sm text-gray-300">Karbon Azaltma</div>
+                                        <div className="text-sm text-gray-300">{t("hero.carbonDecrease")}</div>
                                     </div>
                                 </div>
                             </motion.div>

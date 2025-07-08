@@ -6,7 +6,7 @@ import { Leaf } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import LanguageSwitcher from "./LanguageSwitcher"
 import { useLanguage } from "@/context/LanguageContext"
-
+import Image from 'next/image'
 const NavbarWithoutLogin = () => {
     const [isScrolled, setIsScrolled] = useState<boolean>(false)
     const { t } = useLanguage();
@@ -30,8 +30,13 @@ const NavbarWithoutLogin = () => {
         >
             <div className="mx-auto flex h-16 items-center justify-between px-4 md:px-6 max-w-7xl">
                 <div className={`flex items-center gap-2 ${isScrolled ? 'text-gray-900' : 'text-white'}`}>
-                    <Leaf className="h-6 w-6 text-green-600" />
-                    <span className="text-xl font-bold">Transyük</span>
+                    <Image
+                        src="/assets/images/transyuk-aka.png"
+                        alt="TRANSYÜK Logo"
+                        width={120}
+                        height={32}
+                        className="h-8 w-auto"
+                    />
                 </div>
                 <nav className="hidden md:flex gap-6">
                     <Link href="#hero" className={`text-base font-semibold transition-colors ${

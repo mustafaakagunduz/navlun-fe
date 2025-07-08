@@ -13,6 +13,9 @@
     "getService": "Get Transport Service",
     "joinAsCarrier": "Join As Carrier",
     "joinAsBroker": "Join As Broker",
+    "activeCarrier": "Active Carrier",
+    "company": "Companies",
+    "carbonDecrease": "Carbon Decrease",
     "safe": "100% Safe",
     "ecofriendly": "Eco-Friendly",
     "sustainable": "Sustainable"
