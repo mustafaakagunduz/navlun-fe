@@ -117,6 +117,28 @@ const messageService = {
         }
     },
 
+    // Mesaj güncelle
+    updateMessage: async (messageId: string, userId: string, newContent: string): Promise<MessageResponse> => {
+        try {
+            return await apiService.put<MessageResponse>(`/messages/${messageId}?userId=${userId}`, {
+                content: newContent
+            });
+        } catch (error) {
+            console.error('Update message error:', error);
+            throw error;
+        }
+    },
+
+    // Mesaj sil
+    deleteMessage: async (messageId: string, userId: string): Promise<boolean> => {
+        try {
+            return await apiService.delete<boolean>(`/messages/${messageId}?userId=${userId}`);
+        } catch (error) {
+            console.error('Delete message error:', error);
+            throw error;
+        }
+    },
+
     // Konuşmayı kullanıcı için sil (soft delete)
     deleteConversationForUser: async (userId: string, loadId: string, otherUserId: string): Promise<boolean> => {
         try {

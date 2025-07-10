@@ -16,6 +16,9 @@ import {
     Send,
     ArrowLeft,
     Package,
+    MoreVertical,  // 👈 YENİ (⋮ ikonu)
+    Edit2,         // 👈 YENİ
+    Trash2,         // 👈 YENİ
     User,
     Calendar,
     Loader2,
@@ -57,6 +60,12 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
     const { toast } = useToast();
     const searchParams = useSearchParams();
     const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    //edit-delete işleri
+    const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+    const [editingContent, setEditingContent] = useState('');
+    const [deletingMessageId, setDeletingMessageId] = useState<string | null>(null);
+
 
     // URL'den otherUserId'yi al
     const otherUserId = searchParams.get('otherUserId');
@@ -112,17 +121,26 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
                     if (finalOtherUserId) {
                         const newMessages = await messageService.getLoadConversation(loadId, user.id, finalOtherUserId);
 
-                        // Mevcut mesajlarla karşılaştır, sadece yeni mesajları ekle
+                        // TAMAMEN YENİ YAKLAŞIM: Tüm mesaj listesini karşılaştır
                         setMessages(prevMessages => {
-                            const currentMessageIds = new Set(prevMessages.map(msg => msg.id));
-                            const freshMessages = newMessages.filter(msg => !currentMessageIds.has(msg.id));
+                            // Aynı mesaj sayısı ve içerik varsa değişiklik yok
+                            if (prevMessages.length === newMessages.length) {
+                                // Her mesajı karşılaştır (content ve updatedAt)
+                                const hasChanges = newMessages.some((newMsg, index) => {
+                                    const prevMsg = prevMessages[index];
+                                    return !prevMsg ||
+                                        prevMsg.content !== newMsg.content ||
+                                        prevMsg.updatedAt !== newMsg.updatedAt;
+                                });
 
-                            if (freshMessages.length > 0) {
-                                console.log(`${freshMessages.length} yeni mesaj alındı`);
-                                return [...prevMessages, ...freshMessages];
+                                if (!hasChanges) {
+                                    return prevMessages; // Değişiklik yok, mevcut state'i koru
+                                }
                             }
 
-                            return prevMessages;
+                            // Değişiklik var veya yeni mesajlar var, tümünü güncelle
+                            console.log('Mesajlar güncellendi (edit/delete/new)');
+                            return newMessages;
                         });
                     }
                 } catch (error) {
@@ -267,6 +285,88 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleEditMessage = (messageId: string, currentContent: string) => {
+        setEditingMessageId(messageId);
+        setEditingContent(currentContent);
+    };
+
+    const handleSaveEdit = async (messageId: string) => {
+        if (!editingContent.trim() || !user?.id) return;
+
+        try {
+            const updatedMessage = await messageService.updateMessage(messageId, user.id, editingContent.trim());
+
+            // Mesajı listede güncelle
+            setMessages(prev =>
+                prev.map(msg =>
+                    msg.id === messageId ? updatedMessage : msg
+                )
+            );
+
+            setEditingMessageId(null);
+            setEditingContent('');
+
+            toast({
+                title: "Başarılı",
+                description: "Mesaj güncellendi.",
+            });
+        } catch (error: any) {
+            console.error('Mesaj güncelleme hatası:', error);
+            toast({
+                title: "Hata",
+                description: error.response?.data?.message || "Mesaj güncellenirken hata oluştu.",
+                variant: "destructive",
+            });
+        }
+    };
+
+    const handleCancelEdit = () => {
+        setEditingMessageId(null);
+        setEditingContent('');
+    };
+
+    const handleDeleteMessage = async (messageId: string) => {
+        if (!user?.id) return;
+
+        const confirmed = window.confirm("Bu mesajı silmek istediğinizden emin misiniz?");
+        if (!confirmed) return;
+
+        try {
+            setDeletingMessageId(messageId);
+
+            await messageService.deleteMessage(messageId, user.id);
+
+            // Mesajı listeden kaldır
+            setMessages(prev => prev.filter(msg => msg.id !== messageId));
+
+            toast({
+                title: "Başarılı",
+                description: "Mesaj silindi.",
+            });
+        } catch (error: any) {
+            console.error('Mesaj silme hatası:', error);
+            toast({
+                title: "Hata",
+                description: error.response?.data?.message || "Mesaj silinirken hata oluştu.",
+                variant: "destructive",
+            });
+        } finally {
+            setDeletingMessageId(null);
+        }
+    };
+
+// Mesajın editlenebilir olup olmadığını kontrol et
+    const canEditMessage = (message: MessageResponse) => {
+        if (message.senderUserId !== user?.id) return false;
+        return true;
+
+        const messageTime = new Date(message.createdAt);
+        const now = new Date();
+        const diffInMinutes = (now.getTime() - messageTime.getTime()) / (1000 * 60);
+
+        return diffInMinutes <= 15; // 15 dakika içinde editlenebilir
     };
 
     const handleSendMessage = async () => {
@@ -459,6 +559,7 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-0">
+
                         {/* Mesaj Listesi */}
                         <div className="h-96 overflow-y-auto p-4 space-y-4">
                             {messages.length === 0 ? (
@@ -468,60 +569,145 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
                                     <p className="text-sm">İlk mesajı göndererek konuşmayı başlatın</p>
                                 </div>
                             ) : (
-                                messages.map((message) => (
-                                    <div
-                                        key={message.id}
-                                        className={`flex ${
-                                            message.senderUserId === user?.id ? 'justify-end' : 'justify-start'
-                                        }`}
-                                    >
+                                messages.map((message) => {
+                                    const isMyMessage = message.senderUserId === user?.id;
+                                    const isEditing = editingMessageId === message.id;
+                                    const isDeleting = deletingMessageId === message.id;
+                                    const canEdit = canEditMessage(message);
+
+                                    return (
                                         <div
-                                            className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${
-                                                message.senderUserId === user?.id
-                                                    ? 'bg-green-600 text-white'
-                                                    : 'bg-gray-100 text-gray-900'
-                                            }`}
+                                            key={message.id}
+                                            className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'}`}
                                         >
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <User className="h-3 w-3" />
-                                                <span className="text-xs font-medium">
-                                                    {message.senderUserId === user?.id ? 'Siz' :
-                                                        `${message.senderFirstName || ''} ${message.senderLastName || ''}`.trim() || 'Bilinmeyen'}
-                                                </span>
-                                                <Badge
-                                                    variant="secondary"
-                                                    className={`text-xs ${
-                                                        message.senderUserId === user?.id
-                                                            ? 'bg-green-700 text-green-100'
-                                                            : getRoleBadgeColor(message.senderRole)
-                                                    }`}
-                                                >
-                                                    {getRoleText(message.senderRole)}
-                                                </Badge>
-                                            </div>
+                                            <div
+                                                className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg relative word-wrap break-word ${
+                                                    isMyMessage
+                                                        ? 'bg-green-600 text-white'
+                                                        : 'bg-gray-100 text-gray-900'
+                                                }`}
+                                                style={{
+                                                    overflowWrap: 'break-word',
+                                                    wordBreak: 'break-word',
+                                                    hyphens: 'auto'
+                                                }}
+                                            >
+                                                {/* Edit/Delete Butonları - Sadece kendi mesajlarında */}
+                                                {isMyMessage && canEdit && !isEditing && !isDeleting && (
+                                                    <div className="absolute -top-2 -right-2 flex gap-1 z-10">
+                                                        <button
+                                                            type="button"
+                                                            className="h-6 w-6 bg-white text-blue-500 hover:bg-blue-50 rounded-full shadow-md border border-gray-200 flex items-center justify-center transition-colors"
+                                                            onClick={() => handleEditMessage(message.id, message.content)}
+                                                        >
+                                                            <Edit2 className="h-3 w-3" />
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            className="h-6 w-6 bg-white text-red-500 hover:bg-red-50 rounded-full shadow-md border border-gray-200 flex items-center justify-center transition-colors"
+                                                            onClick={() => handleDeleteMessage(message.id)}
+                                                        >
+                                                            <Trash2 className="h-3 w-3" />
+                                                        </button>
+                                                    </div>
+                                                )}
 
-                                            <p className="text-sm whitespace-pre-wrap">
-                                                {message.content}
-                                            </p>
+                                                {/* Loading indicator for deleting */}
+                                                {isDeleting && (
+                                                    <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center z-20">
+                                                        <Loader2 className="h-4 w-4 animate-spin text-white" />
+                                                    </div>
+                                                )}
 
-                                            <div className={`flex items-center justify-between mt-2 text-xs ${
-                                                message.senderUserId === user?.id
-                                                    ? 'text-green-100'
-                                                    : 'text-gray-500'
-                                            }`}>
-                                                <div className="flex items-center gap-1">
-                                                    <Calendar className="h-3 w-3" />
-                                                    {formatDate(message.createdAt)}
+                                                {/* Header - User info */}
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <User className="h-3 w-3 flex-shrink-0" />
+                                                    <span className="text-xs font-medium truncate">
+            {isMyMessage ? 'Siz' :
+                `${message.senderFirstName || ''} ${message.senderLastName || ''}`.trim() || 'Bilinmeyen'}
+        </span>
+                                                    <Badge
+                                                        variant="secondary"
+                                                        className={`text-xs flex-shrink-0 ${
+                                                            isMyMessage
+                                                                ? 'bg-green-700 text-green-100'
+                                                                : getRoleBadgeColor(message.senderRole)
+                                                        }`}
+                                                    >
+                                                        {getRoleText(message.senderRole)}
+                                                    </Badge>
                                                 </div>
-                                                {message.senderUserId === user?.id && (
-                                                    <span className="ml-1">
-                                                        {message.isRead ? '✓✓' : '✓'}
-                                                    </span>
+
+                                                {/* Message Content */}
+                                                {isEditing ? (
+                                                    <div className="space-y-2">
+                                                        <Textarea
+                                                            value={editingContent}
+                                                            onChange={(e) => setEditingContent(e.target.value)}
+                                                            className="min-h-[60px] text-sm bg-white text-gray-900 border-gray-300"
+                                                            autoFocus
+                                                        />
+                                                        <div className="flex gap-2 justify-end">
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={handleCancelEdit}
+                                                                className="h-7 px-2 text-xs"
+                                                            >
+                                                                İptal
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                onClick={() => handleSaveEdit(message.id)}
+                                                                disabled={!editingContent.trim()}
+                                                                className="h-7 px-2 text-xs"
+                                                            >
+                                                                Kaydet
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <p
+                                                        className="text-sm min-w-0"
+                                                        style={{
+                                                            overflowWrap: 'break-word',
+                                                            wordBreak: 'break-word',
+                                                            whiteSpace: 'pre-wrap',
+                                                            hyphens: 'auto'
+                                                        }}
+                                                    >
+                                                        {message.content}
+                                                    </p>
+                                                )}
+
+                                                {/* Footer - Date and read status */}
+                                                {!isEditing && (
+                                                    <div className={`flex items-center justify-between mt-2 text-xs ${
+                                                        isMyMessage
+                                                            ? 'text-green-100'
+                                                            : 'text-gray-500'
+                                                    }`}>
+                                                        <div className="flex items-center gap-1 flex-shrink-0">
+                                                            <Calendar className="h-3 w-3" />
+                                                            <span className="truncate">
+                    {formatDate(message.createdAt)}
+                </span>
+                                                            {message.updatedAt && message.updatedAt !== message.createdAt &&
+                                                                new Date(message.updatedAt).getTime() !== new Date(message.createdAt).getTime() && (
+                                                                    <span className="ml-1 italic">(düzenlendi)</span>
+                                                                )}
+                                                        </div>
+                                                        {isMyMessage && (
+                                                            <span className="ml-1 flex-shrink-0">
+                    {message.isRead ? '✓✓' : '✓'}
+                </span>
+                                                        )}
+                                                    </div>
                                                 )}
                                             </div>
                                         </div>
-                                    </div>
-                                ))
+                                    );
+                                })
                             )}
                             <div ref={messagesEndRef} />
                         </div>
