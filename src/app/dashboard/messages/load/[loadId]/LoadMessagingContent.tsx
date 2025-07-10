@@ -49,6 +49,8 @@ interface OtherUser {
 }
 
 export default function LoadMessagingContent({ loadId }: LoadMessagingContentProps) {
+    const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const isPollingActiveRef = useRef(true);
     const { user } = useAuth();
     const { t } = useLanguage();
     const router = useRouter();
@@ -77,6 +79,86 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
+
+    // Polling için useEffect
+    useEffect(() => {
+        if (!loadId || !user?.id || !otherUser?.id) return;
+
+        const startPolling = () => {
+            // Mevcut interval'ı temizle
+            if (pollingIntervalRef.current) {
+                clearInterval(pollingIntervalRef.current);
+            }
+
+            pollingIntervalRef.current = setInterval(async () => {
+                // Sayfa aktif değilse polling yapma
+                if (document.visibilityState !== 'visible') return;
+
+                // Polling aktif değilse (mesaj gönderiliyorsa) polling yapma
+                if (!isPollingActiveRef.current) return;
+
+                try {
+                    let finalOtherUserId = null;
+
+                    if (user?.role === 'BROKER' || user?.role === 'CARRIER') {
+                        // Broker/Carrier için sender'ın user ID'sini kullan
+                        const loadData = await loadService.getLoadById(loadId);
+                        finalOtherUserId = loadData.sender?.userId;
+                    } else {
+                        // Sender için otherUser ID'sini kullan
+                        finalOtherUserId = otherUser.id;
+                    }
+
+                    if (finalOtherUserId) {
+                        const newMessages = await messageService.getLoadConversation(loadId, user.id, finalOtherUserId);
+
+                        // Mevcut mesajlarla karşılaştır, sadece yeni mesajları ekle
+                        setMessages(prevMessages => {
+                            const currentMessageIds = new Set(prevMessages.map(msg => msg.id));
+                            const freshMessages = newMessages.filter(msg => !currentMessageIds.has(msg.id));
+
+                            if (freshMessages.length > 0) {
+                                console.log(`${freshMessages.length} yeni mesaj alındı`);
+                                return [...prevMessages, ...freshMessages];
+                            }
+
+                            return prevMessages;
+                        });
+                    }
+                } catch (error) {
+                    console.error('Polling sırasında hata:', error);
+                }
+            }, 3000); // 3 saniyede bir kontrol et
+        };
+
+        startPolling();
+
+        // Cleanup function
+        return () => {
+            if (pollingIntervalRef.current) {
+                clearInterval(pollingIntervalRef.current);
+            }
+        };
+    }, [loadId, user?.id, otherUser?.id, user?.role]);
+
+// Sayfa görünürlüğü değiştiğinde polling'i kontrol et
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                // Sayfa görünür olduğunda polling'i yeniden başlat
+                isPollingActiveRef.current = true;
+            } else {
+                // Sayfa görünmez olduğunda polling'i durdur
+                isPollingActiveRef.current = false;
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, []);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -175,6 +257,9 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
         try {
             setSending(true);
 
+            // Mesaj gönderilirken polling'i durdur
+            isPollingActiveRef.current = false;
+
             const messageData = {
                 loadId,
                 senderUserId: user.id,
@@ -186,10 +271,6 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
                 category: MessageCategory.GENERAL,
             };
 
-            console.log('Debug - Message data being sent:', messageData);
-            console.log('Debug - OtherUser state:', otherUser);
-
-
             const response = await messageService.sendMessage(messageData);
 
             // Mesajı listeye ekle
@@ -200,6 +281,7 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
                 title: "Başarılı",
                 description: "Mesaj gönderildi.",
             });
+
         } catch (error) {
             console.error('Mesaj gönderme hatası:', error);
             toast({
@@ -209,6 +291,11 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
             });
         } finally {
             setSending(false);
+
+            // Mesaj gönderimi tamamlandıktan sonra polling'i tekrar başlat
+            setTimeout(() => {
+                isPollingActiveRef.current = true;
+            }, 1000);
         }
     };
 
