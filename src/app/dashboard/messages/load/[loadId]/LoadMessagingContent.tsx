@@ -89,6 +89,7 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
             console.log('Debug - LoadId:', loadId);
             console.log('Debug - UserId:', user?.id);
             console.log('Debug - OtherUserId:', otherUserId);
+            console.log('Debug - User Role:', user?.role);
             console.log('Debug - API URL will be:', `/messages/load/${loadId}/conversation?userId=${user?.id}&otherUserId=${otherUserId}`);
 
             // Load bilgilerini getir
@@ -101,7 +102,7 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
                 status: loadData.status,
                 origin: loadData.loadingAddress,
                 destination: loadData.deliveryAddress,
-                weight: loadData.netWeight || 0, // netWeight kullan
+                weight: loadData.netWeight || 0,
                 goodsType: loadData.goodsType,
                 senderName: loadData.sender?.companyName || loadData.sender?.contactPerson || "Bilinmeyen"
             });
@@ -109,27 +110,50 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
             // Diğer kullanıcı bilgisini belirle
             if (user?.role === 'BROKER') {
                 // Broker ise, sender ile konuşuyor
-                if (loadData.sender?.id) {
+                if (loadData.sender?.userId) {
                     setOtherUser({
-                        id: loadData.sender.id,
+                        id: loadData.sender.userId, // User ID kullan
+                        name: loadData.sender.companyName || loadData.sender.contactPerson || "Bilinmeyen",
+                        role: 'SENDER'
+                    });
+                }
+            } else if (user?.role === 'CARRIER') {
+                // Carrier ise, sender ile konuşuyor
+                if (loadData.sender?.userId) {
+                    setOtherUser({
+                        id: loadData.sender.userId, // User ID kullan
                         name: loadData.sender.companyName || loadData.sender.contactPerson || "Bilinmeyen",
                         role: 'SENDER'
                     });
                 }
             } else {
-                // Sender ise, broker ile konuşuyor (otherUserId'den belirle)
+                // Sender ise, broker/carrier ile konuşuyor (otherUserId'den belirle)
                 if (otherUserId) {
                     setOtherUser({
                         id: otherUserId,
-                        name: "Broker", // Bu bilgi daha detaylı API'den alınabilir
-                        role: 'BROKER'
+                        name: "Taşıyıcı/Broker", // Bu bilgi daha detaylı API'den alınabilir
+                        role: 'CARRIER' // Default olarak carrier, gerçekte API'den alınmalı
                     });
                 }
             }
 
-            // Mesajları getir
-            if (user?.id && otherUserId) {
-                const messagesData = await messageService.getLoadConversation(loadId, user.id, otherUserId);
+            // Mesajları getir - otherUser bilgisi belirlendikten sonra
+            let finalOtherUserId = null;
+
+            if (user?.role === 'BROKER' || user?.role === 'CARRIER') {
+                // Broker/Carrier ise sender ile konuşuyor
+                // sender.id profile ID'si, sender.userId ise User ID'si
+                finalOtherUserId = loadData.sender?.userId;
+            } else {
+                // Sender ise URL'den gelen otherUserId'yi kullan
+                finalOtherUserId = otherUserId;
+            }
+
+            if (user?.id && finalOtherUserId) {
+                console.log('Debug - Final other user ID:', finalOtherUserId);
+                console.log('Debug - Sender Profile ID:', loadData.sender?.id);
+                console.log('Debug - Sender User ID:', loadData.sender?.userId);
+                const messagesData = await messageService.getLoadConversation(loadId, user.id, finalOtherUserId);
                 setMessages(messagesData);
             }
 
@@ -161,6 +185,10 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
                 priority: MessagePriority.NORMAL,
                 category: MessageCategory.GENERAL,
             };
+
+            console.log('Debug - Message data being sent:', messageData);
+            console.log('Debug - OtherUser state:', otherUser);
+
 
             const response = await messageService.sendMessage(messageData);
 

@@ -140,7 +140,7 @@ export default function AvailableLoadsPage() {
     const handleMessageSender = (load: Load) => {
         // Backend'den gelen Load objesinde sender.id'yi kullan
         if (load.sender?.id) {
-            router.push(`/dashboard/messages/load/${load.id}?senderProfileId=${load.sender.id}`);
+            router.push(`/dashboard/messages/load/${load.id}?otherUserId=${load.sender.id}`);
         } else {
             toast({
                 title: 'Hata',

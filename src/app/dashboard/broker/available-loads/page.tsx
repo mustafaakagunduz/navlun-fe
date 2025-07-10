@@ -224,15 +224,13 @@ export default function BrokerAvailableLoads() {
         router.push(`/dashboard/broker/loads/${load.id}`);
     };
 
-    const handleMessageSender = (load: Load) => {
-        // Sender bilgisini kontrol et
-        const senderId = load.sender?.id || load.senderId;
 
-        if (senderId) {
-            // Standart otherUserId parametresi kullan
-            router.push(`/dashboard/messages/load/${load.id}?otherUserId=${senderId}`);
+
+    const handleMessageSender = (load: Load) => {
+        if (load.sender?.id) {
+            router.push(`/dashboard/messages/load/${load.id}?otherUserId=${load.sender.id}`);
         } else {
-            console.error('Sender bilgisi bulunamadı. Load object:', load);
+            console.log('Debug - Load object:', load);
             toast({
                 title: 'Hata',
                 description: 'Gönderici bilgisi bulunamadı.',
