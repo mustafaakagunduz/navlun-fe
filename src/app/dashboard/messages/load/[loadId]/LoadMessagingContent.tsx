@@ -237,6 +237,24 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
                 console.log('Debug - Sender User ID:', loadData.sender?.userId);
                 const messagesData = await messageService.getLoadConversation(loadId, user.id, finalOtherUserId);
                 setMessages(messagesData);
+
+                // Okunmamış mesajları okundu olarak işaretle
+                const unreadMessages = messagesData.filter(msg =>
+                    msg.receiverUserId === user.id && !msg.isRead
+                );
+
+                for (const message of unreadMessages) {
+                    try {
+                        await messageService.markAsRead(message.id, user.id);
+                    } catch (error) {
+                        console.error('Mesaj okundu işaretlenirken hata:', error);
+                    }
+                }
+
+                if (unreadMessages.length > 0) {
+                    console.log(`${unreadMessages.length} mesaj okundu olarak işaretlendi`);
+                }
+
             }
 
         } catch (error) {

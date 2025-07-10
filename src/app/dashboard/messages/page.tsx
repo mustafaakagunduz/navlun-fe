@@ -16,25 +16,29 @@ import {
     Clock,
     Package,
     User,
+    Trash2,
     RefreshCcw,
     Mail
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from '@/hooks/use-toast';
 import messageService, { ConversationResponse } from '@/services/messageService';
+import { updateMessageCount } from '@/store/slices/notificationsSlice';
+import { useAppDispatch } from '@/hooks/redux';
 
 export default function MessagesPage() {
     const { user, isAuthenticated, isLoading } = useAuth();
     const router = useRouter();
     const { t } = useLanguage();
     const { toast } = useToast();
-
+    const dispatch = useAppDispatch();
     // State
     const [conversations, setConversations] = useState<ConversationResponse[]>([]);
     const [filteredConversations, setFilteredConversations] = useState<ConversationResponse[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [unreadCount, setUnreadCount] = useState(0);
+    const [deletingConversationId, setDeletingConversationId] = useState<string | null>(null);
 
     // Redirect unauthenticated users
     useEffect(() => {
@@ -65,6 +69,37 @@ export default function MessagesPage() {
         }
     }, [searchQuery, conversations]);
 
+    // Sayfa focus olduğunda unread count'ları güncelle
+    useEffect(() => {
+        const handleFocus = () => {
+            if (user?.id) {
+                loadUnreadCount();
+            }
+        };
+
+        window.addEventListener('focus', handleFocus);
+
+        return () => {
+            window.removeEventListener('focus', handleFocus);
+        };
+    }, [user?.id]);
+
+// Sayfa görünür olduğunda konuşmaları yenile
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible' && user?.id) {
+                loadConversations();
+                loadUnreadCount();
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, [user?.id]);
+
     const loadConversations = async () => {
         try {
             setLoading(true);
@@ -82,10 +117,47 @@ export default function MessagesPage() {
         }
     };
 
+    const handleDeleteConversation = async (loadId: string, otherUserId: string, loadTitle: string) => {
+        if (!user?.id) return;
+
+        const confirmed = window.confirm(
+            `"${loadTitle}" konuşmasını silmek istediğinizden emin misiniz?\n\nBu işlem geri alınamaz.`
+        );
+
+        if (!confirmed) return;
+
+        try {
+            setDeletingConversationId(`${loadId}-${otherUserId}`);
+
+            await messageService.deleteConversationForUser(user.id, loadId, otherUserId);
+
+            // Konuşmayı listeden kaldır
+            setConversations(prev =>
+                prev.filter(conv => !(conv.loadId === loadId && conv.otherUserId === otherUserId))
+            );
+
+            toast({
+                title: "Başarılı",
+                description: "Konuşma silindi.",
+            });
+
+        } catch (error) {
+            console.error('Konuşma silme hatası:', error);
+            toast({
+                title: "Hata",
+                description: "Konuşma silinemedi.",
+                variant: "destructive",
+            });
+        } finally {
+            setDeletingConversationId(null);
+        }
+    };
+
     const loadUnreadCount = async () => {
         try {
             const count = await messageService.getUnreadCount(user!.id);
             setUnreadCount(count);
+            dispatch(updateMessageCount(count));
         } catch (error) {
             console.error('Okunmamış sayı yüklenirken hata:', error);
         }
@@ -93,6 +165,18 @@ export default function MessagesPage() {
 
     const handleConversationClick = (loadId: string, otherUserId: string) => {
         router.push(`/dashboard/messages/load/${loadId}?otherUserId=${otherUserId}`);
+
+        // Konuşmaya girince o konuşmanın unread count'ını sıfırla (UI güncelleme)
+        setTimeout(() => {
+            setConversations(prev =>
+                prev.map(conv =>
+                    conv.loadId === loadId && conv.otherUserId === otherUserId
+                        ? { ...conv, unreadCount: 0 }
+                        : conv
+                )
+            );
+            loadUnreadCount();
+        }, 1000);
     };
 
     const handleRefresh = () => {
@@ -237,48 +321,71 @@ export default function MessagesPage() {
                                 {filteredConversations.map((conversation) => (
                                     <div
                                         key={`${conversation.loadId}-${conversation.otherUserId}`}
-                                        className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                                        onClick={() => handleConversationClick(conversation.loadId, conversation.otherUserId)}
+                                        className="p-4 border rounded-lg hover:bg-gray-50 transition-colors relative group"
                                     >
-                                        <div className="flex items-start justify-between">
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <Package className="h-4 w-4 text-blue-600" />
-                                                    <span className="font-semibold text-gray-900">
-                                                        {conversation.loadTitle}
-                                                    </span>
-                                                    {conversation.unreadCount > 0 && (
-                                                        <Badge variant="destructive" className="text-xs">
-                                                            {conversation.unreadCount} yeni
-                                                        </Badge>
-                                                    )}
-                                                </div>
+                                        {/* Delete Button */}
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDeleteConversation(conversation.loadId, conversation.otherUserId, conversation.loadTitle);
+                                            }}
+                                            disabled={deletingConversationId === `${conversation.loadId}-${conversation.otherUserId}`}
+                                        >
+                                            {deletingConversationId === `${conversation.loadId}-${conversation.otherUserId}` ? (
+                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                            ) : (
+                                                <Trash2 className="h-4 w-4" />
+                                            )}
+                                        </Button>
 
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <User className="h-4 w-4 text-gray-500" />
-                                                    <span className="text-gray-700">
+                                        {/* Conversation Content - Clickable */}
+                                        <div
+                                            className="cursor-pointer pr-10"
+                                            onClick={() => handleConversationClick(conversation.loadId, conversation.otherUserId)}
+                                        >
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-3 mb-2">
+                                                        <Package className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                                                        <h3 className="font-semibold text-gray-900 truncate">
+                                                            {conversation.loadTitle}
+                                                        </h3>
+                                                        {conversation.unreadCount > 0 && (
+                                                            <Badge variant="destructive" className="bg-red-500 text-xs">
+                                                                {conversation.unreadCount}
+                                                            </Badge>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <User className="h-3 w-3 text-gray-400" />
+                                                        <span className="text-sm text-gray-600">
                                                         {conversation.otherUserName}
                                                     </span>
-                                                    <Badge
-                                                        variant="secondary"
-                                                        className={`text-xs ${getRoleBadgeColor(conversation.otherUserRole)}`}
-                                                    >
-                                                        {getRoleText(conversation.otherUserRole)}
-                                                    </Badge>
-                                                </div>
-
-                                                <p className="text-sm text-gray-600 line-clamp-2 mb-2">
-                                                    {conversation.lastMessageContent}
-                                                </p>
-
-                                                <div className="flex items-center justify-between text-xs text-gray-500">
-                                                    <div className="flex items-center gap-1">
-                                                        <Clock className="h-3 w-3" />
-                                                        {formatDate(conversation.lastMessageAt)}
+                                                        <Badge
+                                                            variant="outline"
+                                                            className={`text-xs ${getRoleBadgeColor(conversation.otherUserRole)}`}
+                                                        >
+                                                            {getRoleText(conversation.otherUserRole)}
+                                                        </Badge>
                                                     </div>
-                                                    <div className="flex items-center gap-1">
-                                                        <MessageSquare className="h-3 w-3" />
-                                                        {conversation.messageCount} mesaj
+
+                                                    <p className="text-sm text-gray-600 line-clamp-2 mb-2">
+                                                        {conversation.lastMessageContent}
+                                                    </p>
+
+                                                    <div className="flex items-center justify-between text-xs text-gray-500">
+                                                        <div className="flex items-center gap-1">
+                                                            <Clock className="h-3 w-3" />
+                                                            {formatDate(conversation.lastMessageAt)}
+                                                        </div>
+                                                        <div className="flex items-center gap-1">
+                                                            <MessageSquare className="h-3 w-3" />
+                                                            {conversation.messageCount} mesaj
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>

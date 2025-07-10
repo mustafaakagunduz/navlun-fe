@@ -117,6 +117,16 @@ const messageService = {
         }
     },
 
+    // Konuşmayı kullanıcı için sil (soft delete)
+    deleteConversationForUser: async (userId: string, loadId: string, otherUserId: string): Promise<boolean> => {
+        try {
+            return await apiService.delete<boolean>(`/messages/user/${userId}/conversation/${loadId}?otherUserId=${otherUserId}`);
+        } catch (error) {
+            console.error('Delete conversation error:', error);
+            throw error;
+        }
+    },
+
     // Mesajı okundu olarak işaretle
     markAsRead: async (messageId: string, userId: string): Promise<boolean> => {
         try {

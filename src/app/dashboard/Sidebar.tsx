@@ -29,7 +29,7 @@ import {
     fetchNotificationCounts,
     resetOfferCount,
     resetLoadCount,
-    updateOfferCount, updateLoadCount
+    updateOfferCount, updateLoadCount, resetMessageCount
 } from '@/store/slices/notificationsSlice'
 
 
@@ -157,6 +157,8 @@ export default function Sidebar() {
             dispatch(resetOfferCount());
         } else if (user?.role === 'CARRIER' && pathname === '/dashboard/carrier/my-loads') {
             dispatch(resetLoadCount());
+        } else if (pathname === '/dashboard/messages') {
+            dispatch(resetMessageCount()); // 👈 YENİ EKLENEN
         }
     }, [pathname, user?.role, dispatch]);
 
