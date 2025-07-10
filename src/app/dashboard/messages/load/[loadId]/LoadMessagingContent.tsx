@@ -253,7 +253,16 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
                 console.log('Debug - Final other user ID:', finalOtherUserId);
                 console.log('Debug - Sender Profile ID:', loadData.sender?.id);
                 console.log('Debug - Sender User ID:', loadData.sender?.userId);
+                // loadData fonksiyonunda, mesajları aldıktan sonra:
                 const messagesData = await messageService.getLoadConversation(loadId, user.id, finalOtherUserId);
+                console.log('Debug - Mesaj tarihleri:', messagesData.map(msg => ({
+                    id: msg.id,
+                    content: msg.content.substring(0, 20),
+                    createdAt: msg.createdAt,
+                    createdAtType: typeof msg.createdAt,
+                    parsedDate: new Date(msg.createdAt),
+                    isValidDate: !isNaN(new Date(msg.createdAt).getTime())
+                })));
                 setMessages(messagesData);
 
                 // Okunmamış mesajları okundu olarak işaretle
