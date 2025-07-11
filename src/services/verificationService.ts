@@ -15,6 +15,10 @@ export type ResendCodeRequest = {
 export type VerificationResponse = {
     success: boolean;
     message: string;
+    userId?: string;
+    email?: string;
+    accessToken?: string;
+    refreshToken?: string;
 };
 
 const verificationService = {

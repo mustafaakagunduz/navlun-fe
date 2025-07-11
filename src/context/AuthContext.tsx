@@ -196,7 +196,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const completeEmailVerification = async () => {
         setState(prev => ({ ...prev, isLoading: true }));
         try {
+            // Token'lar zaten localStorage'da varsa direkt kullanıcı bilgilerini al
+            const token = localStorage.getItem('accessToken');
+            if (token) {
+                console.log('Using existing tokens from localStorage');
+                const user = await authService.getCurrentUser();
+
+                setState({
+                    user,
+                    isLoading: false,
+                    isAuthenticated: true,
+                    needsVerification: false,
+                    verificationUserId: null,
+                    verificationEmail: null,
+                    verificationPassword: null,
+                    error: null,
+                });
+
+                const dashboardUrl = getDashboardUrl(user.role);
+                console.log('Redirecting to:', dashboardUrl);
+                router.push(dashboardUrl);
+                return;
+            }
+
+            // Token yoksa eski yöntemle login yap (fallback)
             if (state.verificationEmail && state.verificationPassword) {
+                console.log('No tokens found, doing manual login');
                 const loginRes = await authService.login(state.verificationEmail, state.verificationPassword);
                 localStorage.setItem('accessToken', loginRes.accessToken);
                 localStorage.setItem('refreshToken', loginRes.refreshToken);
@@ -214,11 +239,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     error: null,
                 });
 
-                router.push(getDashboardUrl(user.role));
+                const dashboardUrl = getDashboardUrl(user.role);
+                router.push(dashboardUrl);
             } else {
                 throw new Error("Login credentials missing");
             }
-        } catch {
+        } catch (error) {
+            console.error('Auto-login error:', error);
             setState({
                 ...state,
                 isLoading: false,
@@ -228,7 +255,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 verificationPassword: null,
                 error: "Doğrulama başarılı ancak otomatik giriş yapılamadı. Lütfen giriş yapın.",
             });
-            router.push('/login');
         }
     };
 

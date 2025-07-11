@@ -467,6 +467,7 @@
       "verifying": "Verifying...",
       "cancel": "Cancel",
       "resendCode": "Resend Code",
+      "timeLeft" : "Remaining Time ",
       "success": "Your Email Address Has Been Successfully Verified!",
       "successMessage": "Your email has been verified, redirecting you...",
       "loginSuccess": "Logging in...",

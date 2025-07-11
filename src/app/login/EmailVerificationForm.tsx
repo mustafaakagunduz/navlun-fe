@@ -56,10 +56,10 @@ const EmailVerificationForm = ({
 
     // 6 hane girildiğinde otomatik doğrulama
     useEffect(() => {
-        if (verificationCode.length === 6 && !isLoading && !success && !isProcessing) {
+        if (verificationCode.length === 6 && !isLoading && !success && !isProcessing && !error) {
             handleAutoSubmit()
         }
-    }, [verificationCode, isLoading, success, isProcessing])
+    }, [verificationCode, isLoading, success, isProcessing, error]) // error'ı da dependency'ye ekledik
 
     // Süreyi biçimlendir
     const formatTime = (seconds: number): string => {
@@ -113,35 +113,57 @@ const EmailVerificationForm = ({
 
     // Otomatik doğrulama
     const handleAutoSubmit = async () => {
-        if (verificationCode.length !== 6 || isProcessing) return
+        if (verificationCode.length !== 6 || isProcessing) {
+            console.log('Skipping auto submit - code length:', verificationCode.length, 'isProcessing:', isProcessing)
+            return
+        }
+
+        console.log('=== FRONTEND VERIFICATION START ===')
+        console.log('Starting verification for userId:', userId, 'code:', verificationCode)
 
         setIsProcessing(true)
         setIsLoading(true)
         setError(null)
 
         try {
-            console.log('Verifying email with code:', verificationCode)
             const response = await verificationService.verifyEmail(userId, verificationCode)
+            console.log('Verification response received:', response)
 
             if (response.success) {
                 console.log('Email verification successful')
                 setSuccess(true)
 
-                // Biraz bekle, sonra otomatik login yap
-                setTimeout(() => {
-                    onVerificationSuccess()
-                }, 1500)
+                // Token'lar varsa localStorage'a kaydet
+                if (response.accessToken && response.refreshToken) {
+                    console.log('Saving tokens to localStorage')
+                    localStorage.setItem('accessToken', response.accessToken)
+                    localStorage.setItem('refreshToken', response.refreshToken)
+
+                    // Token'lar kaydedildikten sonra kısa bir süre bekle
+                    setTimeout(() => {
+                        console.log('Calling onVerificationSuccess callback')
+                        onVerificationSuccess()
+                    }, 1000) // 1.5 saniyeden 1 saniyeye düşürdük
+                } else {
+                    console.log('No tokens in response, using fallback method')
+                    setTimeout(() => {
+                        console.log('Calling onVerificationSuccess callback (fallback)')
+                        onVerificationSuccess()
+                    }, 1500)
+                }
             } else {
                 console.log('Email verification failed:', response.message)
                 setError(response.message || t("auth.emailVerification.incorrectCode"))
                 setIsLoading(false)
                 setIsProcessing(false)
             }
+            console.log('=== FRONTEND VERIFICATION END (SUCCESS) ===')
         } catch (error: any) {
             console.error('Verification error:', error)
             setError(error.response?.data?.message || t("auth.emailVerification.verificationFailed"))
             setIsLoading(false)
             setIsProcessing(false)
+            console.log('=== FRONTEND VERIFICATION END (ERROR) ===')
         }
     }
 
@@ -256,7 +278,7 @@ const EmailVerificationForm = ({
                                 <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
                                     <Clock className="h-4 w-4" />
                                     <span>
-                                        {t("auth.emailVerification.timeLeft") || "Kalan süre"}: {formatTime(timeLeft)}
+                                        {t("emailVerification.timeLeft") || "Kalan süre "}: {formatTime(timeLeft)}
                                     </span>
                                 </div>
                             )}

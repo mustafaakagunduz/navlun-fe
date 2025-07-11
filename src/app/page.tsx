@@ -22,12 +22,17 @@ export default function Home() {
                 {/* Login olmuş kullanıcılar için boşluk bırak */}
                 {user && <div className="h-20"></div>}
 
-                <AboutSection />
+
+                {/* Login olmuş kullanıcılar için boşluk bırak
                 <ServicesSection />
                 <ContactSection />
+                <AboutSection />
+                <Footer />
+                */}
+
             </main>
 
-            <Footer />
+
         </div>
     )
 }
