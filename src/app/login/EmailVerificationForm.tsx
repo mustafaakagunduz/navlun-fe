@@ -111,43 +111,47 @@ const EmailVerificationForm = ({
         }
     }
 
-    // Otomatik doğrulama
+    // handleAutoSubmit fonksiyonunu güncelle (satır 144-187 arası)
     const handleAutoSubmit = async () => {
-        if (verificationCode.length !== 6 || isProcessing) {
-            console.log('Skipping auto submit - code length:', verificationCode.length, 'isProcessing:', isProcessing)
-            return
-        }
+        if (verificationCode.length !== 6 || isProcessing) return
 
-        console.log('=== FRONTEND VERIFICATION START ===')
-        console.log('Starting verification for userId:', userId, 'code:', verificationCode)
-
+        console.log('Auto-submitting with code:', verificationCode)
         setIsProcessing(true)
-        setIsLoading(true)
         setError(null)
+        setIsLoading(true)
 
         try {
+            console.log('=== FRONTEND VERIFICATION START ===')
+            console.log('Sending verification request - UserId:', userId, 'Code:', verificationCode)
+
             const response = await verificationService.verifyEmail(userId, verificationCode)
-            console.log('Verification response received:', response)
+            console.log('Verification response:', response)
 
+            // handleAutoSubmit fonksiyonunda (satır 142 civarı)
             if (response.success) {
-                console.log('Email verification successful')
-                setSuccess(true)
+                console.log('Verification successful')
+                setIsLoading(false)
+                setSuccess(true) // Başarı state'ini ekle
 
-                // Token'lar varsa localStorage'a kaydet
+                // Token'lar varsa otomatik login yap
                 if (response.accessToken && response.refreshToken) {
-                    console.log('Saving tokens to localStorage')
+                    console.log('Tokens received, auto-login in progress...')
+
+                    // Token'ları localStorage'a kaydet
                     localStorage.setItem('accessToken', response.accessToken)
                     localStorage.setItem('refreshToken', response.refreshToken)
+                    localStorage.setItem('userEmail', response.email || email)
+                    localStorage.setItem('userId', response.userId || userId)
 
-                    // Token'lar kaydedildikten sonra kısa bir süre bekle
+                    // onVerificationSuccess'i çağır
                     setTimeout(() => {
-                        console.log('Calling onVerificationSuccess callback')
+                        console.log('Calling onVerificationSuccess')
                         onVerificationSuccess()
-                    }, 1000) // 1.5 saniyeden 1 saniyeye düşürdük
+                    }, 1500)
                 } else {
-                    console.log('No tokens in response, using fallback method')
+                    // Token yoksa normal success callback
                     setTimeout(() => {
-                        console.log('Calling onVerificationSuccess callback (fallback)')
+                        console.log('Calling onVerificationSuccess without tokens')
                         onVerificationSuccess()
                     }, 1500)
                 }

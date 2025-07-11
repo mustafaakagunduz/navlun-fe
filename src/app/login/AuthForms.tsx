@@ -252,11 +252,25 @@ const AuthForms = () => {
         if (error) clearError()
     }
 
-    // Email verification handlers
-    const handleVerificationSuccess = () => {
-        completeEmailVerification()
-    }
+    // handleVerificationSuccess fonksiyonunu güncelle
+    const handleVerificationSuccess = async () => {
+        console.log('=== VERIFICATION SUCCESS HANDLER ===')
 
+        // Token'lar localStorage'da zaten var, oradan al
+        const accessToken = localStorage.getItem('accessToken')
+        const refreshToken = localStorage.getItem('refreshToken')
+        const userEmail = localStorage.getItem('userEmail')
+
+        if (accessToken && refreshToken && userEmail) {
+            // Token'lar varsa direkt login işlemini tamamla
+            console.log('Auto-login with tokens from localStorage')
+            await completeEmailVerification(accessToken, refreshToken, userEmail)
+        } else {
+            // Token yoksa normal verification completion
+            console.log('Normal verification completion')
+            await completeEmailVerification()
+        }
+    }
     const handleVerificationCancel = () => {
         cancelEmailVerification()
     }

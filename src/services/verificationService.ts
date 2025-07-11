@@ -16,6 +16,7 @@ export type VerificationResponse = {
     success: boolean;
     message: string;
     userId?: string;
+    role?: 'ADMIN' | 'SENDER' | 'CARRIER' | 'BROKER';
     email?: string;
     accessToken?: string;
     refreshToken?: string;

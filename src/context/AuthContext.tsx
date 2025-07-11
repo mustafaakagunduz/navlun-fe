@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import authService from '@/services/authService';
+import { useToast } from '@/hooks/use-toast';
 
 // User type definition
 export type User = {
@@ -34,7 +35,7 @@ type AuthContextType = AuthState & {
     logout: () => Promise<void>;
     refreshToken: () => Promise<boolean>;
     clearError: () => void;
-    completeEmailVerification: () => Promise<void>;
+    completeEmailVerification: (accessToken?: string, refreshToken?: string, userEmail?: string) => Promise<void>;
     cancelEmailVerification: () => void;
 };
 
@@ -51,24 +52,26 @@ const defaultState: AuthState = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Helper function - component dışında
+const getDashboardRoute = (role: string): string => {
+    switch (role) {
+        case 'SENDER':
+            return '/dashboard/sender';
+        case 'CARRIER':
+            return '/dashboard/carrier';
+        case 'BROKER':
+            return '/dashboard/broker';
+        case 'ADMIN':
+            return '/dashboard/admin';
+        default:
+            return '/dashboard';
+    }
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [state, setState] = useState<AuthState>(defaultState);
     const router = useRouter();
-
-    const getDashboardUrl = (role: string): string => {
-        switch (role) {
-            case 'ADMIN':
-                return '/dashboard/admin';
-            case 'SENDER':
-                return '/dashboard/sender';
-            case 'CARRIER':
-                return '/dashboard/carrier';
-            case 'BROKER':
-                return '/dashboard/broker';
-            default:
-                return '/dashboard';
-        }
-    };
+    const { toast } = useToast();
 
     useEffect(() => {
         const verifyToken = async () => {
@@ -126,7 +129,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 verificationPassword: null,
             });
 
-            const dashboardUrl = getDashboardUrl(user.role);
+            const dashboardUrl = getDashboardRoute(user.role);
             router.push(dashboardUrl);
 
         } catch (error: any) {
@@ -168,8 +171,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const logout = async () => {
         setState(prev => ({ ...prev, isLoading: true }));
         try {
-            const refreshToken = localStorage.getItem('refreshToken');
-            if (refreshToken) await authService.logout(refreshToken);
+            const refreshTokenValue = localStorage.getItem('refreshToken');
+            if (refreshTokenValue) await authService.logout(refreshTokenValue);
         } finally {
             localStorage.clear();
             setState({ ...defaultState, isLoading: false });
@@ -178,11 +181,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     const refreshToken = async (): Promise<boolean> => {
-        const refreshToken = localStorage.getItem('refreshToken');
-        if (!refreshToken) return false;
+        const refreshTokenValue = localStorage.getItem('refreshToken');
+        if (!refreshTokenValue) return false;
 
         try {
-            const response = await authService.refreshToken(refreshToken);
+            const response = await authService.refreshToken(refreshTokenValue);
             localStorage.setItem('accessToken', response.accessToken);
             localStorage.setItem('refreshToken', response.refreshToken);
             return true;
@@ -193,67 +196,67 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const clearError = () => setState(prev => ({ ...prev, error: null }));
 
-    const completeEmailVerification = async () => {
-        setState(prev => ({ ...prev, isLoading: true }));
+    // completeEmailVerification fonksiyonunu güncelle
+    const completeEmailVerification = async (accessToken?: string, refreshToken?: string, userEmail?: string) => {
         try {
-            // Token'lar zaten localStorage'da varsa direkt kullanıcı bilgilerini al
-            const token = localStorage.getItem('accessToken');
-            if (token) {
-                console.log('Using existing tokens from localStorage');
-                const user = await authService.getCurrentUser();
+            if (accessToken && refreshToken && userEmail) {
+                // Token'lar sağlandıysa direkt login yap
+                console.log('Completing email verification with auto-login');
 
+                // Token'ları kaydet
+                localStorage.setItem('accessToken', accessToken);
+                localStorage.setItem('refreshToken', refreshToken);
+                localStorage.setItem('userEmail', userEmail);
+
+                // Kullanıcı bilgilerini çek
+                const userData = await authService.getCurrentUser();
+
+                // State'i güncelle
                 setState({
-                    user,
+                    user: userData,
                     isLoading: false,
                     isAuthenticated: true,
+                    error: null,
                     needsVerification: false,
                     verificationUserId: null,
                     verificationEmail: null,
                     verificationPassword: null,
-                    error: null,
                 });
 
-                const dashboardUrl = getDashboardUrl(user.role);
-                console.log('Redirecting to:', dashboardUrl);
-                router.push(dashboardUrl);
-                return;
-            }
+                // Role'e göre yönlendir
+                const dashboardRoute = getDashboardRoute(userData.role);
+                router.push(dashboardRoute);
 
-            // Token yoksa eski yöntemle login yap (fallback)
-            if (state.verificationEmail && state.verificationPassword) {
-                console.log('No tokens found, doing manual login');
-                const loginRes = await authService.login(state.verificationEmail, state.verificationPassword);
-                localStorage.setItem('accessToken', loginRes.accessToken);
-                localStorage.setItem('refreshToken', loginRes.refreshToken);
-
-                const user = await authService.getCurrentUser();
-
-                setState({
-                    user,
-                    isLoading: false,
-                    isAuthenticated: true,
-                    needsVerification: false,
-                    verificationUserId: null,
-                    verificationEmail: null,
-                    verificationPassword: null,
-                    error: null,
+                toast({
+                    title: "E-posta Doğrulandı",
+                    description: "E-posta adresiniz başarıyla doğrulandı. Yönlendiriliyorsunuz...",
+                    variant: "default"
                 });
-
-                const dashboardUrl = getDashboardUrl(user.role);
-                router.push(dashboardUrl);
             } else {
-                throw new Error("Login credentials missing");
+                // Normal verification completion (eski yöntem)
+                setState(prev => ({
+                    ...prev,
+                    needsVerification: false,
+                    verificationUserId: null,
+                    verificationEmail: null,
+                    verificationPassword: null,
+                }));
+
+                toast({
+                    title: "E-posta Doğrulandı",
+                    description: "E-posta adresiniz doğrulandı. Lütfen giriş yapın.",
+                    variant: "default"
+                });
+
+                router.push('/login');
             }
         } catch (error) {
-            console.error('Auto-login error:', error);
-            setState({
-                ...state,
-                isLoading: false,
-                needsVerification: false,
-                verificationUserId: null,
-                verificationEmail: null,
-                verificationPassword: null,
-                error: "Doğrulama başarılı ancak otomatik giriş yapılamadı. Lütfen giriş yapın.",
+            console.error('Email verification completion error:', error);
+            setState(prev => ({ ...prev, error: "E-posta doğrulama tamamlanamadı." }));
+            toast({
+                title: "Hata",
+                description: "E-posta doğrulama işlemi tamamlanamadı.",
+                variant: "destructive"
             });
         }
     };
