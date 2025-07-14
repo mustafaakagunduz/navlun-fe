@@ -1,5 +1,5 @@
-// src/services/loadService.ts
 import apiService from '@/services/apiService';
+import {BrokerOfferResponse} from "@/services/brokerService";
 
 export enum LoadStatus {
     PENDING = 'PENDING',
@@ -77,6 +77,12 @@ export type LoadWithOffers = {
     pendingOffersCount: number;
     hasAcceptedOffer: boolean;
 };
+
+export interface LoadWithBrokerOffers extends LoadWithOffers {
+    brokerOffers?: BrokerOfferResponse[];
+    brokerOffersCount?: number;
+    hasPendingBrokerOffers?: boolean;
+}
 
 export type LoadUpdateRequest = {
     title?: string;

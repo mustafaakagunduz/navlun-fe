@@ -26,6 +26,8 @@ export enum OfferStatus {
     CANCELLED = 'CANCELLED'
 }
 
+
+
 export interface BrokerOfferResponse {
     id: string;
     loadId: string;
@@ -228,6 +230,42 @@ const brokerService = {
             return await apiService.get<BrokerProfile[]>('/broker-profiles/company-status', { isCompany });
         } catch (error) {
             console.error(`Get broker profiles by company status (${isCompany}) error:`, error);
+            throw error;
+        }
+    },
+
+    // brokerService.ts'ye eklenecek kısım:
+
+// Broker teklifini kabul et
+    acceptBrokerOffer: async (offerId: string): Promise<BrokerOfferResponse> => {
+        try {
+            return await apiService.patch<BrokerOfferResponse>(`/broker-offers/${offerId}/accept`, {});
+        } catch (error) {
+            console.error(`Accept broker offer (ID: ${offerId}) error:`, error);
+            throw error;
+        }
+    },
+
+// Broker teklifini reddet
+    rejectBrokerOffer: async (offerId: string): Promise<BrokerOfferResponse> => {
+        try {
+            return await apiService.patch<BrokerOfferResponse>(`/broker-offers/${offerId}/reject`, {});
+        } catch (error) {
+            console.error(`Reject broker offer (ID: ${offerId}) error:`, error);
+            throw error;
+        }
+    },
+
+// Mevcut sender'ın yüklerine gelen broker tekliflerini getir
+    getCurrentSenderReceivedBrokerOffers: async (loadId?: string, status?: OfferStatus): Promise<BrokerOfferResponse[]> => {
+        try {
+            const params: Record<string, any> = {};
+            if (loadId) params.loadId = loadId;
+            if (status) params.status = status;
+
+            return await apiService.get<BrokerOfferResponse[]>('/broker-offers/my-received-broker-offers', params);
+        } catch (error) {
+            console.error('Get current sender received broker offers error:', error);
             throw error;
         }
     },
