@@ -116,7 +116,7 @@
         "myLoads": "My Loads",
         "offers": "Offers",
         "profile": "My Profile",
-        "brokerages": "Brokerages",
+        "senderoffers" : "Incoming Offers",
         "messages": "Messages",
         "shipPortfolio": "Ship Portfolio",
         "availableLoads": "Available Loads",

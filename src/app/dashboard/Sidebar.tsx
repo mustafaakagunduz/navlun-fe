@@ -15,7 +15,7 @@ import {
     FileText,
     DollarSign,
     HandshakeIcon,
-    Leaf, MapPin, MessageSquare
+    Leaf, MapPin, MessageSquare, Ship
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
@@ -31,6 +31,7 @@ import {
     resetLoadCount,
     updateOfferCount, updateLoadCount, resetMessageCount
 } from '@/store/slices/notificationsSlice'
+import {fetchCurrentBrokerOffers} from "@/store/slices/brokerOffersSlice";
 
 
 // Notification Badge komponenti
@@ -54,6 +55,7 @@ export default function Sidebar() {
 
     const { loadsWithOffers } = useAppSelector(state => state.offers);
     const { acceptedLoads, rejectedOffers } = useAppSelector(state => state.offers);
+    const { pendingOffers } = useAppSelector(state => state.brokerOffers);
 
     const notificationCounts = counts;
 
@@ -63,7 +65,7 @@ export default function Sidebar() {
         { href: "/dashboard/sender/loads", label: t("dashboard.sidebar.myLoads"), icon: Package },
         {
             href: "/dashboard/sender/offers",
-            label: t("dashboard.sidebar.offers"),
+            label: t("dashboard.sidebar.senderoffers"),
             icon: FileText,
             badge: notificationCounts.offers
         },
@@ -71,7 +73,7 @@ export default function Sidebar() {
             href: "/dashboard/messages",
             label: t("dashboard.sidebar.messages"),
             icon: MessageSquare,
-            badge: notificationCounts.messages || 0  // 👈 YENİ EKLENEN
+            badge: notificationCounts.messages || 0
         },
         { href: "/dashboard/sender/delivery-status", label: "Teslimat Takibi", icon: MapPin },
         { href: "/dashboard/carrier/sender-completed-deliveries", label: t("dashboard.sidebar.completed"), icon: CheckCheck },
@@ -85,7 +87,7 @@ export default function Sidebar() {
         { href: "/dashboard/carrier/available-loads", label: t("dashboard.sidebar.availableLoads"), icon: Package },
         {
             href: "/dashboard/carrier/my-loads",
-            label: "Tekliflerim",
+            label: t("dashboard.sidebar.offers"),
             icon: Truck,
             badge: notificationCounts.loads
         },
@@ -104,12 +106,17 @@ export default function Sidebar() {
     const brokerMenuItems = [
         { href: "/dashboard", label: t("dashboard.sidebar.home"), icon: Home },
         { href: "/dashboard/broker/available-loads", label: t("dashboard.sidebar.availableLoads"), icon: Package },
-        { href: "/dashboard/broker/offers", label: t("dashboard.sidebar.offers"), icon: HandshakeIcon },
+        {
+            href: "/dashboard/broker/my-offers",
+            label: t("dashboard.sidebar.offers"),
+            icon: HandshakeIcon,
+            badge: notificationCounts.offers // Broker teklifleri için badge
+        },
         {
             href: "/dashboard/messages",
             label: t("dashboard.sidebar.messages"),
             icon: MessageSquare,
-            badge: notificationCounts.messages || 0  // 👈 YENİ EKLENEN
+            badge: notificationCounts.messages || 0
         },
         { href: "/dashboard/broker/ship-portfolio", label: t("dashboard.sidebar.shipPortfolio"), icon: Truck },
         { href: "/dashboard/broker/commissions", label: t("dashboard.sidebar.commissions"), icon: DollarSign },
@@ -134,6 +141,9 @@ export default function Sidebar() {
         } else if (user.role === 'CARRIER') {
             dispatch(fetchAcceptedLoads());
             dispatch(fetchRejectedOffers());
+        } else if (user.role === 'BROKER') {
+            // Broker kendi tekliflerini getir
+            dispatch(fetchCurrentBrokerOffers());
         }
     }, [user, dispatch]);
 
@@ -148,8 +158,11 @@ export default function Sidebar() {
         } else if (user?.role === 'CARRIER') {
             const totalLoads = acceptedLoads.length + rejectedOffers.length;
             dispatch(updateLoadCount(totalLoads));
+        } else if (user?.role === 'BROKER') {
+            // Broker teklifleri için count hesapla - pending offers
+            dispatch(updateOfferCount(pendingOffers.length));
         }
-    }, [loadsWithOffers, acceptedLoads, rejectedOffers, user?.role, dispatch]);
+    }, [loadsWithOffers, acceptedLoads, rejectedOffers, pendingOffers, user?.role, dispatch]);
 
     useEffect(() => {
         // Sayfa değişikliklerinde badge'leri sıfırla
@@ -157,8 +170,10 @@ export default function Sidebar() {
             dispatch(resetOfferCount());
         } else if (user?.role === 'CARRIER' && pathname === '/dashboard/carrier/my-loads') {
             dispatch(resetLoadCount());
+        } else if (user?.role === 'BROKER' && pathname === '/dashboard/broker/my-offers') {
+            dispatch(resetOfferCount()); // Broker teklifleri için reset
         } else if (pathname === '/dashboard/messages') {
-            dispatch(resetMessageCount()); // 👈 YENİ EKLENEN
+            dispatch(resetMessageCount());
         }
     }, [pathname, user?.role, dispatch]);
 

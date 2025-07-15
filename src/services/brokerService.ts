@@ -25,15 +25,18 @@ export enum OfferStatus {
     REJECTED = 'REJECTED',
     CANCELLED = 'CANCELLED'
 }
-
-
-
 export interface BrokerOfferResponse {
     id: string;
     loadId: string;
     loadTitle?: string;
     loadGoodsType?: string;
     loadWeight?: number;
+    senderId?: string;
+    senderName?: string;
+    senderCompanyName?: string;
+    senderContactPerson?: string;
+    senderIsCompany?: boolean;
+
     brokerProfileId: string;
     brokerName?: string;
     brokerEcoFriendlyCertified?: boolean;

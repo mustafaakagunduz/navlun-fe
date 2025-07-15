@@ -2,6 +2,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import brokerService from '@/services/brokerService'
 import authService from '@/services/authService'
+import { BrokerOfferResponse } from '@/services/brokerService'
 
 export enum OfferStatus {
     PENDING = 'PENDING',
@@ -62,6 +63,8 @@ export interface BrokerOfferRequest {
     commissionRate: number
     validUntil: string
 }
+
+
 
 interface BrokerOffersState {
     // All broker offers
@@ -163,6 +166,19 @@ export const fetchBrokerOffers = createAsyncThunk(
             return offers
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Teklifler yüklenemedi')
+        }
+    }
+)
+
+// Broker'ın kendi tekliflerini getirme thunk'ı ekle
+export const fetchCurrentBrokerOffers = createAsyncThunk(
+    'brokerOffers/fetchCurrentBrokerOffers',
+    async (status: OfferStatus | undefined = undefined, { rejectWithValue }) => {
+        try {
+            const offers = await brokerService.getCurrentBrokerOffers(status)
+            return offers
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || 'Broker teklifleri yüklenemedi')
         }
     }
 )
@@ -491,6 +507,56 @@ const brokerOffersSlice = createSlice({
                 state.statsLoading = false
                 state.statsError = action.payload as string
             })
+
+        builder
+            .addCase(fetchCurrentBrokerOffers.pending, (state) => {
+                state.offersLoading = true
+                state.offersError = null
+            })
+            .addCase(fetchCurrentBrokerOffers.fulfilled, (state, action) => {
+                state.offersLoading = false
+                state.offers = action.payload
+
+                // Durumlara göre ayır
+                state.pendingOffers = action.payload.filter(offer => offer.status === OfferStatus.PENDING)
+                state.acceptedOffers = action.payload.filter(offer => offer.status === OfferStatus.ACCEPTED)
+                state.rejectedOffers = action.payload.filter(offer => offer.status === OfferStatus.REJECTED)
+
+                // Stats güncelle
+                const totalOffers = action.payload.length
+                const pendingCount = state.pendingOffers.length
+                const acceptedCount = state.acceptedOffers.length
+                const rejectedCount = state.rejectedOffers.length
+
+                const totalCommission = action.payload.reduce(
+                    (sum, offer) => sum + (offer.commissionAmount || 0), 0
+                )
+
+                const averageOfferValue = totalOffers > 0
+                    ? action.payload.reduce((sum, offer) => sum + (offer.totalAmount || 0), 0) / totalOffers
+                    : 0
+
+                const successRate = totalOffers > 0
+                    ? (acceptedCount / (acceptedCount + rejectedCount)) * 100
+                    : 0
+
+                state.stats = {
+                    ...state.stats,
+                    totalOffers,
+                    pendingCount,
+                    acceptedCount,
+                    rejectedCount,
+                    totalCommission,
+                    averageOfferValue,
+                    successRate
+                }
+            })
+            .addCase(fetchCurrentBrokerOffers.rejected, (state, action) => {
+                state.offersLoading = false
+                state.offersError = action.payload as string
+            })
+
+
     }
 })
 
