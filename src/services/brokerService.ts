@@ -234,27 +234,8 @@ const brokerService = {
         }
     },
 
-    // brokerService.ts'ye eklenecek kısım:
 
-// Broker teklifini kabul et
-    acceptBrokerOffer: async (offerId: string): Promise<BrokerOfferResponse> => {
-        try {
-            return await apiService.patch<BrokerOfferResponse>(`/broker-offers/${offerId}/accept`, {});
-        } catch (error) {
-            console.error(`Accept broker offer (ID: ${offerId}) error:`, error);
-            throw error;
-        }
-    },
 
-// Broker teklifini reddet
-    rejectBrokerOffer: async (offerId: string): Promise<BrokerOfferResponse> => {
-        try {
-            return await apiService.patch<BrokerOfferResponse>(`/broker-offers/${offerId}/reject`, {});
-        } catch (error) {
-            console.error(`Reject broker offer (ID: ${offerId}) error:`, error);
-            throw error;
-        }
-    },
 
     // Broker'ın kendi tekliflerini getir
     getCurrentBrokerOffers: async (status?: OfferStatus): Promise<BrokerOfferResponse[]> => {
@@ -275,20 +256,6 @@ const brokerService = {
             return await apiService.get<boolean>('/broker-offers/check', { loadId, brokerId });
         } catch (error) {
             console.error(`Check broker offer (load: ${loadId}, broker: ${brokerId}) error:`, error);
-            throw error;
-        }
-    },
-
-// Mevcut sender'ın yüklerine gelen broker tekliflerini getir
-    getCurrentSenderReceivedBrokerOffers: async (loadId?: string, status?: OfferStatus): Promise<BrokerOfferResponse[]> => {
-        try {
-            const params: Record<string, any> = {};
-            if (loadId) params.loadId = loadId;
-            if (status) params.status = status;
-
-            return await apiService.get<BrokerOfferResponse[]>('/broker-offers/my-received-broker-offers', params);
-        } catch (error) {
-            console.error('Get current sender received broker offers error:', error);
             throw error;
         }
     },
@@ -591,6 +558,40 @@ const brokerService = {
             return await apiService.get<BrokerOfferResponse>(`/broker-offers/${offerId}`);
         } catch (error) {
             console.error(`Get broker offer by ID (${offerId}) error:`, error);
+            throw error;
+        }
+    },
+
+    // Mevcut sender'ın yüklerine gelen broker tekliflerini getir
+    getCurrentSenderReceivedBrokerOffers: async (loadId?: string, status?: OfferStatus): Promise<BrokerOfferResponse[]> => {
+        try {
+            const params: Record<string, any> = {};
+            if (loadId) params.loadId = loadId;
+            if (status) params.status = status;
+
+            return await apiService.get<BrokerOfferResponse[]>('/broker-offers/my-received-broker-offers', params);
+        } catch (error) {
+            console.error('Get current sender received broker offers error:', error);
+            throw error;
+        }
+    },
+
+// Broker teklifini kabul et
+    acceptBrokerOffer: async (offerId: string): Promise<BrokerOfferResponse> => {
+        try {
+            return await apiService.patch<BrokerOfferResponse>(`/broker-offers/${offerId}/accept`, {});
+        } catch (error) {
+            console.error(`Accept broker offer (ID: ${offerId}) error:`, error);
+            throw error;
+        }
+    },
+
+// Broker teklifini reddet
+    rejectBrokerOffer: async (offerId: string): Promise<BrokerOfferResponse> => {
+        try {
+            return await apiService.patch<BrokerOfferResponse>(`/broker-offers/${offerId}/reject`, {});
+        } catch (error) {
+            console.error(`Reject broker offer (ID: ${offerId}) error:`, error);
             throw error;
         }
     },
