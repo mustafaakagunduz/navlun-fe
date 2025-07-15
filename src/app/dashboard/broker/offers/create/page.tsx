@@ -202,6 +202,23 @@ function BrokerOfferCreate() {
         }));
     };
 
+    // Gemileri filtreleyen fonksiyon ekleyin
+    const getAvailableShips = () => {
+        return availableShips.filter(ship => {
+            // Frontend'de de aynı kontrolü yapalım
+            if (!ship.available) return false;
+            if (ship.nextAvailableDate) {
+                const nextDate = new Date(ship.nextAvailableDate);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                return nextDate <= today;
+            }
+            return true;
+        });
+    };
+
+// Ship seçim kısmında availableShips yerine getAvailableShips() kullanın
+
     // Form validation
     const validateForm = (): boolean => {
         const errors: Record<string, string> = {};
@@ -465,7 +482,7 @@ function BrokerOfferCreate() {
                                                 <SelectValue placeholder="Gemi seçiniz..." />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {availableShips.map((ship) => (
+                                                {getAvailableShips().map((ship) => (
                                                     <SelectItem key={ship.id} value={ship.id}>
                                                         <div className="flex items-center justify-between w-full">
                                                             <div className="flex flex-col">

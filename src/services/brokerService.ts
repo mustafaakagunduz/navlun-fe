@@ -256,6 +256,29 @@ const brokerService = {
         }
     },
 
+    // Broker'ın kendi tekliflerini getir
+    getCurrentBrokerOffers: async (status?: OfferStatus): Promise<BrokerOfferResponse[]> => {
+        try {
+            const params: Record<string, any> = {};
+            if (status) params.status = status;
+
+            return await apiService.get<BrokerOfferResponse[]>('/broker-offers/my-broker-offers', params);
+        } catch (error) {
+            console.error('Get current broker offers error:', error);
+            throw error;
+        }
+    },
+
+// Broker'ın belirli bir yük için teklif verip vermediğini kontrol eder
+    hasBrokerAlreadyOfferedForLoad: async (loadId: string, brokerId: string): Promise<boolean> => {
+        try {
+            return await apiService.get<boolean>('/broker-offers/check', { loadId, brokerId });
+        } catch (error) {
+            console.error(`Check broker offer (load: ${loadId}, broker: ${brokerId}) error:`, error);
+            throw error;
+        }
+    },
+
 // Mevcut sender'ın yüklerine gelen broker tekliflerini getir
     getCurrentSenderReceivedBrokerOffers: async (loadId?: string, status?: OfferStatus): Promise<BrokerOfferResponse[]> => {
         try {
@@ -524,11 +547,30 @@ const brokerService = {
     },
 
     // Broker Offer işlemleri
+    // Broker Offer işlemleri
     createBrokerOffer: async (offerData: BrokerOfferRequest): Promise<BrokerOfferResponse> => {
         try {
-            return await apiService.post<BrokerOfferResponse, BrokerOfferRequest>('/broker-offers', offerData);
+            console.log('=== BROKER OFFER REQUEST ===');
+            console.log('Gönderilen data:', JSON.stringify(offerData, null, 2));
+
+            const result = await apiService.post<BrokerOfferResponse, BrokerOfferRequest>('/broker-offers', offerData);
+
+            console.log('=== BROKER OFFER RESPONSE ===');
+            console.log('Alınan response:', JSON.stringify(result, null, 2));
+
+            return result;
         } catch (error) {
             console.error('Create broker offer error:', error);
+
+            // Hata detaylarını logla
+            // @ts-ignore
+            if (error.response) {
+                // @ts-ignore
+                console.error('Error response status:', error.response.status);
+                // @ts-ignore
+                console.error('Error response data:', error.response.data);
+            }
+
             throw error;
         }
     },

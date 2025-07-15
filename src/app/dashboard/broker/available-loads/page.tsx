@@ -431,7 +431,7 @@ export default function BrokerAvailableLoads() {
                                     <div className="flex items-start justify-between">
                                         <div className="flex-1">
                                             <CardTitle className="text-lg font-semibold text-gray-900 mb-1">
-                                                {load.goodsType}
+                                                {load.title}
                                             </CardTitle>
                                             <div className="flex items-center gap-2 text-sm text-gray-600">
                                                 <Building2 className="h-4 w-4" />

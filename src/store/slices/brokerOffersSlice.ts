@@ -167,6 +167,54 @@ export const fetchBrokerOffers = createAsyncThunk(
     }
 )
 
+// Broker teklif kabul etme
+export const acceptBrokerOffer = createAsyncThunk(
+    'brokerOffers/acceptBrokerOffer',
+    async (offerId: string, { rejectWithValue }) => {
+        try {
+            return await brokerService.acceptBrokerOffer(offerId);
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || 'Broker teklifi kabul edilemedi');
+        }
+    }
+);
+
+// Broker teklif reddetme
+export const rejectBrokerOffer = createAsyncThunk(
+    'brokerOffers/rejectBrokerOffer',
+    async (offerId: string, { rejectWithValue }) => {
+        try {
+            return await brokerService.rejectBrokerOffer(offerId);
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || 'Broker teklifi reddedilemedi');
+        }
+    }
+);
+
+// Sender'ın aldığı broker tekliflerini getir - DÜZELTİLMİŞ VERSİYON
+export const fetchCurrentSenderReceivedBrokerOffers = createAsyncThunk(
+    'brokerOffers/fetchCurrentSenderReceivedBrokerOffers',
+    async (params: { loadId?: string; status?: OfferStatus } = {}, { rejectWithValue }) => {
+        try {
+            return await brokerService.getCurrentSenderReceivedBrokerOffers(params.loadId, params.status);
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || 'Broker teklifleri alınamadı');
+        }
+    }
+);
+
+// Broker'ın yük için teklif verip vermediğini kontrol et
+export const checkBrokerAlreadyOfferedForLoad = createAsyncThunk(
+    'brokerOffers/checkBrokerAlreadyOfferedForLoad',
+    async ({ loadId, brokerId }: { loadId: string; brokerId: string }, { rejectWithValue }) => {
+        try {
+            return await brokerService.hasBrokerAlreadyOfferedForLoad(loadId, brokerId);
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || 'Kontrol sırasında hata oluştu');
+        }
+    }
+);
+
 export const fetchBrokerOffersPaginated = createAsyncThunk(
     'brokerOffers/fetchOffersPaginated',
     async ({ page = 0, size = 20 }: { page?: number; size?: number }, { rejectWithValue }) => {
