@@ -223,7 +223,8 @@
       "assigned": "Atanmış",
       "in_transit": "Taşınıyor",
       "delivered": "Teslim Edildi",
-      "completed": "Tamamlandı"
+      "completed": "Tamamlandı",
+      "active": "Aktif"
     },
     "units": {
       "kg": "kg",

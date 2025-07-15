@@ -11,6 +11,10 @@ interface BrokerState {
     profileLoading: boolean
     profileError: string | null
 
+    offeredLoads: string[], // loadId'leri içeren array
+    offeredLoadsLoading: boolean,
+    offeredLoadsError: string | null,
+
     // Available loads for broker
     availableLoads: Load[]
     availableLoadsLoading: boolean
@@ -48,6 +52,10 @@ const initialState: BrokerState = {
     profile: null,
     profileLoading: false,
     profileError: null,
+
+    offeredLoads: [],
+    offeredLoadsLoading: false,
+    offeredLoadsError: null,
 
     availableLoads: [],
     availableLoadsLoading: false,
@@ -89,6 +97,30 @@ export const fetchBrokerProfile = createAsyncThunk(
             return profile
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Broker profili yüklenemedi')
+        }
+    }
+)
+
+export const checkOfferedLoads = createAsyncThunk(
+    'broker/checkOfferedLoads',
+    async (loadIds: string[], { rejectWithValue }) => {
+        try {
+            const currentUser = await authService.getCurrentUser()
+            const brokerProfile = await brokerService.getBrokerProfileByUserId(currentUser.id)
+
+            const offeredLoadIds: string[] = []
+
+            // Her load için teklif verilip verilmediğini kontrol et
+            for (const loadId of loadIds) {
+                const hasOffered = await brokerService.hasBrokerAlreadyOfferedForLoad(loadId, brokerProfile.id)
+                if (hasOffered) {
+                    offeredLoadIds.push(loadId)
+                }
+            }
+
+            return offeredLoadIds
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || 'Teklif kontrolü yapılamadı')
         }
     }
 )
@@ -223,6 +255,20 @@ const brokerSlice = createSlice({
             .addCase(fetchBrokerStats.rejected, (state, action) => {
                 state.statsLoading = false
                 state.statsError = action.payload as string
+            })
+
+        builder
+            .addCase(checkOfferedLoads.pending, (state) => {
+                state.offeredLoadsLoading = true
+                state.offeredLoadsError = null
+            })
+            .addCase(checkOfferedLoads.fulfilled, (state, action) => {
+                state.offeredLoadsLoading = false
+                state.offeredLoads = action.payload
+            })
+            .addCase(checkOfferedLoads.rejected, (state, action) => {
+                state.offeredLoadsLoading = false
+                state.offeredLoadsError = action.payload as string
             })
     }
 })

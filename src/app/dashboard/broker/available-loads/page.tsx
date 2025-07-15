@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from '@/hooks/use-toast';
+import { checkOfferedLoads } from '@/store/slices/brokerSlice';
 
 import {
     Search,
@@ -33,7 +34,7 @@ import {
     Route,
     AlertCircle,
     MessageSquare,
-    Loader2
+    Loader2, CheckCircle
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { Load, LoadStatus } from "@/services/loadService";
@@ -64,6 +65,7 @@ export default function BrokerAvailableLoads() {
         availableLoadsLoading,
         availableLoadsError,
         availableLoadsPage,
+        offeredLoads,
         availableLoadsTotalPages,
         availableLoadsTotalElements,
         filters
@@ -80,6 +82,13 @@ export default function BrokerAvailableLoads() {
             router.push('/dashboard');
         }
     }, [isLoading, isAuthenticated, user, router]);
+
+    useEffect(() => {
+        if (availableLoads.length > 0) {
+            const loadIds = availableLoads.map(load => load.id);
+            dispatch(checkOfferedLoads(loadIds));
+        }
+    }, [availableLoads, dispatch]);
 
     // Fetch available loads on mount and page change
     useEffect(() => {
@@ -497,36 +506,42 @@ export default function BrokerAvailableLoads() {
                                     </div>
 
                                     {/* Actions */}
-                                    <div className="flex items-center justify-between pt-4 border-t">
-                                        {/* Action Buttons */}
-                                        <div className="flex gap-2 pt-4 border-t">
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="flex-1"
-                                                onClick={() => handleViewDetails(load)}
-                                            >
-                                                <Eye className="h-4 w-4 mr-1" />
-                                                Detay
-                                            </Button>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="flex-1"
-                                                onClick={() => handleMessageSender(load)}
-                                            >
-                                                <MessageSquare className="h-4 w-4 mr-1" />
-                                                Mesajlaş
-                                            </Button>
+                                    <div className="flex gap-2 pt-4 border-t">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="flex-1"
+                                            onClick={() => handleViewDetails(load)}
+                                        >
+                                            <Eye className="h-4 w-4 mr-1" />
+                                            Detay
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="flex-1"
+                                            onClick={() => handleMessageSender(load)}
+                                        >
+                                            <MessageSquare className="h-4 w-4 mr-1" />
+                                            Mesajlaş
+                                        </Button>
+
+                                        {/* Teklif Ver butonu yerine ekle */}
+                                        {offeredLoads.includes(load.id) ? (
+                                            <Badge className="bg-green-100 text-green-800 flex-1 justify-center">
+                                                <CheckCircle className="h-3 w-3 mr-1" />
+                                                Teklif Verildi
+                                            </Badge>
+                                        ) : (
                                             <Button
                                                 onClick={() => handleOfferClick(load)}
-                                                size="sm"
-                                                className="flex-1 bg-amber-600 hover:bg-amber-700"
+                                                className="flex-1"
+                                                disabled={load.status !== 'PENDING' && load.status !== 'ACTIVE'}
                                             >
                                                 <HandshakeIcon className="h-4 w-4 mr-1" />
                                                 Teklif Ver
                                             </Button>
-                                        </div>
+                                        )}
                                     </div>
                                 </CardContent>
                             </Card>

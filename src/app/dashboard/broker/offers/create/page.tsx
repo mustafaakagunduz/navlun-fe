@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
+import { useToast } from '@/hooks/use-toast';
 import { Suspense } from 'react';
 import {
     ArrowLeft,
@@ -62,6 +63,7 @@ function BrokerOfferCreate() {
     const searchParams = useSearchParams();
     const { t } = useLanguage();
     const dispatch = useAppDispatch();
+    const { toast } = useToast();
 
     // URL'den loadId'yi al
     const loadId = searchParams.get('loadId');
@@ -187,9 +189,18 @@ function BrokerOfferCreate() {
     // Redirect on success
     useEffect(() => {
         if (createOfferSuccess) {
-            router.push('/dashboard/broker/offers?success=true');
+            toast({
+                title: "Teklif Başarıyla Oluşturuldu",
+                description: "Teklifiniz yük sahibine gönderildi.",
+                variant: "default",
+            });
+
+            // 1 saniye bekleyip available-loads sayfasına yönlendir
+            setTimeout(() => {
+                router.push('/dashboard/broker/available-loads');
+            }, 1000);
         }
-    }, [createOfferSuccess, router]);
+    }, [createOfferSuccess, router, toast]);
 
     // Ship selection handler
     const handleShipSelect = (shipId: string) => {
