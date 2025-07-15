@@ -35,6 +35,7 @@ import GoodsTypeSelect from "@/app/dashboard/sender/loads/new-load/GoodsTypeSele
 import InsurancePolicyCard from "@/app/dashboard/sender/loads/new-load/InsurancePolicyCard";
 import CarbonFootprintDisplay from "@/app/dashboard/sender/loads/new-load/CarbonFootprintDisplay";
 import senderService from "@/services/senderService";
+import { useToast } from '@/hooks/use-toast';
 
 type FormData = {
     title: string;
@@ -54,6 +55,7 @@ export default function NewLoadForm() {
     const { user } = useAuth();
     const { t } = useLanguage();
     const dispatch = useAppDispatch();
+    const { toast } = useToast();
 
     // Form state
     const {
@@ -176,26 +178,39 @@ export default function NewLoadForm() {
             // Redux kullan:
             await dispatch(createLoad(loadRequest)).unwrap();
 
-            setSubmitSuccess(t('newLoad.success.created'));
+            toast({
+                title: "Yük Başarıyla Oluşturuldu",
+                description: "Yükünüz sisteme başarıyla eklendi ve açık yükler listesinde görünecektir.",
+                variant: "default",
+            });
 
             // Redirect after success
             setTimeout(() => {
                 router.push('/dashboard/sender/loads');
-            }, 1500);
+            }, 1000);
 
         } catch (error: any) {
             console.error('❌ Yük oluşturma hatası:', error);
 
+            let errorMessage = '';
+
             if (error.message && error.message.includes('Sender profile not found')) {
-                setSubmitError('Gönderici profili bulunamadı. Lütfen önce profil oluşturun.');
+                errorMessage = 'Gönderici profili bulunamadı. Lütfen önce profil oluşturun.';
             } else {
-                setSubmitError(
-                    error || // Redux thunk error
+                errorMessage = error ||
                     error.response?.data?.message ||
                     error.message ||
-                    t('newLoad.errors.createFailed')
-                );
+                    t('newLoad.errors.createFailed');
             }
+
+            // Hem setSubmitError hem de toast göster
+            setSubmitError(errorMessage);
+
+            toast({
+                title: "Yük Oluşturulamadı",
+                description: errorMessage,
+                variant: "destructive",
+            });
         }
     };
     // Handle back navigation
