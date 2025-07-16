@@ -14,7 +14,7 @@ export const config = {
     // Site ayarları
     site: {
         url: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
-        name: 'EkoTransport',
+        name: 'Transyük',
         description: 'Navlun ve Kargo Takip Sistemi'
     },
 

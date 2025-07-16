@@ -12,7 +12,7 @@ const nextConfig = {
 
         // Image optimization
         images: {
-            domains: ['ekotransport.com', 'cdn.ekotransport.com'],
+            domains: ['transyuk.com', 'cdn.transyuk.com'],
             formats: ['image/webp', 'image/avif'],
         },
 
