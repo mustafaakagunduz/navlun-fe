@@ -1,8 +1,66 @@
-import type { NextConfig } from "next";
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+    env: {
+        CUSTOM_KEY: process.env.CUSTOM_KEY,
+    },
 
-const nextConfig: NextConfig = {
+    // Production optimizations
+    ...(process.env.NODE_ENV === 'production' && {
+        compress: true,
+        poweredByHeader: false,
+        generateEtags: false,
 
-    /* diğer config ayarları buraya */
+        // Image optimization
+        images: {
+            domains: ['ekotransport.com', 'cdn.ekotransport.com'],
+            formats: ['image/webp', 'image/avif'],
+        },
+
+        // Headers for security
+        async headers() {
+            return [
+                {
+                    source: '/(.*)',
+                    headers: [
+                        {
+                            key: 'X-Frame-Options',
+                            value: 'DENY',
+                        },
+                        {
+                            key: 'X-Content-Type-Options',
+                            value: 'nosniff',
+                        },
+                        {
+                            key: 'Referrer-Policy',
+                            value: 'origin-when-cross-origin',
+                        },
+                    ],
+                },
+            ];
+        },
+    }),
+
+    // Development optimizations
+    ...(process.env.NODE_ENV === 'development' && {
+        reactStrictMode: true,
+        eslint: {
+            ignoreDuringBuilds: false,
+        },
+    }),
+
+    // Redirects for production domain
+    async redirects() {
+        if (process.env.NODE_ENV === 'production') {
+            return [
+                {
+                    source: '/home',
+                    destination: '/',
+                    permanent: true,
+                },
+            ];
+        }
+        return [];
+    },
 };
 
-export default nextConfig;
+module.exports = nextConfig;

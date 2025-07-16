@@ -1,20 +1,44 @@
 // src/lib/axios.ts
 import axios from 'axios';
 
-// API temel URL'ini ortam değişkeninden al, yoksa varsayılan olarak local'i kullan
-const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
+// Environment'a göre API URL'ini belirle
+const getBaseURL = () => {
+    // Production check
+    if (process.env.NEXT_PUBLIC_APP_ENV === 'production') {
+        return process.env.NEXT_PUBLIC_API_URL || 'https://api.ekotransport.com/api/v1';
+    }
+
+    // Development için
+    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
+};
+
+const baseURL = getBaseURL();
+
+// Timeout değerini environment'dan al
+const timeout = parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT || '15000');
 
 const axiosInstance = axios.create({
     baseURL,
-    timeout: 15000,
+    timeout,
     headers: {
         'Content-Type': 'application/json',
     },
 });
 
+// Development'da console log
+if (process.env.NEXT_PUBLIC_APP_ENV === 'development') {
+    console.log('🔗 API Base URL:', baseURL);
+    console.log('⏱️ API Timeout:', timeout);
+}
+
 // İstek interceptor'u
 axiosInstance.interceptors.request.use(
     (config) => {
+        // Development'da istekleri logla
+        if (process.env.NEXT_PUBLIC_APP_ENV === 'development' && process.env.NEXT_PUBLIC_ENABLE_DEBUG === 'true') {
+            console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`);
+        }
+
         // Token kontrolü - localStorage'dan token al (client-side)
         if (typeof window !== 'undefined') {
             const token = localStorage.getItem('accessToken');
@@ -24,21 +48,35 @@ axiosInstance.interceptors.request.use(
         }
         return config;
     },
-    (error) => Promise.reject(error)
+    (error) => {
+        if (process.env.NEXT_PUBLIC_APP_ENV === 'development') {
+            console.error('❌ Request Error:', error);
+        }
+        return Promise.reject(error);
+    }
 );
 
 // Yanıt interceptor'u
 axiosInstance.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        // Development'da başarılı yanıtları logla
+        if (process.env.NEXT_PUBLIC_APP_ENV === 'development' && process.env.NEXT_PUBLIC_ENABLE_DEBUG === 'true') {
+            console.log(`✅ API Response: ${response.status} ${response.config.method?.toUpperCase()} ${response.config.url}`);
+        }
+        return response;
+    },
     async (error) => {
         const originalRequest = error.config;
 
+        // Development'da hataları logla
+        if (process.env.NEXT_PUBLIC_APP_ENV === 'development') {
+            console.error(`❌ API Error: ${error.response?.status} ${originalRequest?.method?.toUpperCase()} ${originalRequest?.url}`);
+        }
+
         // 401 hatası ve token yenileme denememiş ise
-        // Sadece oturum açılmış durumdayken 401 hata kodunda token yenilemeyi dene
         if (error.response?.status === 401 && !originalRequest._retry &&
             typeof window !== 'undefined' &&
             localStorage.getItem('accessToken') && // Token varsa (oturum açılmışsa)
-            // Eğer /auth/login endpoint'ine istek yapılmıyorsa (login sırasındaki 401 hatası değilse)
             !originalRequest.url.includes('/auth/login')) {
 
             originalRequest._retry = true;
@@ -50,7 +88,7 @@ axiosInstance.interceptors.response.use(
                     // Refresh token yoksa kullanıcıyı çıkış yaptır
                     localStorage.removeItem('accessToken');
                     localStorage.removeItem('refreshToken');
-                    window.location.href = '/'; // Ana sayfaya yönlendir
+                    window.location.href = '/';
                     return Promise.reject(error);
                 }
 
@@ -62,7 +100,6 @@ axiosInstance.interceptors.response.use(
 
                 if (response.data.accessToken) {
                     localStorage.setItem('accessToken', response.data.accessToken);
-                    // Refresh token yenileniyorsa onu da güncelle
                     if (response.data.refreshToken) {
                         localStorage.setItem('refreshToken', response.data.refreshToken);
                     }
@@ -75,12 +112,11 @@ axiosInstance.interceptors.response.use(
                 // Token yenileme başarısız ise çıkış yap
                 localStorage.removeItem('accessToken');
                 localStorage.removeItem('refreshToken');
-                window.location.href = '/'; // Ana sayfaya yönlendir
+                window.location.href = '/';
                 return Promise.reject(refreshError);
             }
         }
 
-        // Diğer tüm hata durumları
         return Promise.reject(error);
     }
 );
