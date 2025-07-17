@@ -727,25 +727,15 @@ export default function SenderProfilePage() {
                                                                 onClick={() => {
                                                                     const downloadUrl = file.downloadUrl || file.url;
                                                                     if (downloadUrl) {
-                                                                        if (file.isPermanent && file.downloadUrl) {
-                                                                            // Backend dosyası için: fetch + download
-                                                                            fetch(downloadUrl)
-                                                                                .then(response => response.blob())
-                                                                                .then(blob => {
-                                                                                    const url = window.URL.createObjectURL(blob);
-                                                                                    const a = document.createElement('a');
-                                                                                    a.href = url;
-                                                                                    a.download = file.name;
-                                                                                    document.body.appendChild(a);
-                                                                                    a.click();
-                                                                                    document.body.removeChild(a);
-                                                                                    window.URL.revokeObjectURL(url);
-                                                                                })
-                                                                                .catch(error => {
-                                                                                    console.error('Download error:', error);
-                                                                                    // Fallback: direkt link aç
-                                                                                    window.open(downloadUrl, '_blank');
-                                                                                });
+                                                                        if (file.isPermanent) {
+                                                                            // ✅ Backend dosyası için: Doğrudan link ile indirme
+                                                                            const a = document.createElement('a');
+                                                                            a.href = downloadUrl;
+                                                                            a.download = file.name;
+                                                                            a.style.display = 'none';
+                                                                            document.body.appendChild(a);
+                                                                            a.click();
+                                                                            document.body.removeChild(a);
                                                                         } else {
                                                                             // Local dosya için: blob download
                                                                             const a = document.createElement('a');
