@@ -6,13 +6,16 @@ import axios from 'axios';
 const getBaseURL = () => {
     // Production check - domain ile kontrol ekle
     if (process.env.NEXT_PUBLIC_APP_ENV === 'production' ||
-        typeof window !== 'undefined' && window.location.hostname === 'transyuk.com') {
+        typeof window !== 'undefined' &&
+        (window.location.hostname === 'transyuk.com' ||
+            window.location.hostname === 'www.transyuk.com')) {
         return process.env.NEXT_PUBLIC_API_URL || 'https://api.transyuk.com/api/v1';
     }
 
     // Development için
     return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
 };
+
 const baseURL = getBaseURL();
 
 // Timeout değerini environment'dan al
