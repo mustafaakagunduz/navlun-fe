@@ -44,7 +44,7 @@ const authService = {
             if (error.response?.data?.message) {
                 throw error; // Original error with message from API
             } else {
-                // Create a more appropriate error with a clear message
+                // Create a more appropriate error with a clear messagee
                 const enhancedError = new Error('Kullanıcı Adı veya Şifre hatalı');
                 (enhancedError as any).response = {
                     data: {
