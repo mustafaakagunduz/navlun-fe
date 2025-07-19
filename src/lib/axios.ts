@@ -6,8 +6,9 @@ const getBaseURL = () => {
     if (process.env.NEXT_PUBLIC_APP_ENV === 'production' ||
         typeof window !== 'undefined' &&
         (window.location.hostname === 'transyuk.com' ||
-            window.location.hostname === 'www.transyuk.com')) {
-        return process.env.NEXT_PUBLIC_API_URL || 'https://Navlun-api-env.eba-isp5uwb8.eu-north-1.elasticbeanstalk.com/api/v1';
+            window.location.hostname === 'www.transyuk.com' ||
+            window.location.hostname === 'navlun-fe.vercel.app')) {
+        return process.env.NEXT_PUBLIC_API_URL || 'http://navlun-api-env.eba-isp5uwb8.eu-north-1.elasticbeanstalk.com/api/v1';
     }
 
     // Development için
