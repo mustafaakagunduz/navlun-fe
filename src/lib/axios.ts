@@ -1,15 +1,16 @@
 // src/lib/axios.ts
 import axios from 'axios';
 
-// Environment'a göre API URL'ini belirle
-// Environment'a göre API URL'ini belirle
 const getBaseURL = () => {
+    // Production check - domain ile kontrol ekle
     if (process.env.NEXT_PUBLIC_APP_ENV === 'production' ||
         typeof window !== 'undefined' &&
         (window.location.hostname === 'transyuk.com' ||
             window.location.hostname === 'www.transyuk.com')) {
-        return process.env.NEXT_PUBLIC_API_URL || 'https://api.transyuk.com/api/v1';
+        return process.env.NEXT_PUBLIC_API_URL || 'https://Navlun-api-env.eba-isp5uwb8.eu-north-1.elasticbeanstalk.com/api/v1';
     }
+
+    // Development için
     return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
 };
 
