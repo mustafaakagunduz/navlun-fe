@@ -8,7 +8,8 @@ const getBaseURL = () => {
         (window.location.hostname === 'transyuk.com' ||
             window.location.hostname === 'www.transyuk.com' ||
             window.location.hostname === 'navlun-fe.vercel.app')) {
-        return process.env.NEXT_PUBLIC_API_URL || 'http://navlun-api-env.eba-isp5uwb8.eu-north-1.elasticbeanstalk.com/api/v1';
+        // Frontend proxy route kullan (Mixed Content Policy için)
+        return '/api';
     }
 
     // Development için

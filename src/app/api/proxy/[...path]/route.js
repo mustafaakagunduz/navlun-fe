@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import axiosInstance from '@/lib/axios';
+import axios from "axios";
 
 export async function GET(request, { params }) {
     return handleRequest(request, 'GET', params.path);
@@ -74,13 +74,13 @@ async function handleRequest(request, method, paths) {
         // burada eklenebilir
 
         // Backend API'ye istek at
-        const response = await axiosInstance({
+        // Backend API'ye istek at
+        const response = await axios({
             method: method.toLowerCase(),
-            url: `/${pathSegment}`,
+            url: `http://navlun-api-env.eba-isp5uwb8.eu-north-1.elasticbeanstalk.com/api/v1/${pathSegment}`,
             params: queryParams,
             data: requestBody,
             headers,
-            // İçerik büyükse veya form dosyası yükleniyorsa timeout'u uzat
             timeout: contentType?.includes('multipart/form-data') ? 60000 : 15000,
         });
 
