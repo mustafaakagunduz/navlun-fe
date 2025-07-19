@@ -1,5 +1,5 @@
+import axios from 'axios';
 import { NextResponse } from 'next/server';
-import axios from "axios";
 
 export async function GET(request, { params }) {
     return handleRequest(request, 'GET', params.path);
@@ -70,10 +70,6 @@ async function handleRequest(request, method, paths) {
             headers['Accept'] = acceptHeader;
         }
 
-        // Canlı ortamda gerekli olabilecek CORS, cache ve diğer header'lar
-        // burada eklenebilir
-
-        // Backend API'ye istek at
         // Backend API'ye istek at
         const response = await axios({
             method: method.toLowerCase(),
@@ -85,7 +81,6 @@ async function handleRequest(request, method, paths) {
         });
 
         // API yanıtını döndür
-        // Eğer yanıt özel bir işleme tabi tutulacaksa (önbelleğe alma vb.) buraya eklenebilir
         return NextResponse.json(response.data, {
             status: response.status,
             headers: {
@@ -107,7 +102,6 @@ async function handleRequest(request, method, paths) {
         const errorData = error.response?.data || { error: errorMessage };
 
         // Üretim ortamında hata mesajlarını filtreleme
-        // 500 hatalarında kullanıcıya aşırı teknik detay gösterme
         const safeErrorData = process.env.NODE_ENV === 'production' && errorStatus >= 500
             ? { error: 'Internal server error occurred. Please try again later.' }
             : errorData;
