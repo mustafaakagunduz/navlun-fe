@@ -2,9 +2,11 @@
 import axios from 'axios';
 
 // Environment'a göre API URL'ini belirle
+// Environment'a göre API URL'ini belirle
 const getBaseURL = () => {
-    // Production check
-    if (process.env.NEXT_PUBLIC_APP_ENV === 'production') {
+    // Production check - domain ile kontrol ekle
+    if (process.env.NEXT_PUBLIC_APP_ENV === 'production' ||
+        typeof window !== 'undefined' && window.location.hostname === 'transyuk.com') {
         return process.env.NEXT_PUBLIC_API_URL || 'https://api.transyuk.com/api/v1';
     }
 
