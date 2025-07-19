@@ -7,8 +7,7 @@ const getBaseURL = () => {
         typeof window !== 'undefined' &&
         (window.location.hostname === 'transyuk.com' ||
             window.location.hostname === 'www.transyuk.com')) {
-        // Geçici hardcode test için
-        return 'https://Navlun-api-env.eba-isp5uwb8.eu-north-1.elasticbeanstalk.com/api/v1';
+        return process.env.NEXT_PUBLIC_API_URL || 'https://Navlun-api-env.eba-isp5uwb8.eu-north-1.elasticbeanstalk.com/api/v1';
     }
 
     // Development için
