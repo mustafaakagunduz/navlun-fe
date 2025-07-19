@@ -5,13 +5,12 @@ import axios from 'axios';
 const getBaseURL = () => {
     // Production check
     if (process.env.NEXT_PUBLIC_APP_ENV === 'production') {
-        return process.env.NEXT_PUBLIC_API_URL || 'https://api.transyuk.com/api/v1';
+        return process.env.NEXT_PUBLIC_API_URL || 'https://api.transyuk.com/api/v1';  // ← HTTPS fallback
     }
 
     // Development için
     return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
 };
-
 const baseURL = getBaseURL();
 
 // Timeout değerini environment'dan al
