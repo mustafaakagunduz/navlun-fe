@@ -55,18 +55,21 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             <header className="bg-white border-b shadow-sm">
                 <div className="container mx-auto flex h-16 items-center justify-between px-4">
                     <div className="flex items-center gap-2">
-                        <Link href="/dashboard">
-                            <div className="flex items-center gap-2">
-                                <Leaf className="h-6 w-6 text-green-600" />
-                                <span className="text-xl font-bold">Transyük</span>
-                            </div>
-                        </Link>
+                        {/* Desktop'ta logo, mobile'da boş alan (hamburger için) */}
+                        <div className="ml-12 md:ml-0">
+                            <Link href="/dashboard">
+                                <div className="flex items-center gap-2">
+                                    <Leaf className="h-6 w-6 text-green-600" />
+                                    <span className="text-xl font-bold">Transyük</span>
+                                </div>
+                            </Link>
+                        </div>
                     </div>
 
                     <div className="flex items-center gap-4">
                         {user && (
                             <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium hidden md:inline">
+                                <span className="text-sm font-medium hidden sm:inline">
                                   {user.firstName} {user.lastName}
                                 </span>
                                 <span className={`text-xs font-medium px-2.5 py-0.5 rounded ${getRoleColorClass(user.role)}`}>
@@ -79,16 +82,17 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                             className="border-green-600 text-green-600 hover:bg-green-50"
                             onClick={handleLogout}
                         >
-                            {t("navbar.logout")}
+                            <span className="hidden sm:inline">{t("navbar.logout")}</span>
+                            <span className="sm:hidden">Çıkış</span>
                         </Button>
                     </div>
                 </div>
             </header>
 
             {/* Main content with sidebar */}
-            <div className="flex flex-1">
+            <div className="flex flex-1 relative">
                 <Sidebar />
-                <main className="flex-1 overflow-auto bg-gray-50">
+                <main className="flex-1 overflow-auto bg-gray-50 w-full md:w-auto">
                     {children}
                 </main>
             </div>
