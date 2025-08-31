@@ -291,16 +291,16 @@ const AuthForms = () => {
     // Reset password form
     if (isResetMode) {
         return (
-            <Card className="border border-gray-200 shadow-xl rounded-xl bg-white overflow-hidden">
-                <CardHeader className="p-6 pb-4">
-                    <CardTitle className="text-xl font-semibold text-gray-900">
+            <Card className="border-0 shadow-2xl rounded-3xl bg-white/95 backdrop-blur-sm overflow-hidden">
+                <CardHeader className="p-8 pb-6">
+                    <CardTitle className="text-2xl font-bold text-gray-900 text-center">
                         {t("auth.resetPassword")}
                     </CardTitle>
-                    <CardDescription className="text-gray-600">
+                    <CardDescription className="text-gray-600 text-center text-base font-medium mt-2">
                         {t("auth.resetPasswordDescription")}
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="p-6 pt-2">
+                <CardContent className="p-8 pt-2">
                     <ResetForm
                         resetEmail={resetEmail}
                         formErrors={formErrors.reset}
@@ -318,33 +318,33 @@ const AuthForms = () => {
 
     // Main login/signup forms
     return (
-        <div className="w-full space-y-4">
+        <div className="w-full space-y-6">
             {error && (
-                <Alert className="bg-red-50 border-red-200 text-red-800">
+                <Alert className="bg-red-50/90 backdrop-blur-sm border border-red-200/50 text-red-800 rounded-2xl shadow-lg">
                     <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>{error}</AlertDescription>
+                    <AlertDescription className="font-medium">{error}</AlertDescription>
                 </Alert>
             )}
 
             <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "login" | "signup")} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 bg-gray-100 rounded-lg p-1 h-12">
+                <TabsList className="grid w-full grid-cols-2 bg-white/10 backdrop-blur-sm rounded-2xl p-1.5 h-14 border border-white/20 shadow-lg">
                     <TabsTrigger
                         value="login"
-                        className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-200 font-medium"
+                        className="rounded-xl data-[state=active]:bg-white/90 data-[state=active]:backdrop-blur-sm data-[state=active]:shadow-lg data-[state=active]:text-gray-900 text-white/80 transition-all duration-300 font-semibold text-base hover:text-white"
                     >
                         {t("auth.login")}
                     </TabsTrigger>
                     <TabsTrigger
                         value="signup"
-                        className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-200 font-medium"
+                        className="rounded-xl data-[state=active]:bg-white/90 data-[state=active]:backdrop-blur-sm data-[state=active]:shadow-lg data-[state=active]:text-gray-900 text-white/80 transition-all duration-300 font-semibold text-base hover:text-white"
                     >
                         {t("auth.signup")}
                     </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="login" className="mt-0">
-                    <Card className="border border-gray-200 shadow-xl rounded-xl bg-white overflow-hidden">
-                        <CardContent className="p-6 pt-6">
+                <TabsContent value="login" className="mt-6">
+                    <Card className="border-0 shadow-2xl rounded-3xl bg-white/95 backdrop-blur-sm overflow-hidden">
+                        <CardContent className="p-8">
                             <LoginForm
                                 loginData={loginData}
                                 formErrors={formErrors.login}
@@ -358,9 +358,9 @@ const AuthForms = () => {
                     </Card>
                 </TabsContent>
 
-                <TabsContent value="signup" className="mt-0">
-                    <Card className="border border-gray-200 shadow-xl rounded-xl bg-white overflow-hidden">
-                        <CardContent className="p-6 pt-6">
+                <TabsContent value="signup" className="mt-6">
+                    <Card className="border-0 shadow-2xl rounded-3xl bg-white/95 backdrop-blur-sm overflow-hidden">
+                        <CardContent className="p-8">
                             <SignupForm
                                 signupData={signupData}
                                 formErrors={formErrors.signup}

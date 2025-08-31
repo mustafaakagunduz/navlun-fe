@@ -2,9 +2,11 @@
 "use client"
 
 import { useEffect } from "react"
-import { Leaf } from "lucide-react"
+import { Leaf, Menu } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 import AuthForms from "./AuthForms"
+import LanguageSwitcher from "@/components/homepage/LanguageSwitcher"
 import { useLanguage } from "@/context/LanguageContext"
 import { useAuth } from "@/context/AuthContext"
 import { useRouter } from "next/navigation"
@@ -22,87 +24,82 @@ const LoginPage = () => {
     }, [isAuthenticated, router])
 
     return (
-        <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-gray-50 to-gray-100">
-            {/* Modern header with logo */}
-            <header className="w-full py-5 bg-white border-b border-gray-100 shadow-sm">
-                <div className="container mx-auto px-4 md:px-8 flex justify-between items-center">
-                    <Link href="/" className="flex items-center gap-2.5 group">
-                        <div className="bg-green-50 p-2 rounded-lg group-hover:bg-green-100 transition-colors duration-200">
-                            <Leaf className="h-6 w-6 text-green-600" />
-                        </div>
-                        <span className="text-xl font-bold text-gray-800 tracking-tight">
-                            Transyük
-                        </span>
+        <div className="min-h-screen flex flex-col relative">
+            {/* Background Image */}
+            <div className="fixed inset-0 z-0">
+                <Image
+                    src="/assets/images/eco-trans.webp"
+                    alt="Ekolojik taşımacılık - Otoyolda kamyonlar"
+                    fill
+                    className="object-cover object-center"
+                    priority
+                    quality={90}
+                />
+                <div className="absolute inset-0 bg-black/40" />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
+            </div>
+            
+            <div className="relative z-10 min-h-screen flex flex-col">
+            {/* Header - Same as main page */}
+            <header className="sticky top-0 z-40 w-full bg-transparent">
+                <div className="flex h-16 items-center justify-between px-3 sm:px-4 w-full">
+                    <Link href="/" className="flex items-center gap-2 text-white hover:opacity-80 transition-opacity">
+                        <Image
+                            src="/assets/images/transyuk-aka.png"
+                            alt="TRANSYÜK Logo"
+                            width={120}
+                            height={32}
+                            className="h-8 w-auto"
+                        />
                     </Link>
+                    <nav className="hidden lg:flex gap-6">
+                        <Link href="/#hero" className="text-base font-semibold transition-colors text-white hover:text-green-400">
+                            Ana Sayfa
+                        </Link>
+                        <Link href="/#about" className="text-base font-semibold transition-colors text-white hover:text-green-400">
+                            Hakkımızda
+                        </Link>
+                        <Link href="/#services" className="text-base font-semibold transition-colors text-white hover:text-green-400">
+                            Hizmetlerimiz
+                        </Link>
+                        <Link href="/#contact" className="text-base font-semibold transition-colors text-white hover:text-green-400">
+                            İletişim
+                        </Link>
+                        <Link href="/#blog" className="text-base font-semibold transition-colors text-white hover:text-green-400">
+                            Blog
+                        </Link>
+                    </nav>
+                    <div className="flex items-center gap-2">
+                        <div className="hidden lg:flex items-center gap-2">
+                            <LanguageSwitcher />
+                        </div>
+                        
+                        <button
+                            className="lg:hidden p-2"
+                            aria-label="Toggle mobile menu"
+                        >
+                            <Menu className="h-6 w-6 text-white" />
+                        </button>
+                    </div>
                 </div>
             </header>
 
-            {/* Main content */}
-            <main className="flex-1 flex flex-col md:flex-row items-stretch">
-                {/* Left side with content and form */}
-                <div className="w-full md:w-1/2 flex items-center justify-center p-6 md:p-12 relative z-10">
-                    <div className="w-full max-w-md">
-                        <div className="mb-8 md:mb-10">
-                            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-                                {t("auth.welcomeBack")}
-                            </h1>
-                            <p className="text-gray-600">
-                                {t("auth.loginOrSignup")}
-                            </p>
-                        </div>
-
-                        <AuthForms />
-                    </div>
-                </div>
-
-                {/* Right side with illustration */}
-                <div className="hidden md:flex md:w-1/2 bg-green-50 relative overflow-hidden">
-                    <div className="w-full h-full flex items-center justify-center">
-                        <div className="max-w-lg p-8 text-center">
-                            <div className="mb-8 flex justify-center">
-                                <div className="rounded-full bg-white p-6 shadow-lg">
-                                    <Leaf className="h-20 w-20 text-green-500" />
-                                </div>
-                            </div>
-
-                            <h2 className="text-2xl font-bold text-green-800 mb-4">
-                                {t("auth.ecoFriendlyTransport")}
-                            </h2>
-                            <p className="text-green-700">
-                                {t("auth.platformDescription")}
-                            </p>
-                        </div>
+            {/* Main content - Centered form */}
+            <main className="flex-1 flex items-center justify-center p-6 md:p-12">
+                <div className="w-full max-w-md">
+                    <div className="text-center mb-8 md:mb-10">
+                        <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-lg">
+                            {t("auth.welcomeBack")}
+                        </h1>
+                        <p className="text-lg text-gray-200/90 font-medium drop-shadow-md">
+                            {t("auth.loginOrSignup")}
+                        </p>
                     </div>
 
-                    {/* Decorative background elements */}
-                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                        <div className="absolute -top-40 -right-40 w-80 h-80 bg-green-100 rounded-full opacity-50"></div>
-                        <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-green-200 rounded-full opacity-30"></div>
-                        <div className="absolute top-1/2 right-8 w-32 h-32 bg-green-300 rounded-full opacity-20"></div>
-                    </div>
+                    <AuthForms />
                 </div>
             </main>
-
-            {/* Footer */}
-            <footer className="w-full py-6 border-t border-gray-200 bg-white">
-                <div className="container mx-auto px-4 md:px-8 flex flex-col md:flex-row justify-between items-center">
-                    <p className="text-sm text-gray-600">
-                        &copy; {new Date().getFullYear()} Transyük. {t("footer.copyright")}
-                    </p>
-
-                    <div className="flex gap-6 mt-4 md:mt-0">
-                        <Link href="/terms" className="text-sm text-gray-600 hover:text-green-600 transition-colors duration-200">
-                            {t("footer.terms")}
-                        </Link>
-                        <Link href="/privacy" className="text-sm text-gray-600 hover:text-green-600 transition-colors duration-200">
-                            {t("footer.privacy")}
-                        </Link>
-                        <Link href="/contact" className="text-sm text-gray-600 hover:text-green-600 transition-colors duration-200">
-                            {t("footer.contact")}
-                        </Link>
-                    </div>
-                </div>
-            </footer>
+            </div>
         </div>
     )
 }

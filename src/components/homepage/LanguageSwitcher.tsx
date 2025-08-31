@@ -19,7 +19,7 @@ const LanguageSwitcher = () => {
             onClick={toggleLanguage}
         >
             <Globe className="h-4 w-4 mr-2" />
-            {language === "tr" ? "English" : "Türkçe"}
+            {language === "tr" ? "Türkçe" : "English"}
         </Button>
     );
 };
