@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     canonical: "https://transyuk.com",
   },
 };
-
+//comment
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
