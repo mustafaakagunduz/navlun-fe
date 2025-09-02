@@ -40,8 +40,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://transyuk.com",
   },
-  viewport: "width=device-width, initial-scale=1",
-  themeColor: "#000000",
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#000000',
 };
 
 const geistSans = Geist({
