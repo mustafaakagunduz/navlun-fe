@@ -1,14 +1,48 @@
-"use client"
-
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/context/LanguageContext";
-import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "@/components/ui/toaster"
 import ReduxProvider from "@/providers/ReduxProvider"
-import Image from "next/image";
-import { usePathname } from "next/navigation";
+import BackgroundImage from "@/components/BackgroundImage";
+
+export const metadata: Metadata = {
+  title: "TRANSYÜK - Türkiye'nin En Güvenilir Nakliye ve Lojistik Platformu",
+  description: "TRANSYÜK ile güvenli, hızlı ve ekonomik nakliye hizmeti. Yük taşımacılığı, lojistik çözümleri ve nakliye platformu. Türkiye geneli güvenilir taşımacılık hizmeti.",
+  keywords: "nakliye, lojistik, yük taşımacılığı, taşımacılık, kargo, transyük, transport, shipping, logistics",
+  authors: [{ name: "TRANSYÜK" }],
+  creator: "TRANSYÜK",
+  publisher: "TRANSYÜK",
+  robots: "index, follow",
+  openGraph: {
+    type: "website",
+    locale: "tr_TR",
+    url: "https://transyuk.com",
+    siteName: "TRANSYÜK",
+    title: "TRANSYÜK - Türkiye'nin En Güvenilir Nakliye ve Lojistik Platformu",
+    description: "TRANSYÜK ile güvenli, hızlı ve ekonomik nakliye hizmeti. Yük taşımacılığı, lojistik çözümleri ve nakliye platformu.",
+    images: [
+      {
+        url: "https://transyuk.com/assets/images/transyuk.png",
+        width: 1200,
+        height: 630,
+        alt: "TRANSYÜK - Nakliye ve Lojistik Platformu",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "TRANSYÜK - Türkiye'nin En Güvenilir Nakliye ve Lojistik Platformu",
+    description: "TRANSYÜK ile güvenli, hızlı ve ekonomik nakliye hizmeti. Yük taşımacılığı, lojistik çözümleri ve nakliye platformu.",
+    images: ["https://transyuk.com/assets/images/transyuk.png"],
+  },
+  alternates: {
+    canonical: "https://transyuk.com",
+  },
+  viewport: "width=device-width, initial-scale=1",
+  themeColor: "#000000",
+};
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -20,31 +54,6 @@ const geistMono = Geist_Mono({
     subsets: ["latin"],
 });
 
-// Arkaplan komponenti
-function BackgroundImage() {
-    const { user } = useAuth();
-    const pathname = usePathname();
-
-    // Sadece ana sayfada ve login olmamış kullanıcılar için göster
-    const shouldShowBackground = pathname === "/" && !user;
-
-    if (!shouldShowBackground) return null;
-
-    return (
-        <div className="fixed inset-0 z-0">
-            <Image
-                src="/assets/images/eco-trans.webp"
-                alt="Ekolojik taşımacılık - Otoyolda kamyonlar"
-                fill
-                className="object-cover object-center"
-                priority
-                quality={90}
-            />
-            <div className="absolute inset-0 bg-black/40" />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
-        </div>
-    );
-}
 
 export default function RootLayout({
                                        children,
