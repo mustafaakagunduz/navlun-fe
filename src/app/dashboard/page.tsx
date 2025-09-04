@@ -3,10 +3,37 @@
 import { useAuth } from "@/context/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/context/LanguageContext";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
+const getDashboardRoute = (role: string): string => {
+    switch (role) {
+        case 'SENDER':
+            return '/dashboard/sender';
+        case 'CARRIER':
+            return '/dashboard/carrier';
+        case 'BROKER':
+            return '/dashboard/broker';
+        case 'ADMIN':
+            return '/dashboard/admin';
+        default:
+            return '/dashboard';
+    }
+};
 
 export default function Dashboard() {
     const { user } = useAuth();
     const { t } = useLanguage();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (user?.role) {
+            const roleBasedRoute = getDashboardRoute(user.role);
+            if (roleBasedRoute !== '/dashboard') {
+                router.replace(roleBasedRoute);
+            }
+        }
+    }, [user, router]);
 
     return (
         <div className="p-8">
