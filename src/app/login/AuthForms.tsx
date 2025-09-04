@@ -95,7 +95,8 @@ const AuthForms = () => {
     // Form handlers
     const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
-        setLoginData(prev => ({ ...prev, [name]: value }))
+        const trimmedValue = name === 'email' ? value.trim() : value
+        setLoginData(prev => ({ ...prev, [name]: trimmedValue }))
         if (formErrors.login[name]) {
             setFormErrors(prev => ({
                 ...prev,
@@ -106,7 +107,8 @@ const AuthForms = () => {
 
     const handleSignupChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
-        setSignupData(prev => ({ ...prev, [name]: value }))
+        const trimmedValue = ['email', 'firstName', 'lastName', 'phone'].includes(name) ? value.trim() : value
+        setSignupData(prev => ({ ...prev, [name]: trimmedValue }))
         if (formErrors.signup[name]) {
             setFormErrors(prev => ({
                 ...prev,
@@ -120,7 +122,7 @@ const AuthForms = () => {
     }
 
     const handleResetEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setResetEmail(e.target.value)
+        setResetEmail(e.target.value.trim())
         if (formErrors.reset.email) {
             setFormErrors(prev => ({
                 ...prev,
