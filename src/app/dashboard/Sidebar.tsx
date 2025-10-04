@@ -20,7 +20,8 @@ import {
     MessageSquare,
     Ship,
     Menu,
-    X
+    X,
+    CreditCard
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
@@ -85,6 +86,7 @@ export default function Sidebar() {
         { href: "/dashboard/sender/delivery-status", label: "Teslimat Takibi", icon: MapPin },
         { href: "/dashboard/sender/sender-completed-deliveries", label: t("dashboard.sidebar.completed"), icon: CheckCheck },
         { href: "/dashboard/sender/environmental-effect", label: t("dashboard.sidebar.environmental"), icon: Leaf },
+        { href: "/dashboard/sender/payment-history", label: t("dashboard.sidebar.paymentHistory"), icon: CreditCard },
         { href: "/dashboard/sender/sender-profile", label: t("dashboard.sidebar.profile"), icon: Users },
     ];
 
@@ -200,7 +202,7 @@ export default function Sidebar() {
             {/* Mobile Overlay */}
             {isMobileMenuOpen && (
                 <div
-                    className="fixed inset-0 bg-black bg-opacity-20 z-40 md:hidden"
+                    className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden"
                     onClick={() => setIsMobileMenuOpen(false)}
                 />
             )}

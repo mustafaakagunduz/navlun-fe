@@ -125,7 +125,8 @@
         "environmental": "Environmental Effect",
         "deals": "Deals",
         "brokerages": "Brokerages",
-        "commissions": "Commissions"
+        "commissions": "Commissions",
+        "paymentHistory": "Payment History"
       },
       "page": {
         "title": "Dashboard",

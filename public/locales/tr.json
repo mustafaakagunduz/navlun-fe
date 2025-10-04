@@ -126,7 +126,8 @@
       "completed": "Tamamlananlar",
       "deals": "Anlaşmalar",
       "brokerages": "Aracılık İşlemleri",
-      "commissions": "Komisyonlar"
+      "commissions": "Komisyonlar",
+      "paymentHistory": "Ödeme Geçmişi"
     },
     "page": {
       "title": "Dashboard",
