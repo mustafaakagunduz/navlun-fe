@@ -341,7 +341,7 @@ function TrackingDetailModal({ tracking, onClose, onViewDocument, formatDate }: 
                 <div className="p-6">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-bold">{tracking.loadTitle} - Detaylar</h2>
-                        <Button variant="ghost" size="sm" onClick={onClose}>
+                        <Button variant="ghost" size="lg" onClick={onClose} className="text-2xl hover:bg-gray-100">
                             ✕
                         </Button>
                     </div>
@@ -351,19 +351,23 @@ function TrackingDetailModal({ tracking, onClose, onViewDocument, formatDate }: 
                         <div>
                             <h3 className="font-semibold mb-3">Durum Geçmişi</h3>
                             <div className="space-y-2">
-                                {tracking.statusHistory.map((history, index) => (
-                                    <div key={index} className="flex items-center gap-3 p-2 bg-muted rounded">
-                                        <Badge variant="outline">
-                                            {deliveryService.getStatusDisplayName(history.status)}
-                                        </Badge>
-                                        <span className="text-sm">{formatDate(history.timestamp)}</span>
-                                        {history.location && (
-                                            <span className="text-sm text-muted-foreground">
-                                                - {history.location}
-                                            </span>
-                                        )}
-                                    </div>
-                                ))}
+                                {tracking.statusHistory && tracking.statusHistory.length > 0 ? (
+                                    tracking.statusHistory.map((history, index) => (
+                                        <div key={index} className="flex items-center gap-3 p-2 bg-muted rounded">
+                                            <Badge variant="outline">
+                                                {deliveryService.getStatusDisplayName(history.status)}
+                                            </Badge>
+                                            <span className="text-sm">{formatDate(history.timestamp)}</span>
+                                            {history.location && (
+                                                <span className="text-sm text-muted-foreground">
+                                                    - {history.location}
+                                                </span>
+                                            )}
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="text-sm text-muted-foreground">Henüz durum geçmişi bulunmuyor</p>
+                                )}
                             </div>
                         </div>
 

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from '@/hooks/use-toast';
 import { checkOfferedLoads } from '@/store/slices/brokerSlice';
 
@@ -37,7 +38,7 @@ import {
     Loader2, CheckCircle
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
-import { Load, LoadStatus } from "@/services/loadService";
+import { Load, LoadStatus, TransportType } from "@/services/loadService";
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import {
     fetchAvailableLoadsForBroker,
@@ -74,6 +75,8 @@ export default function BrokerAvailableLoads() {
     // Local state
     const [showFilters, setShowFilters] = useState(false);
     const [selectedLoad, setSelectedLoad] = useState<Load | null>(null);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const [activeTransportType, setActiveTransportType] = useState<TransportType>(TransportType.SEA);
     const pageSize = 12;
 
     // Redirect non-broker users
@@ -106,6 +109,9 @@ export default function BrokerAvailableLoads() {
 
     // Filter and search logic
     const filteredLoads = availableLoads.filter((load) => {
+        // Transport type filter
+        const matchesTransportType = load.transportType === activeTransportType;
+
         const matchesSearch = filters.searchQuery === '' ||
             load.goodsType.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
             load.loadingAddress.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
@@ -123,7 +129,7 @@ export default function BrokerAvailableLoads() {
             (filters.ecoFriendly === 'eco' && load.ecoTransportRequested) ||
             (filters.ecoFriendly === 'standard' && !load.ecoTransportRequested);
 
-        return matchesSearch && matchesGoodsType && matchesInsurance && matchesEcoFriendly;
+        return matchesTransportType && matchesSearch && matchesGoodsType && matchesInsurance && matchesEcoFriendly;
     });
 
     // Sort loads
@@ -230,7 +236,7 @@ export default function BrokerAvailableLoads() {
 
     const handleViewDetails = (load: Load) => {
         setSelectedLoad(load);
-        router.push(`/dashboard/broker/loads/${load.id}`);
+        setIsDetailModalOpen(true);
     };
 
 
@@ -273,7 +279,7 @@ export default function BrokerAvailableLoads() {
                     <div className="flex items-center gap-3">
                         <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
                             <Package className="h-4 w-4 mr-1" />
-                            {availableLoadsTotalElements} toplam yük
+                            {sortedLoads.length} yük
                         </Badge>
                         <Button
                             variant="outline"
@@ -285,6 +291,28 @@ export default function BrokerAvailableLoads() {
                         </Button>
                     </div>
                 </div>
+
+                {/* Transport Type Tabs */}
+                <Card>
+                    <CardContent className="p-4">
+                        <div className="flex gap-2">
+                            <Button
+                                variant={activeTransportType === TransportType.SEA ? "default" : "outline"}
+                                onClick={() => setActiveTransportType(TransportType.SEA)}
+                                className="flex-1"
+                            >
+                                ⚓ Deniz Yolu Yükleri
+                            </Button>
+                            <Button
+                                variant={activeTransportType === TransportType.LAND ? "default" : "outline"}
+                                onClick={() => setActiveTransportType(TransportType.LAND)}
+                                className="flex-1"
+                            >
+                                🚛 Kara Yolu Yükleri
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
 
                 {/* Search and Filters */}
                 <Card>
@@ -598,6 +626,196 @@ export default function BrokerAvailableLoads() {
                         </Button>
                     </div>
                 )}
+
+                {/* Load Detail Modal */}
+                <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
+                    <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                        {selectedLoad && (
+                            <>
+                                <DialogHeader>
+                                    <DialogTitle className="text-2xl font-bold">
+                                        {selectedLoad.title}
+                                    </DialogTitle>
+                                </DialogHeader>
+
+                                <div className="space-y-6">
+                                    {/* Status and Company */}
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <Building2 className="h-5 w-5 text-gray-400" />
+                                            <span className="text-lg font-medium">{selectedLoad.sender?.companyName || 'Şirket bilgisi yok'}</span>
+                                        </div>
+                                        <Badge className={`${getStatusBadgeColor(selectedLoad.status)} border`}>
+                                            {getStatusText(selectedLoad.status)}
+                                        </Badge>
+                                    </div>
+
+                                    {/* Route Information */}
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle className="text-lg flex items-center gap-2">
+                                                <Route className="h-5 w-5" />
+                                                Rota Bilgileri
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="space-y-3">
+                                            <div className="flex items-start gap-3">
+                                                <MapPin className="h-5 w-5 text-green-600 mt-0.5" />
+                                                <div>
+                                                    <p className="font-medium text-green-600">Yükleme Adresi</p>
+                                                    <p className="text-gray-700">{selectedLoad.loadingAddress}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-start gap-3">
+                                                <MapPin className="h-5 w-5 text-red-600 mt-0.5" />
+                                                <div>
+                                                    <p className="font-medium text-red-600">Teslimat Adresi</p>
+                                                    <p className="text-gray-700">{selectedLoad.deliveryAddress}</p>
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+
+                                    {/* Load Details */}
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle className="text-lg flex items-center gap-2">
+                                                <Package className="h-5 w-5" />
+                                                Yük Detayları
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <p className="text-sm text-gray-600">Mal Türü</p>
+                                                <p className="font-medium">{selectedLoad.goodsType}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-600">Net Ağırlık</p>
+                                                <p className="font-medium flex items-center gap-1">
+                                                    <Weight className="h-4 w-4" />
+                                                    {selectedLoad.netWeight} kg
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-600">Brüt Ağırlık</p>
+                                                <p className="font-medium">{selectedLoad.grossWeight} kg</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-600">Hacim</p>
+                                                <p className="font-medium">{selectedLoad.volume} m³</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-600">Paket Sayısı</p>
+                                                <p className="font-medium">{selectedLoad.numberOfPackages}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-600">Gerekli Araç Tipi</p>
+                                                <p className="font-medium flex items-center gap-1">
+                                                    <Truck className="h-4 w-4" />
+                                                    {selectedLoad.requiredVehicleType}
+                                                </p>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+
+                                    {/* Dates and Price */}
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle className="text-lg flex items-center gap-2">
+                                                <Calendar className="h-5 w-5" />
+                                                Tarih ve Fiyat Bilgileri
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <p className="text-sm text-gray-600">Yükleme Tarihi</p>
+                                                <p className="font-medium">{formatDate(selectedLoad.loadingDate)}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-600">Teslimat Tarihi</p>
+                                                <p className="font-medium">{formatDate(selectedLoad.deliveryDate)}</p>
+                                            </div>
+                                            {selectedLoad.estimatedPrice && (
+                                                <div className="col-span-2">
+                                                    <p className="text-sm text-gray-600">Tahmini Fiyat</p>
+                                                    <p className="text-2xl font-bold text-amber-600 flex items-center gap-1">
+                                                        <DollarSign className="h-6 w-6" />
+                                                        ₺{selectedLoad.estimatedPrice.toLocaleString()}
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+
+                                    {/* Additional Services */}
+                                    {(selectedLoad.insuranceRequested || selectedLoad.ecoTransportRequested) && (
+                                        <Card>
+                                            <CardHeader>
+                                                <CardTitle className="text-lg">Ek Hizmetler</CardTitle>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {selectedLoad.insuranceRequested && (
+                                                        <Badge variant="secondary" className="text-sm">
+                                                            <Shield className="h-4 w-4 mr-1" />
+                                                            Sigorta Talep Edildi
+                                                        </Badge>
+                                                    )}
+                                                    {selectedLoad.ecoTransportRequested && (
+                                                        <Badge variant="secondary" className="text-sm bg-green-100 text-green-800">
+                                                            <Leaf className="h-4 w-4 mr-1" />
+                                                            Çevreci Taşıma Talep Edildi
+                                                        </Badge>
+                                                    )}
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    )}
+
+                                    {/* Description */}
+                                    {selectedLoad.description && (
+                                        <Card>
+                                            <CardHeader>
+                                                <CardTitle className="text-lg">Açıklama</CardTitle>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <p className="text-gray-700">{selectedLoad.description}</p>
+                                            </CardContent>
+                                        </Card>
+                                    )}
+
+                                    {/* Action Buttons */}
+                                    <div className="flex gap-3 pt-4 border-t">
+                                        <Button
+                                            variant="outline"
+                                            className="flex-1"
+                                            onClick={() => {
+                                                setIsDetailModalOpen(false);
+                                                handleMessageSender(selectedLoad);
+                                            }}
+                                        >
+                                            <MessageSquare className="h-4 w-4 mr-2" />
+                                            Mesajlaş
+                                        </Button>
+                                        {!offeredLoads.includes(selectedLoad.id) && (
+                                            <Button
+                                                className="flex-1"
+                                                onClick={() => {
+                                                    setIsDetailModalOpen(false);
+                                                    handleOfferClick(selectedLoad);
+                                                }}
+                                                disabled={selectedLoad.status !== 'PENDING' && selectedLoad.status !== 'ACTIVE'}
+                                            >
+                                                <HandshakeIcon className="h-4 w-4 mr-2" />
+                                                Teklif Ver
+                                            </Button>
+                                        )}
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </DialogContent>
+                </Dialog>
             </div>
         </ProtectedRoute>
     );

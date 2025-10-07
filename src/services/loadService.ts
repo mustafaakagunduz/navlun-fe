@@ -11,6 +11,11 @@ export enum LoadStatus {
     ACTIVE = 'ACTIVE',
 }
 
+export enum TransportType {
+    SEA = 'SEA',
+    LAND = 'LAND',
+}
+
 // Tip tanımlamaları
 export type Load = {
     id: string;
@@ -34,6 +39,7 @@ export type Load = {
     deliveryDate: string;
     estimatedPrice?: number;
     status: LoadStatus;
+    transportType: TransportType;
     insuranceRequested: boolean;
     ecoTransportRequested?: boolean;
     active: boolean;
@@ -51,6 +57,7 @@ export type LoadRequest = {
     deliveryDate: string;
     description?: string;
     insuranceRequested: boolean;
+    transportType: TransportType;
     senderId: string;
     selectedInsurancePolicy?: string;
     insurancePolicyDetails?: string;
