@@ -30,7 +30,7 @@ import {
     AlertCircle,
     CheckCircle2
 } from "lucide-react";
-import loadService, { LoadRequest, InsurancePolicy } from '@/services/loadService';
+import loadService, { LoadRequest, InsurancePolicy, TransportType } from '@/services/loadService';
 import GoodsTypeSelect from "@/app/dashboard/sender/loads/new-load/GoodsTypeSelect";
 import InsurancePolicyCard from "@/app/dashboard/sender/loads/new-load/InsurancePolicyCard";
 import CarbonFootprintDisplay from "@/app/dashboard/sender/loads/new-load/CarbonFootprintDisplay";
@@ -48,6 +48,7 @@ type FormData = {
     description: string;
     insuranceRequested: boolean;
     selectedInsurancePolicy?: string;
+    transportType: TransportType;
 };
 
 export default function NewLoadForm() {
@@ -75,7 +76,8 @@ export default function NewLoadForm() {
             deliveryDate: '',
             description: '',
             insuranceRequested: false,
-            selectedInsurancePolicy: undefined
+            selectedInsurancePolicy: undefined,
+            transportType: TransportType.LAND
         }
     });
 
@@ -166,6 +168,7 @@ export default function NewLoadForm() {
                 deliveryDate: data.deliveryDate,
                 description: data.description || '',
                 insuranceRequested: data.insuranceRequested,
+                transportType: data.transportType,
                 selectedInsurancePolicy: data.insuranceRequested ? data.selectedInsurancePolicy : undefined,
                 insurancePolicyDetails: data.insuranceRequested && data.selectedInsurancePolicy
                     ? JSON.stringify(insurancePolicies.find(p => p.id === data.selectedInsurancePolicy))

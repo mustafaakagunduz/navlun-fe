@@ -700,21 +700,6 @@ export default function BrokerAvailableLoads() {
                                                 <p className="text-sm text-gray-600">Brüt Ağırlık</p>
                                                 <p className="font-medium">{selectedLoad.grossWeight} kg</p>
                                             </div>
-                                            <div>
-                                                <p className="text-sm text-gray-600">Hacim</p>
-                                                <p className="font-medium">{selectedLoad.volume} m³</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-sm text-gray-600">Paket Sayısı</p>
-                                                <p className="font-medium">{selectedLoad.numberOfPackages}</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-sm text-gray-600">Gerekli Araç Tipi</p>
-                                                <p className="font-medium flex items-center gap-1">
-                                                    <Truck className="h-4 w-4" />
-                                                    {selectedLoad.requiredVehicleType}
-                                                </p>
-                                            </div>
                                         </CardContent>
                                     </Card>
 
