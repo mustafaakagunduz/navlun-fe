@@ -1,7 +1,7 @@
 // src/app/login/page.tsx
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, Suspense } from "react"
 import { Leaf, Menu } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
@@ -9,12 +9,14 @@ import AuthForms from "./AuthForms"
 import LanguageSwitcher from "@/components/homepage/LanguageSwitcher"
 import { useLanguage } from "@/context/LanguageContext"
 import { useAuth } from "@/context/AuthContext"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 
-const LoginPage = () => {
+const LoginContent = () => {
     const { t } = useLanguage()
     const { isAuthenticated } = useAuth()
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const roleParam = searchParams.get('role') as 'SENDER' | 'CARRIER' | 'BROKER' | null
 
     // Redirect if already logged in
     useEffect(() => {
@@ -96,11 +98,26 @@ const LoginPage = () => {
                         </p>
                     </div>
 
-                    <AuthForms />
+                    <AuthForms initialRole={roleParam} />
                 </div>
             </main>
             </div>
         </div>
+    )
+}
+
+const LoginPage = () => {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Yükleniyor...</p>
+                </div>
+            </div>
+        }>
+            <LoginContent />
+        </Suspense>
     )
 }
 

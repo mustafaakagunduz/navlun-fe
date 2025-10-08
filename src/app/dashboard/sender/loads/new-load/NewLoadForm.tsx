@@ -100,17 +100,21 @@ export default function NewLoadForm() {
             try {
                 setIsLoadingData(true);
 
-                // Paralel olarak goods types ve insurance policies yükle
-                const [goodsTypesResponse, insurancePoliciesResponse] = await Promise.all([
-                    loadService.getGoodsTypes(),
-                    loadService.getInsurancePolicies()
-                ]);
-
+                // Sadece goods types yükle
+                const goodsTypesResponse = await loadService.getGoodsTypes();
                 setGoodsTypes(goodsTypesResponse);
-                setInsurancePolicies(insurancePoliciesResponse);
+
+                // Insurance policies optional - hata olsa bile devam et
+                try {
+                    const insurancePoliciesResponse = await loadService.getInsurancePolicies();
+                    setInsurancePolicies(insurancePoliciesResponse);
+                } catch (insuranceError) {
+                    console.warn('Insurance policies could not be loaded:', insuranceError);
+                    setInsurancePolicies([]);
+                }
             } catch (error) {
                 console.error('Error loading initial data:', error);
-                setSubmitError(t('newLoad.errors.loadingData'));
+                setSubmitError('Mal türleri yüklenirken hata oluştu. Lütfen sayfayı yenileyin.');
             } finally {
                 setIsLoadingData(false);
             }
@@ -167,12 +171,10 @@ export default function NewLoadForm() {
                 loadingDate: data.loadingDate,
                 deliveryDate: data.deliveryDate,
                 description: data.description || '',
-                insuranceRequested: data.insuranceRequested,
+                insuranceRequested: false, // Sigorta geçici olarak kapalı
                 transportType: data.transportType,
-                selectedInsurancePolicy: data.insuranceRequested ? data.selectedInsurancePolicy : undefined,
-                insurancePolicyDetails: data.insuranceRequested && data.selectedInsurancePolicy
-                    ? JSON.stringify(insurancePolicies.find(p => p.id === data.selectedInsurancePolicy))
-                    : undefined,
+                selectedInsurancePolicy: undefined,
+                insurancePolicyDetails: undefined,
                 senderId: senderProfile.id
             };
 
@@ -483,57 +485,59 @@ export default function NewLoadForm() {
                         />
                     )}
 
-                    {/* Insurance Section */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Shield className="h-5 w-5 text-green-600" />
-                                {t('newLoad.sections.insurance')}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                            {/* Insurance Checkbox */}
-                            <div className="flex items-center space-x-3 p-4 border rounded-lg bg-blue-50">
-                                <Checkbox
-                                    id="insuranceRequested"
-                                    checked={watchedInsuranceRequested}
-                                    onCheckedChange={(checked) => {
-                                        setValue('insuranceRequested', !!checked);
-                                        if (!checked) {
-                                            setValue('selectedInsurancePolicy', undefined);
-                                        }
-                                    }}
-                                />
-                                <div className="flex-1">
-                                    <Label htmlFor="insuranceRequested" className="cursor-pointer">
-                                        <div className="flex items-center gap-2">
-                                            <Shield className="h-4 w-4 text-blue-600" />
-                                            <span className="font-medium">{t('newLoad.fields.insuranceRequested')}</span>
-                                        </div>
-                                        <p className="text-sm text-gray-600 mt-1">
-                                            {t('newLoad.insuranceDescription')}
-                                        </p>
-                                    </Label>
-                                </div>
-                            </div>
-
-                            {/* Insurance Policy Selection */}
-                            {watchedInsuranceRequested && (
-                                <div className="mt-6">
-                                    <InsurancePolicyCard
-                                        policies={insurancePolicies}
-                                        selectedPolicy={watchedSelectedPolicy}
-                                        onSelectPolicy={(policyId) => setValue('selectedInsurancePolicy', policyId)}
+                    {/* Insurance Section - Geçici olarak gizlendi */}
+                    {false && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <Shield className="h-5 w-5 text-green-600" />
+                                    {t('newLoad.sections.insurance')}
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                {/* Insurance Checkbox */}
+                                <div className="flex items-center space-x-3 p-4 border rounded-lg bg-blue-50">
+                                    <Checkbox
+                                        id="insuranceRequested"
+                                        checked={watchedInsuranceRequested}
+                                        onCheckedChange={(checked) => {
+                                            setValue('insuranceRequested', !!checked);
+                                            if (!checked) {
+                                                setValue('selectedInsurancePolicy', undefined);
+                                            }
+                                        }}
                                     />
-                                    {errors.selectedInsurancePolicy && (
-                                        <p className="text-sm text-red-600 mt-2">
-                                            {errors.selectedInsurancePolicy.message}
-                                        </p>
-                                    )}
+                                    <div className="flex-1">
+                                        <Label htmlFor="insuranceRequested" className="cursor-pointer">
+                                            <div className="flex items-center gap-2">
+                                                <Shield className="h-4 w-4 text-blue-600" />
+                                                <span className="font-medium">{t('newLoad.fields.insuranceRequested')}</span>
+                                            </div>
+                                            <p className="text-sm text-gray-600 mt-1">
+                                                {t('newLoad.insuranceDescription')}
+                                            </p>
+                                        </Label>
+                                    </div>
                                 </div>
-                            )}
-                        </CardContent>
-                    </Card>
+
+                                {/* Insurance Policy Selection */}
+                                {watchedInsuranceRequested && (
+                                    <div className="mt-6">
+                                        <InsurancePolicyCard
+                                            policies={insurancePolicies}
+                                            selectedPolicy={watchedSelectedPolicy}
+                                            onSelectPolicy={(policyId) => setValue('selectedInsurancePolicy', policyId)}
+                                        />
+                                        {errors.selectedInsurancePolicy && (
+                                            <p className="text-sm text-red-600 mt-2">
+                                                {errors.selectedInsurancePolicy?.message}
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    )}
 
                     {/* Form Actions */}
                     <div className="flex flex-col sm:flex-row gap-4 pt-6">

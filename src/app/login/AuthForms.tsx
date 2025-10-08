@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, CheckCircle } from "lucide-react"
 import { useLanguage } from "@/context/LanguageContext"
 import { useAuth } from "@/context/AuthContext"
+import { useToast } from "@/hooks/use-toast"
 import authService from "@/services/authService"
 
 // Import types
@@ -19,8 +20,13 @@ import SignupForm from "./SignupForm"
 import ResetForm from "./ResetForm"
 import EmailVerificationForm from "./EmailVerificationForm"
 
-const AuthForms = () => {
+type AuthFormsProps = {
+    initialRole?: 'SENDER' | 'CARRIER' | 'BROKER' | null
+}
+
+const AuthForms = ({ initialRole }: AuthFormsProps) => {
     const { t } = useLanguage()
+    const { toast } = useToast()
     const {
         login,
         signup,
@@ -34,8 +40,8 @@ const AuthForms = () => {
         cancelEmailVerification
     } = useAuth()
 
-    // Form states
-    const [activeTab, setActiveTab] = useState<"login" | "signup">("login")
+    // Form states - initialRole varsa signup tab'ını aç
+    const [activeTab, setActiveTab] = useState<"login" | "signup">(initialRole ? "signup" : "login")
     const [isResetMode, setIsResetMode] = useState(false)
     const [resetSuccess, setResetSuccess] = useState(false)
     const [passwordsMatch, setPasswordsMatch] = useState(true)
@@ -54,8 +60,8 @@ const AuthForms = () => {
         email: "",
         password: "",
         confirmPassword: "",
-        phone: "+90",
-        role: 'SENDER'
+        phone: "",
+        role: initialRole || 'SENDER'
     })
 
     // Error states
@@ -216,7 +222,7 @@ const AuthForms = () => {
         if (!validateSignupForm()) return
 
         try {
-            await signup({
+            const result = await signup({
                 firstName: signupData.firstName.trim(),
                 lastName: signupData.lastName.trim(),
                 email: signupData.email.trim(),
@@ -224,8 +230,52 @@ const AuthForms = () => {
                 phone: signupData.phone.trim(),
                 role: signupData.role
             })
+
+            // If signup failed (result is null), check for specific errors
+            if (!result && error) {
+                const errorMessage = error.toLowerCase()
+                const newErrors: FormErrorsType = {}
+
+                // E-posta zaten kullanılıyor kontrolü
+                if (errorMessage.includes('e-posta') || errorMessage.includes('email') || errorMessage.includes('zaten')) {
+                    newErrors.email = "Bu e-posta adresi zaten kullanılıyor"
+                    toast({
+                        title: "E-posta Zaten Kullanılıyor",
+                        description: "Bu e-posta adresi ile daha önce kayıt olunmuş. Lütfen farklı bir e-posta deneyin veya giriş yapın.",
+                        variant: "destructive"
+                    })
+                }
+                // Telefon numarası zaten kullanılıyor kontrolü
+                else if (errorMessage.includes('telefon') || errorMessage.includes('phone')) {
+                    newErrors.phone = "Bu telefon numarası zaten kullanılıyor"
+                    toast({
+                        title: "Telefon Numarası Zaten Kullanılıyor",
+                        description: "Bu telefon numarası ile daha önce kayıt olunmuş. Lütfen farklı bir numara deneyin.",
+                        variant: "destructive"
+                    })
+                }
+                // Genel hata mesajı
+                else {
+                    toast({
+                        title: "Kayıt Başarısız",
+                        description: error,
+                        variant: "destructive"
+                    })
+                }
+
+                if (Object.keys(newErrors).length > 0) {
+                    setFormErrors(prev => ({ ...prev, signup: newErrors }))
+                }
+            }
         } catch (error: any) {
             console.error("Signup error:", error)
+            // Ekstra güvenlik: catch bloğunda da toast göster
+            const errorMsg = error?.response?.data?.message || error?.message || "Kayıt sırasında beklenmeyen bir hata oluştu"
+            toast({
+                title: "Hata",
+                description: errorMsg,
+                variant: "destructive"
+            })
         }
     }
 

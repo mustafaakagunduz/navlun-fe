@@ -32,7 +32,7 @@ const NavbarWithoutLogin = () => {
             <div className="flex h-16 items-center justify-between px-3 sm:px-4 w-full">
                 <div className={`flex items-center gap-2 ${isScrolled ? 'text-gray-900' : 'text-white'}`}>
                     <Image
-                        src="/assets/images/transyuk-aka.png"
+                        src="/assets/images/transyuk.png"
                         alt="TRANSYÜK Logo"
                         width={120}
                         height={32}
@@ -67,13 +67,6 @@ const NavbarWithoutLogin = () => {
                             : 'text-white hover:text-green-400'
                     }`}>
                         {t("navbar.contact")}
-                    </Link>
-                    <Link href="#blog" className={`text-base font-semibold transition-colors ${
-                        isScrolled
-                            ? 'text-gray-700 hover:text-green-600'
-                            : 'text-white hover:text-green-400'
-                    }`}>
-                        {t("navbar.blog")}
                     </Link>
                 </nav>
                 <div className="flex items-center gap-2">
@@ -141,8 +134,8 @@ const NavbarWithoutLogin = () => {
                         >
                             {t("navbar.services")}
                         </Link>
-                        <Link 
-                            href="#contact" 
+                        <Link
+                            href="#contact"
                             className={`block text-base font-semibold transition-colors ${
                                 isScrolled
                                     ? 'text-gray-700 hover:text-green-600'
@@ -151,17 +144,6 @@ const NavbarWithoutLogin = () => {
                             onClick={() => setIsMobileMenuOpen(false)}
                         >
                             {t("navbar.contact")}
-                        </Link>
-                        <Link 
-                            href="#blog" 
-                            className={`block text-base font-semibold transition-colors ${
-                                isScrolled
-                                    ? 'text-gray-700 hover:text-green-600'
-                                    : 'text-white hover:text-green-400'
-                            }`}
-                            onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                            {t("navbar.blog")}
                         </Link>
                         
                         <div className="pt-3 border-t border-gray-300/30 space-y-3">

@@ -73,7 +73,7 @@ const HeroSection = () => {
                             >
                                 <div className="flex flex-col gap-3 sm:gap-4">
                                     {/* İlk buton - Get Service */}
-                                    <Link href="/auth/register">
+                                    <Link href="/login?role=SENDER">
                                         <motion.div
                                             whileHover={{ scale: 1.05 }}
                                             whileTap={{ scale: 0.95 }}
@@ -91,7 +91,7 @@ const HeroSection = () => {
 
                                     {/* İkinci ve üçüncü butonlar - yan yana */}
                                     <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                                        <Link href="/auth/login" className="flex-1">
+                                        <Link href="/login?role=CARRIER" className="flex-1">
                                             <motion.div
                                                 whileHover={{ scale: 1.05 }}
                                                 whileTap={{ scale: 0.95 }}
@@ -107,7 +107,7 @@ const HeroSection = () => {
                                             </motion.div>
                                         </Link>
 
-                                        <Link href="/auth/login" className="flex-1">
+                                        <Link href="/login?role=BROKER" className="flex-1">
                                             <motion.div
                                                 whileHover={{ scale: 1.05 }}
                                                 whileTap={{ scale: 0.95 }}

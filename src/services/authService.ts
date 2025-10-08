@@ -17,6 +17,7 @@ export type LoginResponse = {
     email: string;
     accessToken: string;
     refreshToken: string;
+    requires2FA?: boolean;
 };
 
 export type SignupData = {
@@ -131,6 +132,20 @@ const authService = {
             await apiService.post('/auth/reset-password', { token, newPassword });
         } catch (error) {
             console.error('Password reset error:', error);
+            throw error;
+        }
+    },
+
+    /**
+     * 2FA kodunu doğrular
+     * @param userId Kullanıcı ID'si
+     * @param code 6 haneli doğrulama kodu
+     */
+    verify2FA: async (userId: string, code: string): Promise<LoginResponse> => {
+        try {
+            return await apiService.post<LoginResponse>('/auth/verify-2fa', { userId, code });
+        } catch (error) {
+            console.error('2FA verification error:', error);
             throw error;
         }
     }

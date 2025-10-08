@@ -28,7 +28,7 @@ const AboutSection = () => {
                     {/* Görsel Alanı */}
                     <div className="relative h-[300px] sm:h-[400px] rounded-xl overflow-hidden shadow-md bg-white">
                         <Image
-                            src="/placeholder.svg?height=400&width=600"
+                            src="/assets/images/eco-trans.webp"
                             alt={t("about.title")}
                             fill
                             className="object-cover"

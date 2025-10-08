@@ -457,7 +457,17 @@ const loadService = {
         }
     },
 
-    // Gönderici istatistiklerini getirir
+    // Mevcut kullanıcının istatistiklerini getirir (sender için)
+    getCurrentUserStatistics: async (): Promise<SenderStatisticsDto> => {
+        try {
+            return await apiService.get<SenderStatisticsDto>('/loads/my-statistics');
+        } catch (error) {
+            console.error('Get current user statistics error:', error);
+            throw error;
+        }
+    },
+
+    // Gönderici istatistiklerini getirir (admin/diğer kullanıcılar için)
     getSenderStatistics: async (
         senderId: string,
         startDate?: string,
@@ -595,6 +605,16 @@ const loadService = {
             return await apiService.get<Load[]>('/loads/my-active-loads');
         } catch (error) {
             console.error('Get current user active loads error:', error);
+            throw error;
+        }
+    },
+
+    // Kullanıcının tamamlanmış teslimatlarını getirir
+    getCurrentUserCompletedDeliveries: async (): Promise<Load[]> => {
+        try {
+            return await apiService.get<Load[]>('/loads/my-completed-deliveries');
+        } catch (error) {
+            console.error('Get current user completed deliveries error:', error);
             throw error;
         }
     },

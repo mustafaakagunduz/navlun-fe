@@ -38,12 +38,17 @@ import {
     AlertTriangle
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { useToast } from "@/hooks/use-toast";
+import carrierService, { CarrierStatistics } from "@/services/carrierService";
 
 export default function CarrierDashboard() {
     const { user, isAuthenticated, isLoading } = useAuth();
     const router = useRouter();
     const { t } = useLanguage();
+    const { toast } = useToast();
     const [currentTime, setCurrentTime] = useState(new Date());
+    const [statistics, setStatistics] = useState<CarrierStatistics | null>(null);
+    const [statsLoading, setStatsLoading] = useState(true);
 
     // Gerçek zamanlı saat güncellemesi
     useEffect(() => {
@@ -60,33 +65,53 @@ export default function CarrierDashboard() {
         }
     }, [isLoading, isAuthenticated, user, router]);
 
-    // Dummy data - yatırımcı sunumu için
-    const carrierStats = {
-        totalEarnings: 247650,
-        monthlyGrowth: 22.8,
-        activeDeliveries: 17,
-        completionRate: 98.4,
-        avgDeliveryTime: 1.8,
-        fuelEfficiency: 15.7,
-        customerRating: 4.93,
-        ecoScore: 94
+    // Load statistics from backend
+    useEffect(() => {
+        const loadStatistics = async () => {
+            if (!isAuthenticated || user?.role !== 'CARRIER') return;
+
+            try {
+                setStatsLoading(true);
+                const stats = await carrierService.getCurrentUserStatistics();
+                setStatistics(stats);
+            } catch (error: any) {
+                console.error('Error loading carrier statistics:', error);
+                toast({
+                    title: "Hata",
+                    description: "İstatistikler yüklenirken bir hata oluştu",
+                    variant: "destructive"
+                });
+            } finally {
+                setStatsLoading(false);
+            }
+        };
+
+        loadStatistics();
+    }, [isAuthenticated, user]);
+
+    // Use statistics data or fallback to empty
+    const carrierStats = statistics ? {
+        totalEarnings: statistics.totalEarnings,
+        monthlyGrowth: statistics.monthlyGrowth,
+        activeDeliveries: statistics.activeDeliveries,
+        completionRate: statistics.completionRate,
+        avgDeliveryTime: statistics.avgDeliveryTime,
+        fuelEfficiency: statistics.fuelEfficiency,
+        customerRating: statistics.customerRating,
+        ecoScore: statistics.ecoScore
+    } : {
+        totalEarnings: 0,
+        monthlyGrowth: 0,
+        activeDeliveries: 0,
+        completionRate: 0,
+        avgDeliveryTime: 0,
+        fuelEfficiency: 0,
+        customerRating: 0,
+        ecoScore: 0
     };
 
-    const activeDeliveries = [
-        { id: 'DEL001', route: 'İstanbul → Ankara', cargo: 'Elektronik', status: 'in_transit', progress: 75, eta: '2 saat', value: '₺3,400', eco: true },
-        { id: 'DEL002', route: 'Bursa → İzmir', cargo: 'Tekstil', status: 'loading', progress: 10, eta: '6 saat', value: '₺2,100', eco: true },
-        { id: 'DEL003', route: 'Ankara → Antalya', cargo: 'Gıda', status: 'in_transit', progress: 45, eta: '4 saat', value: '₺2,850', eco: false },
-        { id: 'DEL004', route: 'İzmir → Adana', cargo: 'İnşaat', status: 'pickup', progress: 5, eta: '8 saat', value: '₺4,200', eco: true },
-        { id: 'DEL005', route: 'Konya → İstanbul', cargo: 'Tarım', status: 'in_transit', progress: 60, eta: '3 saat', value: '₺1,750', eco: true }
-    ];
-
-    const topRoutes = [
-        { route: 'İstanbul → Ankara', count: 47, earnings: '₺48,500', rating: 4.9, efficiency: 96 },
-        { route: 'Bursa → İzmir', count: 38, earnings: '₺32,400', rating: 4.8, efficiency: 94 },
-        { route: 'Ankara → İzmir', count: 34, earnings: '₺29,800', rating: 4.9, efficiency: 92 },
-        { route: 'İstanbul → İzmir', count: 29, earnings: '₺35,600', rating: 4.7, efficiency: 90 },
-        { route: 'Ankara → Antalya', count: 25, earnings: '₺28,300', rating: 4.8, efficiency: 88 }
-    ];
+    const activeDeliveries = statistics?.recentDeliveries || [];
+    const topRoutes = statistics?.topRoutes || [];
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -150,10 +175,6 @@ export default function CarrierDashboard() {
                                         })}
                                     </div>
                                 </div>
-                                <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg">
-                                    <Route className="h-4 w-4 mr-2" />
-                                    Yeni Rota Planla
-                                </Button>
                             </div>
                         </div>
 
@@ -165,7 +186,7 @@ export default function CarrierDashboard() {
                                         <div>
                                             <p className="text-sm font-medium text-gray-600">Toplam Kazanç</p>
                                             <p className="text-3xl font-bold text-purple-600">
-                                                ₺{carrierStats.totalEarnings.toLocaleString()}
+                                                {carrierService.formatCurrency(carrierStats.totalEarnings)}
                                             </p>
                                             <div className="flex items-center mt-2">
                                                 <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
@@ -378,7 +399,7 @@ export default function CarrierDashboard() {
                                                     </div>
                                                 </div>
                                                 <div className="text-right">
-                                                    <p className="font-bold text-purple-600">{route.earnings}</p>
+                                                    <p className="font-bold text-purple-600">{carrierService.formatCurrency(route.earnings)}</p>
                                                     <Badge variant="outline" className="text-xs mt-1">
                                                         Verimli Rota
                                                     </Badge>
@@ -405,7 +426,7 @@ export default function CarrierDashboard() {
                                                 <CardContent className="p-4 text-center">
                                                     <Fuel className="h-8 w-8 text-green-600 mx-auto mb-2" />
                                                     <p className="text-sm text-green-800 font-medium">Yakıt Tasarrufu</p>
-                                                    <p className="text-2xl font-bold text-green-600">₺12.4K</p>
+                                                    <p className="text-2xl font-bold text-green-600">{carrierService.formatCurrency(statistics?.fleetAnalytics?.fuelSavings || 0)}</p>
                                                 </CardContent>
                                             </Card>
 
@@ -413,7 +434,7 @@ export default function CarrierDashboard() {
                                                 <CardContent className="p-4 text-center">
                                                     <Zap className="h-8 w-8 text-blue-600 mx-auto mb-2" />
                                                     <p className="text-sm text-blue-800 font-medium">Operasyon Verimliliği</p>
-                                                    <p className="text-2xl font-bold text-blue-600">94%</p>
+                                                    <p className="text-2xl font-bold text-blue-600">{statistics?.fleetAnalytics?.operationEfficiency || 0}%</p>
                                                 </CardContent>
                                             </Card>
                                         </div>
@@ -429,27 +450,27 @@ export default function CarrierDashboard() {
                                                     <span className="text-sm">Aktif Araçlar</span>
                                                     <div className="flex items-center gap-2">
                                                         <div className="w-20 bg-gray-200 rounded-full h-2">
-                                                            <div className="bg-green-600 h-2 rounded-full" style={{width: '95%'}}></div>
+                                                            <div className="bg-green-600 h-2 rounded-full" style={{width: `${(statistics?.fleetAnalytics?.activeVehicles || 0) / (statistics?.fleetAnalytics?.totalVehicles || 1) * 100}%`}}></div>
                                                         </div>
-                                                        <span className="text-sm font-bold">4/4</span>
+                                                        <span className="text-sm font-bold">{statistics?.fleetAnalytics?.activeVehicles || 0}/{statistics?.fleetAnalytics?.totalVehicles || 0}</span>
                                                     </div>
                                                 </div>
                                                 <div className="flex justify-between items-center">
                                                     <span className="text-sm">Bakım Durumu</span>
                                                     <div className="flex items-center gap-2">
                                                         <div className="w-20 bg-gray-200 rounded-full h-2">
-                                                            <div className="bg-blue-600 h-2 rounded-full" style={{width: '88%'}}></div>
+                                                            <div className="bg-blue-600 h-2 rounded-full" style={{width: `${statistics?.fleetAnalytics?.maintenancePercentage || 0}%`}}></div>
                                                         </div>
-                                                        <span className="text-sm font-bold">88%</span>
+                                                        <span className="text-sm font-bold">{statistics?.fleetAnalytics?.maintenancePercentage || 0}%</span>
                                                     </div>
                                                 </div>
                                                 <div className="flex justify-between items-center">
                                                     <span className="text-sm">Güvenlik Skoru</span>
                                                     <div className="flex items-center gap-2">
                                                         <div className="w-20 bg-gray-200 rounded-full h-2">
-                                                            <div className="bg-purple-600 h-2 rounded-full" style={{width: '99%'}}></div>
+                                                            <div className="bg-purple-600 h-2 rounded-full" style={{width: `${statistics?.fleetAnalytics?.safetyScore || 0}%`}}></div>
                                                         </div>
-                                                        <span className="text-sm font-bold">99%</span>
+                                                        <span className="text-sm font-bold">{statistics?.fleetAnalytics?.safetyScore || 0}%</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -463,7 +484,7 @@ export default function CarrierDashboard() {
                                                     <p className="text-sm text-green-600">CO₂ emisyon azaltımı</p>
                                                 </div>
                                                 <div className="text-right">
-                                                    <div className="text-3xl font-bold text-green-600">-23%</div>
+                                                    <div className="text-3xl font-bold text-green-600">-{statistics?.fleetAnalytics?.co2ReductionPercentage || 0}%</div>
                                                     <div className="text-sm text-green-700">Bu yıl</div>
                                                 </div>
                                             </div>
@@ -495,10 +516,10 @@ export default function CarrierDashboard() {
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-3xl font-bold text-purple-600">67</div>
+                                    <div className="text-3xl font-bold text-purple-600">{statistics?.availableLoads || 0}</div>
                                     <div className="text-sm text-gray-600 mt-1">
                                         <TrendingUp className="inline h-4 w-4 text-green-600 mr-1" />
-                                        +18% bu hafta
+                                        Aktif ilanlar
                                     </div>
                                 </CardContent>
                             </Card>
@@ -511,8 +532,8 @@ export default function CarrierDashboard() {
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-3xl font-bold text-blue-600">47,850 km</div>
-                                    <div className="text-sm text-gray-600 mt-1">Bu ay: 3,247 km</div>
+                                    <div className="text-3xl font-bold text-blue-600">{carrierService.formatNumber(statistics?.totalDistance || 0)} km</div>
+                                    <div className="text-sm text-gray-600 mt-1">Toplam kat edilen yol</div>
                                 </CardContent>
                             </Card>
 
@@ -524,7 +545,7 @@ export default function CarrierDashboard() {
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-3xl font-bold text-green-600">247</div>
+                                    <div className="text-3xl font-bold text-green-600">{statistics?.safetyDays || 0}</div>
                                     <div className="text-sm text-gray-600 mt-1">Kaza-sız gün</div>
                                 </CardContent>
                             </Card>
@@ -537,10 +558,10 @@ export default function CarrierDashboard() {
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-3xl font-bold text-emerald-600">{carrierStats.customerRating}/5</div>
+                                    <div className="text-3xl font-bold text-emerald-600">{carrierStats.customerRating.toFixed(2)}/5</div>
                                     <div className="text-sm text-gray-600 mt-1">
                                         <Star className="inline h-4 w-4 text-yellow-500 mr-1" />
-                                        347 değerlendirme
+                                        {statistics?.totalReviews || 0} değerlendirme
                                     </div>
                                 </CardContent>
                             </Card>

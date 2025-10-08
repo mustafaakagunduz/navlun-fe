@@ -113,6 +113,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
             const response = await authService.login(email, password);
 
+            // Check if 2FA is required
+            if (response.requires2FA) {
+                setState(prev => ({
+                    ...prev,
+                    isLoading: false,
+                    needsVerification: true,
+                    verificationUserId: response.userId,
+                    verificationEmail: email,
+                    verificationPassword: password,
+                    error: null,
+                }));
+                return;
+            }
+
+            // If no 2FA required (old flow), proceed with login
             localStorage.setItem('accessToken', response.accessToken);
             localStorage.setItem('refreshToken', response.refreshToken);
 
@@ -223,13 +238,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     verificationPassword: null,
                 });
 
-                // Role'e göre yönlendir
-                const dashboardRoute = getDashboardRoute(userData.role);
-                router.push(dashboardRoute);
+                // Ana sayfaya yönlendir
+                router.push('/');
 
                 toast({
-                    title: "E-posta Doğrulandı",
-                    description: "E-posta adresiniz başarıyla doğrulandı. Yönlendiriliyorsunuz...",
+                    title: "Kayıt Başarılı",
+                    description: "Hesabınız başarıyla oluşturuldu ve giriş yaptınız.",
                     variant: "default"
                 });
             } else {

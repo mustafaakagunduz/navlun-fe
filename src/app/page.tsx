@@ -51,14 +51,10 @@ export default function Home() {
                     {/* Login olmuş kullanıcılar için boşluk bırak */}
                     {user && <div className="h-20"></div>}
 
-
-                    {/* Login olmuş kullanıcılar için boşluk bırak
+                    <AboutSection />
                     <ServicesSection />
                     <ContactSection />
-                    <AboutSection />
                     <Footer />
-                    */}
-
                 </main>
 
 

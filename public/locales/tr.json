@@ -479,6 +479,27 @@
       "accountNotVerified": "Hesabınız doğrulanmamış. Lütfen e-posta adresinize gönderilen doğrulama kodunu kullanın."
     },
 
+    "smsVerification": {
+      "title": "Telefon Numaranızı Doğrulayın",
+      "description": "Telefonunuza gönderilen 6 haneli doğrulama kodunu girin",
+      "enterSixDigits": "Lütfen 6 haneli kodu girin",
+      "verify": "Doğrula",
+      "verifying": "Doğrulanıyor...",
+      "cancel": "İptal",
+      "resendCode": "Kodu Yeniden Gönder",
+      "success": "Telefon Numaranız Başarıyla Doğrulandı!",
+      "successMessage": "Telefon numaranız doğrulandı, yönlendiriliyorsunuz...",
+      "loginSuccess": "Giriş Yapılıyor...",
+      "redirectingMessage": "Dashboard'a yönlendiriliyorsunuz...",
+      "incorrectCode": "Hatalı doğrulama kodu. Lütfen tekrar deneyin.",
+      "verificationFailed": "Doğrulama başarısız oldu. Lütfen tekrar deneyin.",
+      "codeExpired": "Doğrulama kodunun süresi doldu. Lütfen yeni bir kod isteyin.",
+      "resendSuccess": "Yeni bir doğrulama kodu gönderildi.",
+      "resendFailed": "Yeni kod gönderilirken bir hata oluştu. Lütfen tekrar deneyin.",
+      "timeLimitMessage": "Kodun geçerlilik süresi",
+      "timeExpired": "Kodun süresi doldu",
+      "timeLeft": "Kalan süre"
+    },
     "emailVerification": {
       "title": "E-posta Adresinizi Doğrulayın",
       "description": "Lütfen e-posta adresinize gönderilen 6 haneli doğrulama kodunu girin.",
@@ -498,14 +519,7 @@
       "resendFailed": "Yeni kod gönderilirken bir hata oluştu. Lütfen tekrar deneyin.",
       "timeLimitMessage": "Kodun geçerlilik süresi",
       "timeExpired": "Kodun süresi doldu",
-      "timeLeft" : "Kalan süre ",
-      "tips": {
-        "title": "Doğrulama kodunu almak için ipuçları:",
-        "sentWithin": "E-posta <strong>birkaç dakika</strong> içinde gönderilir",
-        "checkSpam": "<strong>Spam/önemsiz</strong> klasörünüzü mutlaka kontrol edin",
-        "ensureCorrect": "E-posta adresinizi doğru girdiğinizden emin olun",
-        "refreshInbox": "Gelen kutunuzu yenileyin"
-      }
+      "timeLeft": "Kalan süre"
     }
   },
   "newLoad": {

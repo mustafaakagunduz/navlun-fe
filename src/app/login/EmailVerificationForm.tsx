@@ -156,15 +156,15 @@ const EmailVerificationForm = ({
                     }, 1500)
                 }
             } else {
-                console.log('Email verification failed:', response.message)
-                setError(response.message || t("auth.emailVerification.incorrectCode"))
+                console.log('Verification failed:', response.message)
+                setError(response.message || t("auth.smsVerification.incorrectCode"))
                 setIsLoading(false)
                 setIsProcessing(false)
             }
             console.log('=== FRONTEND VERIFICATION END (SUCCESS) ===')
         } catch (error: any) {
             console.error('Verification error:', error)
-            setError(error.response?.data?.message || t("auth.emailVerification.verificationFailed"))
+            setError(error.response?.data?.message || t("auth.smsVerification.verificationFailed"))
             setIsLoading(false)
             setIsProcessing(false)
             console.log('=== FRONTEND VERIFICATION END (ERROR) ===')
@@ -204,11 +204,11 @@ const EmailVerificationForm = ({
                     inputRefs.current[0].focus()
                 }
             } else {
-                setError(response.message || t("auth.emailVerification.resendFailed"))
+                setError(response.message || t("auth.smsVerification.resendFailed"))
             }
         } catch (error: any) {
             console.error('Resend error:', error)
-            setError(error.response?.data?.message || t("auth.emailVerification.resendFailed"))
+            setError(error.response?.data?.message || t("auth.smsVerification.resendFailed"))
         } finally {
             setIsResending(false)
         }
@@ -219,14 +219,14 @@ const EmailVerificationForm = ({
             <CardHeader className="p-6 pb-4 text-center">
                 <div className="flex justify-center mb-4">
                     <div className="rounded-full bg-green-100 p-3">
-                        <Mail className="h-8 w-8 text-green-600" />
+                        <KeyRound className="h-8 w-8 text-green-600" />
                     </div>
                 </div>
                 <CardTitle className="text-xl font-semibold text-gray-900">
-                    {t("auth.emailVerification.title") || "E-posta Doğrulama"}
+                    {t("auth.smsVerification.title") || "Telefon Doğrulama"}
                 </CardTitle>
                 <CardDescription className="text-gray-600 text-sm">
-                    {t("auth.emailVerification.description") || `${email} adresine gönderilen 6 haneli kodu girin`}
+                    {t("auth.smsVerification.description") || `Telefonunuza gönderilen 6 haneli kodu girin`}
                 </CardDescription>
             </CardHeader>
 
@@ -240,10 +240,10 @@ const EmailVerificationForm = ({
                         </div>
                         <div>
                             <h3 className="text-lg font-semibold text-green-700 mb-2">
-                                {t("auth.emailVerification.success") || "Doğrulama Başarılı!"}
+                                {t("auth.smsVerification.success") || "Doğrulama Başarılı!"}
                             </h3>
                             <p className="text-gray-600 text-sm">
-                                {t("auth.emailVerification.successMessage") || "E-posta adresiniz başarıyla doğrulandı. Giriş yapılıyor..."}
+                                {t("auth.smsVerification.successMessage") || "Telefon numaranız başarıyla doğrulandı. Giriş yapılıyor..."}
                             </p>
                         </div>
                     </div>
@@ -282,7 +282,7 @@ const EmailVerificationForm = ({
                                 <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
                                     <Clock className="h-4 w-4" />
                                     <span>
-                                        {t("emailVerification.timeLeft") || "Kalan süre "}: {formatTime(timeLeft)}
+                                        {t("smsVerification.timeLeft") || "Kalan süre"}: {formatTime(timeLeft)}
                                     </span>
                                 </div>
                             )}
@@ -311,10 +311,10 @@ const EmailVerificationForm = ({
                                 {isLoading || isProcessing ? (
                                     <>
                                         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                                        {t("auth.emailVerification.verifying") || "Doğrulanıyor..."}
+                                        {t("auth.smsVerification.verifying") || "Doğrulanıyor..."}
                                     </>
                                 ) : (
-                                    t("auth.emailVerification.verify") || "Doğrula"
+                                    t("auth.smsVerification.verify") || "Doğrula"
                                 )}
                             </button>
 
@@ -326,7 +326,7 @@ const EmailVerificationForm = ({
                                     onClick={onCancel}
                                     disabled={isLoading || isProcessing}
                                 >
-                                    {t("auth.emailVerification.cancel") || "İptal"}
+                                    {t("auth.smsVerification.cancel") || "İptal"}
                                 </Button>
 
                                 <Button
@@ -341,7 +341,7 @@ const EmailVerificationForm = ({
                                     ) : (
                                         <RefreshCw className="mr-1 h-3 w-3" />
                                     )}
-                                    {t("auth.emailVerification.resendCode") || "Kodu Yeniden Gönder"}
+                                    {t("auth.smsVerification.resendCode") || "Kodu Yeniden Gönder"}
                                 </Button>
                             </div>
                         </div>

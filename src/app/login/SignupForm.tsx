@@ -100,11 +100,12 @@ const SignupForm = ({
         <FormInput
             id="phone"
             name="phone"
-            placeholder="+90 (___) ___ __ __"
+            placeholder="535 123 45 67"
             value={signupData.phone}
             onChange={handleSignupChange}
             icon={<Phone className={styleClasses.icon} />}
             label={t("auth.phone") || "Telefon"}
+            error={formErrors.phone}
         />
 
         <FormInput

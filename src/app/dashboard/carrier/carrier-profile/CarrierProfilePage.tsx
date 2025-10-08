@@ -48,7 +48,55 @@ import {
     Package
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
-import carrierService, { CarrierProfile, Vehicle, VehicleRequest, VehicleUpdateRequest } from '@/services/carrierService';
+import carrierService from '@/services/carrierService';
+
+// Local types for carrier profile
+interface CarrierProfile {
+    id?: string;
+    company: boolean;
+    companyName: string;
+    taxNumber?: string;
+    iban?: string;
+    isEcoFriendly: boolean;
+    driverLicense?: string;
+    phone?: string;
+    email?: string;
+}
+
+interface Vehicle {
+    id: string;
+    plateNumber: string;
+    type: string;
+    ecoCertified: boolean;
+    insuranceStatus: boolean;
+    inspectionDate: string;
+    driverName: string;
+    carryingCapacity: number;
+    active: boolean;
+}
+
+interface VehicleRequest {
+    plateNumber: string;
+    type: string;
+    ecoCertified: boolean;
+    insuranceStatus: boolean;
+    inspectionDate: string;
+    driverName: string;
+    carryingCapacity: number;
+    carrierId: string;
+    active: boolean;
+}
+
+interface VehicleUpdateRequest {
+    plateNumber?: string;
+    type?: string;
+    ecoCertified?: boolean;
+    insuranceStatus?: boolean;
+    inspectionDate?: string;
+    driverName?: string;
+    carryingCapacity?: number;
+    active?: boolean;
+}
 
 export default function CarrierProfilePage() {
     const { user } = useAuth();

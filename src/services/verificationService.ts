@@ -30,8 +30,17 @@ const verificationService = {
      */
     verifyEmail: async (userId: string, code: string): Promise<VerificationResponse> => {
         try {
-            const response = await apiService.post<VerificationResponse>('/auth/verify-email', { userId, code });
-            return response;
+            const response = await apiService.post<any>('/auth/verify-email', { userId, code });
+            // Backend'den gelen response'a success: true ekle
+            return {
+                success: true,
+                message: response.message || 'Doğrulama başarılı',
+                userId: response.userId,
+                role: response.role,
+                email: response.email,
+                accessToken: response.accessToken,
+                refreshToken: response.refreshToken,
+            };
         } catch (error: any) {
             console.error('Email verification error:', error);
             // API'den gelen hata mesajını kullan veya varsayılan bir hata mesajı döndür
@@ -49,8 +58,11 @@ const verificationService = {
      */
     resendVerificationCode: async (userId: string, email: string): Promise<VerificationResponse> => {
         try {
-            const response = await apiService.post<VerificationResponse>('/auth/resend-verification-code', { userId, email });
-            return response;
+            const response = await apiService.post<any>('/auth/resend-verification-code', { userId, email });
+            return {
+                success: true,
+                message: response.message || 'Kod başarıyla gönderildi',
+            };
         } catch (error: any) {
             console.error('Resend verification code error:', error);
             return {
