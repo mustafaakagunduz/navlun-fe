@@ -33,7 +33,7 @@ export default function DocumentUploadModal() {
     const [formData, setFormData] = useState({
         file: null as File | null,
         description: '',
-        documentType: 'pickup' as 'pickup' | 'delivery'
+        documentType: 'pickup' as 'pickup' | 'delivery' | 'cancellation'
     });
 
     const [dragActive, setDragActive] = useState(false);
@@ -126,9 +126,11 @@ export default function DocumentUploadModal() {
                 documentType: formData.documentType
             })).unwrap();
 
+            const docTypeText = formData.documentType === 'pickup' ? 'Alım' :
+                                 formData.documentType === 'delivery' ? 'Teslimat' : 'İptal';
             toast({
                 title: "Başarılı",
-                description: `${formData.documentType === 'pickup' ? 'Alım' : 'Teslimat'} belgesi başarıyla yüklendi`,
+                description: `${docTypeText} belgesi başarıyla yüklendi`,
             });
 
             // Active deliveries'i yenile
@@ -167,7 +169,7 @@ export default function DocumentUploadModal() {
                             <Label htmlFor="documentType">Belge Türü</Label>
                             <Select
                                 value={formData.documentType}
-                                onValueChange={(value) => setFormData(prev => ({ ...prev, documentType: value as 'pickup' | 'delivery' }))}
+                                onValueChange={(value) => setFormData(prev => ({ ...prev, documentType: value as 'pickup' | 'delivery' | 'cancellation' }))}
                             >
                                 <SelectTrigger>
                                     <SelectValue />
@@ -175,6 +177,7 @@ export default function DocumentUploadModal() {
                                 <SelectContent>
                                     <SelectItem value="pickup">Alım Belgesi</SelectItem>
                                     <SelectItem value="delivery">Teslimat Belgesi</SelectItem>
+                                    <SelectItem value="cancellation">İptal Belgesi</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

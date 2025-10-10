@@ -23,7 +23,7 @@ import deliveryService from '@/services/deliveryService';
 interface DeliveryStatusCardProps {
     delivery: DeliveryTrackingData;
     onUpdateStatus: () => void;
-    onUploadDocument: (type: 'pickup' | 'delivery') => void;
+    onUploadDocument: (type: 'pickup' | 'delivery' | 'cancellation') => void;
 }
 
 export default function DeliveryStatusCard({
@@ -70,6 +70,11 @@ export default function DeliveryStatusCard({
                                     <Leaf className="h-4 w-4 text-green-600" />
                                 </div>
                             )}
+                            {delivery.cancellationDocuments && delivery.cancellationDocuments.length > 0 && (
+                                <Badge variant="destructive" className="ml-2">
+                                    İptal Talebi
+                                </Badge>
+                            )}
                         </CardTitle>
                         <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                             <span className="flex items-center gap-1">
@@ -114,10 +119,10 @@ export default function DeliveryStatusCard({
                 )}
 
                 {/* Documents */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-3">
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium">Alım Belgeleri</span>
+                            <span className="text-sm font-medium">Alım</span>
                             <Badge variant="outline">
                                 {delivery.pickupDocuments.length}
                             </Badge>
@@ -129,14 +134,14 @@ export default function DeliveryStatusCard({
                             onClick={() => onUploadDocument('pickup')}
                             disabled={delivery.currentStatus === DeliveryStep.DELIVERED}
                         >
-                            <Upload className="h-4 w-4 mr-2" />
-                            Alım Belgesi Ekle
+                            <Upload className="h-4 w-4 mr-1" />
+                            Ekle
                         </Button>
                     </div>
 
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium">Teslimat Belgeleri</span>
+                            <span className="text-sm font-medium">Teslimat</span>
                             <Badge variant="outline">
                                 {delivery.deliveryDocuments.length}
                             </Badge>
@@ -148,8 +153,27 @@ export default function DeliveryStatusCard({
                             onClick={() => onUploadDocument('delivery')}
                             disabled={delivery.currentStatus !== DeliveryStep.PICKED_UP}
                         >
-                            <Upload className="h-4 w-4 mr-2" />
-                            Teslimat Belgesi Ekle
+                            <Upload className="h-4 w-4 mr-1" />
+                            Ekle
+                        </Button>
+                    </div>
+
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-red-600">İptal</span>
+                            <Badge variant="outline" className="border-red-200">
+                                {delivery.cancellationDocuments?.length || 0}
+                            </Badge>
+                        </div>
+                        <Button
+                            variant="destructive"
+                            size="sm"
+                            className="w-full"
+                            onClick={() => onUploadDocument('cancellation')}
+                            disabled={delivery.currentStatus === DeliveryStep.DELIVERED}
+                        >
+                            <Upload className="h-4 w-4 mr-1" />
+                            İptal Et
                         </Button>
                     </div>
                 </div>

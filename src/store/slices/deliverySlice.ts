@@ -29,7 +29,7 @@ interface DeliveryState {
     // UI state
     showStatusModal: boolean
     showDocumentModal: boolean
-    selectedDocumentType: 'pickup' | 'delivery' | null
+    selectedDocumentType: 'pickup' | 'delivery' | 'cancellation' | null
 }
 
 const initialState: DeliveryState = {
@@ -110,13 +110,15 @@ export const uploadDocument = createAsyncThunk(
         deliveryStatusId: string,
         file: File,
         description?: string,
-        documentType: 'pickup' | 'delivery'
+        documentType: 'pickup' | 'delivery' | 'cancellation'
     }, { rejectWithValue, dispatch }) => {
         try {
             if (documentType === 'pickup') {
                 await deliveryService.uploadPickupDocument(deliveryStatusId, file, description)
-            } else {
+            } else if (documentType === 'delivery') {
                 await deliveryService.uploadDeliveryDocument(deliveryStatusId, file, description)
+            } else {
+                await deliveryService.uploadCancellationDocument(deliveryStatusId, file, description)
             }
 
             // Belge yüklendikten sonra tracking'i yenile
@@ -156,7 +158,7 @@ const deliverySlice = createSlice({
         setShowDocumentModal: (state, action: PayloadAction<boolean>) => {
             state.showDocumentModal = action.payload
         },
-        setSelectedDocumentType: (state, action: PayloadAction<'pickup' | 'delivery' | null>) => {
+        setSelectedDocumentType: (state, action: PayloadAction<'pickup' | 'delivery' | 'cancellation' | null>) => {
             state.selectedDocumentType = action.payload
         },
         clearErrors: (state) => {

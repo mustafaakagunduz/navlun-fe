@@ -51,6 +51,7 @@ export type DeliveryTrackingData = {
     statusHistory: StatusHistoryItem[];
     pickupDocuments: string[];
     deliveryDocuments: string[];
+    cancellationDocuments: string[];
     carrier: {
         name: string;
         phone?: string;
@@ -319,6 +320,26 @@ const deliveryService = {
             return response;
         } catch (error) {
             console.error('Delivery document upload error:', error);
+            throw error;
+        }
+    },
+
+// Cancellation belgesi yükleme
+    uploadCancellationDocument: async (deliveryStatusId: string, file: File, description?: string): Promise<DocumentUploadResponse> => {
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            if (description) {
+                formData.append('description', description);
+            }
+
+            const response = await apiService.uploadFile<DocumentUploadResponse>(
+                `/delivery-status/${deliveryStatusId}/upload-cancellation-document`,
+                formData
+            );
+            return response;
+        } catch (error) {
+            console.error('Cancellation document upload error:', error);
             throw error;
         }
     },
