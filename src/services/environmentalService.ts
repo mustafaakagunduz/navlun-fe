@@ -36,7 +36,7 @@ export interface EnvironmentalImpact {
 }
 
 class EnvironmentalService {
-    private baseUrl = '/api/v1/loads';
+    private baseUrl = '/loads';
 
     /**
      * Get current user's environmental impact statistics

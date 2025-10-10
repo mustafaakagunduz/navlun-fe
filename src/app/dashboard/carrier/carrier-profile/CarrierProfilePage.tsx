@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from "@/context/AuthContext";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 
 // Local User type with phone property
@@ -781,6 +781,9 @@ export default function CarrierProfilePage() {
                                     <Package className="h-5 w-5" />
                                     Yeni Araç Ekle
                                 </DialogTitle>
+                                <DialogDescription>
+                                    Yeni araç bilgilerini girerek filo listenize ekleyin
+                                </DialogDescription>
                             </DialogHeader>
 
                             <form onSubmit={(e) => { e.preventDefault(); handleAddVehicle(); }} className="space-y-4">
@@ -941,6 +944,9 @@ export default function CarrierProfilePage() {
                                     <Edit3 className="h-5 w-5" />
                                     Araç Düzenle
                                 </DialogTitle>
+                                <DialogDescription>
+                                    Mevcut araç bilgilerini güncelleyin
+                                </DialogDescription>
                             </DialogHeader>
 
                             <form onSubmit={(e) => { e.preventDefault(); editingVehicleId && handleUpdateVehicle(editingVehicleId); }} className="space-y-4">

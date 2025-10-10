@@ -763,6 +763,15 @@ const loadService = {
         }
     },
 
+    // Carrier için tamamlanmış teslimatları getir
+    getCompletedDeliveriesForCarrier: async (): Promise<Load[]> => {
+        try {
+            return await apiService.get<Load[]>('/loads/carrier/completed-deliveries');
+        } catch (error) {
+            console.error('Get completed deliveries for carrier error:', error);
+            throw error;
+        }
+    },
 
 };
 

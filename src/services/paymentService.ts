@@ -61,7 +61,7 @@ export interface PaymentStatistics {
 }
 
 class PaymentService {
-    private baseUrl = '/api/v1/payments';
+    private baseUrl = '/payments';
 
     /**
      * Get current user's payment history

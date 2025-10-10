@@ -82,75 +82,76 @@ class CarrierService {
         ];
     }
 
-    // Mock method - to be implemented with real API
     async getCarrierProfileByUserId(userId: string): Promise<any> {
-        // TODO: Implement real API call
-        return {
-            id: userId,
-            company: false,
-            name: '',
-            companyName: '',
-            taxNumber: '',
-            iban: '',
-            isEcoFriendly: false,
-            driverLicense: '',
-            phone: '',
-            email: ''
-        };
+        try {
+            return await apiService.get(`${this.baseUrl}/user/${userId}`);
+        } catch (error) {
+            console.error('Get carrier profile by user ID error:', error);
+            throw error;
+        }
     }
 
-    // Mock method - to be implemented with real API
     async createCarrierProfile(profileData: any): Promise<any> {
-        // TODO: Implement real API call
-        return {
-            id: 'mock-profile-id',
-            ...profileData
-        };
+        try {
+            return await apiService.post(this.baseUrl, profileData);
+        } catch (error) {
+            console.error('Create carrier profile error:', error);
+            throw error;
+        }
     }
 
-    // Mock method - to be implemented with real API
     async updateCarrierProfile(profileId: string, profileData: any): Promise<any> {
-        // TODO: Implement real API call
-        return {
-            id: profileId,
-            ...profileData
-        };
+        try {
+            return await apiService.put(`${this.baseUrl}/${profileId}`, profileData);
+        } catch (error) {
+            console.error('Update carrier profile error:', error);
+            throw error;
+        }
     }
 
-    // Mock method - to be implemented with real API
     async getVehicles(userId: string): Promise<any[]> {
-        // TODO: Implement real API call
-        return [];
+        try {
+            return await apiService.get('/vehicles/my-vehicles');
+        } catch (error) {
+            console.error('Get vehicles error:', error);
+            throw error;
+        }
     }
 
-    // Mock method - to be implemented with real API
     async getVehiclesByCarrier(carrierId: string): Promise<any[]> {
-        // TODO: Implement real API call
-        return [];
+        try {
+            return await apiService.get(`/vehicles/carrier/${carrierId}`);
+        } catch (error) {
+            console.error('Get vehicles by carrier error:', error);
+            throw error;
+        }
     }
 
-    // Mock method - to be implemented with real API
     async createVehicle(vehicleData: any): Promise<any> {
-        // TODO: Implement real API call
-        return {
-            id: 'mock-vehicle-id',
-            ...vehicleData
-        };
+        try {
+            return await apiService.post('/vehicles', vehicleData);
+        } catch (error) {
+            console.error('Create vehicle error:', error);
+            throw error;
+        }
     }
 
-    // Mock method - to be implemented with real API
     async updateVehicle(vehicleId: string, vehicleData: any): Promise<any> {
-        // TODO: Implement real API call
-        return {
-            id: vehicleId,
-            ...vehicleData
-        };
+        try {
+            return await apiService.put(`/vehicles/${vehicleId}`, vehicleData);
+        } catch (error) {
+            console.error('Update vehicle error:', error);
+            throw error;
+        }
     }
 
-    // Mock method - to be implemented with real API
     async deleteVehicle(vehicleId: string): Promise<void> {
-        // TODO: Implement real API call
-        return;
+        try {
+            await apiService.delete(`/vehicles/${vehicleId}`);
+        } catch (error) {
+            console.error('Delete vehicle error:', error);
+            throw error;
+        }
     }
 }
 

@@ -16,6 +16,11 @@ interface LoadsState {
     availableLoadsLoading: boolean
     availableLoadsError: string | null
 
+    // Completed deliveries for carriers
+    completedDeliveries: Load[]
+    completedDeliveriesLoading: boolean
+    completedDeliveriesError: string | null
+
     // Load details
     selectedLoad: Load | null
 
@@ -36,6 +41,9 @@ const initialState: LoadsState = {
     availableLoads: [],
     availableLoadsLoading: false,
     availableLoadsError: null,
+    completedDeliveries: [],
+    completedDeliveriesLoading: false,
+    completedDeliveriesError: null,
     selectedLoad: null,
     statusFilter: 'ALL',
     searchQuery: '',
@@ -94,6 +102,18 @@ export const updateLoadStatus = createAsyncThunk(
             return updatedLoad
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Yük durumu güncellenemedi')
+        }
+    }
+)
+
+export const fetchCompletedDeliveries = createAsyncThunk(
+    'loads/fetchCompletedDeliveries',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await loadService.getCompletedDeliveriesForCarrier()
+            return response
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || 'Tamamlanan teslimatlar yüklenemedi')
         }
     }
 )
@@ -172,6 +192,21 @@ const loadsSlice = createSlice({
                 if (index !== -1) {
                     state.myLoads[index] = updatedLoad
                 }
+            })
+
+        // Completed Deliveries
+        builder
+            .addCase(fetchCompletedDeliveries.pending, (state) => {
+                state.completedDeliveriesLoading = true
+                state.completedDeliveriesError = null
+            })
+            .addCase(fetchCompletedDeliveries.fulfilled, (state, action) => {
+                state.completedDeliveriesLoading = false
+                state.completedDeliveries = action.payload
+            })
+            .addCase(fetchCompletedDeliveries.rejected, (state, action) => {
+                state.completedDeliveriesLoading = false
+                state.completedDeliveriesError = action.payload as string
             })
     },
 })

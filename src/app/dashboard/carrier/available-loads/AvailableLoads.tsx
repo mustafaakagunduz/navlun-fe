@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -343,6 +343,9 @@ export default function AvailableLoadsPage() {
                 <DialogContent className="max-w-2xl">
                     <DialogHeader>
                         <DialogTitle>Yük Detayları</DialogTitle>
+                        <DialogDescription>
+                            Seçili yükün detaylı bilgilerini görüntüleyin
+                        </DialogDescription>
                     </DialogHeader>
                     {selectedLoad && (
                         <div className="space-y-6">
@@ -420,6 +423,9 @@ export default function AvailableLoadsPage() {
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Teklif Ver</DialogTitle>
+                        <DialogDescription>
+                            Seçili yük için teklif gönderin
+                        </DialogDescription>
                     </DialogHeader>
                     {selectedLoad && (
                         <div className="space-y-4">
@@ -441,32 +447,28 @@ export default function AvailableLoadsPage() {
                                 </div>
 
                                 <div>
-                                    <Label htmlFor="vehicle">Araç Seçin</Label>
-                                    <Select value={offerForm.vehicleId} onValueChange={(value) => setOfferForm(prev => ({ ...prev, vehicleId: value }))}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Araç seçin" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {vehicles.map((vehicle) => (
-                                                <SelectItem key={vehicle.id} value={vehicle.id}>
-                                                    {vehicle.plateNumber} - {vehicle.type}
-                                                    {vehicle.ecoCertified && ' (Çevreci)'}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    <Label htmlFor="vehicle">Araç Seçin *</Label>
+                                    {vehicles.length === 0 ? (
+                                        <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md text-sm text-yellow-800">
+                                            Henüz araç eklememişsiniz. Teklif vermek için önce araç eklemelisiniz.
+                                        </div>
+                                    ) : (
+                                        <Select value={offerForm.vehicleId} onValueChange={(value) => setOfferForm(prev => ({ ...prev, vehicleId: value }))}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Araç seçin" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {vehicles.map((vehicle) => (
+                                                    <SelectItem key={vehicle.id} value={vehicle.id}>
+                                                        {vehicle.plateNumber} - {vehicle.type}
+                                                        {vehicle.ecoCertified && ' (Çevreci)'}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    )}
                                 </div>
 
-                                {selectedLoad.insuranceRequested && (
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id="insurance"
-                                            checked={offerForm.insuranceAccepted}
-                                            onCheckedChange={(checked) => setOfferForm(prev => ({ ...prev, insuranceAccepted: !!checked }))}
-                                        />
-                                        <Label htmlFor="insurance">Sigorta kabul ediyorum</Label>
-                                    </div>
-                                )}
 
                                 <div>
                                     <Label htmlFor="notes">Notlar (Opsiyonel)</Label>
