@@ -1,11 +1,11 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 
-export default function OAuth2CallbackPage() {
+function OAuth2Callback() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const { setUser } = useAuth()
@@ -109,5 +109,23 @@ export default function OAuth2CallbackPage() {
                 </div>
             </div>
         </div>
+    )
+}
+
+export default function OAuth2CallbackPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-green-100">
+                <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+                    <div className="text-center">
+                        <Loader2 className="mx-auto h-12 w-12 animate-spin text-green-600 mb-4" />
+                        <h2 className="text-2xl font-bold text-gray-900 mb-2">Giriş yapılıyor...</h2>
+                        <p className="text-gray-600">Lütfen bekleyin, hesabınıza giriş yapıyoruz.</p>
+                    </div>
+                </div>
+            </div>
+        }>
+            <OAuth2Callback />
+        </Suspense>
     )
 }

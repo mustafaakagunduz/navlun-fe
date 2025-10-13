@@ -35,6 +35,7 @@ type AuthContextType = AuthState & {
     logout: () => Promise<void>;
     refreshToken: () => Promise<boolean>;
     clearError: () => void;
+    setUser: (user: User) => void;
     completeEmailVerification: (accessToken?: string, refreshToken?: string, userEmail?: string) => Promise<void>;
     cancelEmailVerification: () => void;
 };
@@ -197,6 +198,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const clearError = () => setState(prev => ({ ...prev, error: null }));
 
+    const setUser = (user: User) => {
+        setState(prev => ({
+            ...prev,
+            user,
+            isAuthenticated: true,
+        }));
+    };
+
     // completeEmailVerification fonksiyonunu güncelle
     const completeEmailVerification = async (accessToken?: string, refreshToken?: string, userEmail?: string) => {
         try {
@@ -281,6 +290,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 logout,
                 refreshToken,
                 clearError,
+                setUser,
                 completeEmailVerification,
                 cancelEmailVerification,
             }}
