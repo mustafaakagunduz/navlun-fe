@@ -8,13 +8,15 @@ export type BrokerProfile = {
     company: boolean;
     companyName: string;
     taxNumber?: string;
-    iban: string;
-    specializations: string[];
-    certificates: string[];
+    iban?: string;
+    specializations?: string[];
+    certificates?: string[];
     licenseNumber?: string;
-    commissionRate: number;
+    commissionRate?: number;
     facilitatedDeals: number;
     ecoFriendlyDeals: number;
+    totalCommissionEarned?: string;
+    ecoFriendlyDealPercentage?: number;
     createdAt?: string;
     updatedAt?: string;
 };
@@ -97,14 +99,15 @@ export type BrokerProfileRequest = {
 };
 
 export type BrokerProfileUpdateRequest = {
-    company?: boolean;
-    companyName?: string;
+    name?: string;
     taxNumber?: string;
-    iban?: string;
-    specializations?: string[];
-    certificates?: string[];
+    specialization?: string;
+    phoneNumber?: string;
+    address?: string;
+    companyRegistrationNumber?: string;
     licenseNumber?: string;
-    commissionRate?: number;
+    ecoFriendlyCertified?: boolean;
+    active?: boolean;
 };
 
 export type Deal = {

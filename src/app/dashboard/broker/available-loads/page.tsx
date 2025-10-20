@@ -292,27 +292,6 @@ export default function BrokerAvailableLoads() {
                     </div>
                 </div>
 
-                {/* Transport Type Tabs */}
-                <Card>
-                    <CardContent className="p-4">
-                        <div className="flex gap-2">
-                            <Button
-                                variant={activeTransportType === TransportType.SEA ? "default" : "outline"}
-                                onClick={() => setActiveTransportType(TransportType.SEA)}
-                                className="flex-1"
-                            >
-                                ⚓ Deniz Yolu Yükleri
-                            </Button>
-                            <Button
-                                variant={activeTransportType === TransportType.LAND ? "default" : "outline"}
-                                onClick={() => setActiveTransportType(TransportType.LAND)}
-                                className="flex-1"
-                            >
-                                🚛 Kara Yolu Yükleri
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
 
                 {/* Search and Filters */}
                 <Card>

@@ -16,6 +16,8 @@ const getDashboardRoute = (role: string): string => {
             return '/dashboard/broker';
         case 'ADMIN':
             return '/dashboard/admin';
+        case 'PENDING':
+            return '/auth/select-role';
         default:
             return '/dashboard';
     }
@@ -60,11 +62,20 @@ export default function Dashboard() {
                                     <h2 className="text-3xl font-bold text-amber-600">{t("dashboard.page.brokerDashboard")}</h2>
                                 )}
 
-                                <p className="mt-6 text-gray-600">
-                                    {t("dashboard.page.greeting")}, <span className="font-bold">{user?.firstName} {user?.lastName}</span>!
-                                    <br />
-                                    {user?.email}
-                                </p>
+                                {user?.role === 'PENDING' && (
+                                    <div className="text-center">
+                                        <h2 className="text-3xl font-bold text-orange-600">Hesap Türü Seçilmedi</h2>
+                                        <p className="mt-4 text-gray-600">Hesap türünü seçmek için yönlendiriliyorsunuz...</p>
+                                    </div>
+                                )}
+
+                                {user?.role !== 'PENDING' && (
+                                    <p className="mt-6 text-gray-600">
+                                        {t("dashboard.page.greeting")}, <span className="font-bold">{user?.firstName} {user?.lastName}</span>!
+                                        <br />
+                                        {user?.email}
+                                    </p>
+                                )}
                             </div>
                         </CardContent>
                     </Card>

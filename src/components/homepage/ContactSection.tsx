@@ -7,9 +7,48 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 import { useLanguage } from "@/context/LanguageContext"
+import { useState } from "react"
+import { useToast } from "@/hooks/use-toast"
 
 const ContactSection = () => {
     const { t } = useLanguage();
+    const { toast } = useToast();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+
+        const formData = new FormData(e.currentTarget);
+        const data = {
+            firstName: formData.get('name'),
+            lastName: formData.get('surname'),
+            email: formData.get('email'),
+            phone: formData.get('phone'),
+            message: formData.get('message')
+        };
+
+        try {
+            // Simulate API call - replace with actual API endpoint
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            toast({
+                title: t("contact.form.successTitle") || "Başarılı!",
+                description: t("contact.form.successMessage") || "Mesajınız başarıyla gönderildi. En kısa sürede size dönüş yapacağız.",
+            });
+
+            // Reset form
+            e.currentTarget.reset();
+        } catch (error) {
+            toast({
+                title: t("contact.form.errorTitle") || "Hata!",
+                description: t("contact.form.errorMessage") || "Mesaj gönderilirken bir hata oluştu. Lütfen tekrar deneyin.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     return (
         <Card className="border-0 shadow-none bg-background">
@@ -36,14 +75,14 @@ const ContactSection = () => {
                                                 <Phone className="h-6 w-6 text-green-600 mt-1" />
                                                 <div>
                                                     <h3 className="font-bold">{t("contact.phone")}</h3>
-                                                    <p className="text-muted-foreground">+90 (212) 555 00 00</p>
+                                                    <p className="text-muted-foreground">+90 (535) 602 11 68</p>
                                                 </div>
                                             </div>
                                             <div className="flex items-start gap-4">
                                                 <Mail className="h-6 w-6 text-green-600 mt-1" />
                                                 <div>
                                                     <h3 className="font-bold">{t("contact.email")}</h3>
-                                                    <p className="text-muted-foreground">info@transyuk.com</p>
+                                                    <p className="text-muted-foreground">selhattinenc@gmail.com</p>
                                                 </div>
                                             </div>
                                             <div className="flex items-start gap-4">
@@ -51,7 +90,7 @@ const ContactSection = () => {
                                                 <div>
                                                     <h3 className="font-bold">{t("contact.address")}</h3>
                                                     <p className="text-muted-foreground">
-                                                        İstanbul, Türkiye
+                                                        Ankara, Türkiye
                                                     </p>
                                                 </div>
                                             </div>
@@ -62,7 +101,7 @@ const ContactSection = () => {
                             <Card className="shadow-md">
                                 <CardContent className="p-6">
                                     <h3 className="text-xl font-bold mb-4">{t("contact.sendMessage")}</h3>
-                                    <form className="space-y-4">
+                                    <form onSubmit={handleSubmit} className="space-y-4">
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="space-y-2">
                                                 <label
@@ -71,7 +110,7 @@ const ContactSection = () => {
                                                 >
                                                     {t("contact.form.firstName")}
                                                 </label>
-                                                <Input id="name" placeholder={t("contact.form.firstName")} />
+                                                <Input id="name" name="name" placeholder={t("contact.form.firstName")} required />
                                             </div>
                                             <div className="space-y-2">
                                                 <label
@@ -80,7 +119,7 @@ const ContactSection = () => {
                                                 >
                                                     {t("contact.form.lastName")}
                                                 </label>
-                                                <Input id="surname" placeholder={t("contact.form.lastName")} />
+                                                <Input id="surname" name="surname" placeholder={t("contact.form.lastName")} required />
                                             </div>
                                         </div>
                                         <div className="space-y-2">
@@ -90,7 +129,7 @@ const ContactSection = () => {
                                             >
                                                 {t("contact.form.email")}
                                             </label>
-                                            <Input id="email" type="email" placeholder={t("contact.form.email")} />
+                                            <Input id="email" name="email" type="email" placeholder={t("contact.form.email")} required />
                                         </div>
                                         <div className="space-y-2">
                                             <label
@@ -99,7 +138,7 @@ const ContactSection = () => {
                                             >
                                                 {t("contact.form.phone")}
                                             </label>
-                                            <Input id="phone" placeholder={t("contact.form.phone")} />
+                                            <Input id="phone" name="phone" placeholder={t("contact.form.phone")} required />
                                         </div>
                                         <div className="space-y-2">
                                             <label
@@ -108,10 +147,10 @@ const ContactSection = () => {
                                             >
                                                 {t("contact.form.message")}
                                             </label>
-                                            <Textarea id="message" placeholder={t("contact.form.message")} className="min-h-[120px]" />
+                                            <Textarea id="message" name="message" placeholder={t("contact.form.message")} className="min-h-[120px]" required />
                                         </div>
-                                        <Button className="w-full bg-green-600 hover:bg-green-700">
-                                            {t("contact.form.submit")}
+                                        <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={isSubmitting}>
+                                            {isSubmitting ? (t("contact.form.sending") || "Gönderiliyor...") : t("contact.form.submit")}
                                         </Button>
                                     </form>
                                 </CardContent>

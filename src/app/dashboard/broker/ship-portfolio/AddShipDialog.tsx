@@ -23,6 +23,7 @@ interface ShipFormData {
     shipType: string;
     flag: string;
     currentPort: string;
+    registrationPort: string;
     deadweightTonnage: string;
     grossTonnage: string;
 
@@ -59,6 +60,7 @@ const initialFormData: ShipFormData = {
     shipType: '',
     flag: '',
     currentPort: '',
+    registrationPort: '',
     deadweightTonnage: '',
     grossTonnage: '',
 
@@ -130,6 +132,7 @@ export default function AddShipDialog({ children }: AddShipDialogProps) {
             flag: formData.flag,
             classificationSociety: formData.classificationSociety || undefined,
             currentPort: formData.currentPort,
+            registrationPort: formData.registrationPort || undefined,
             nextAvailableDate: formData.nextAvailableDate || undefined,
             ecoFriendly: formData.ecoFriendly
         };
@@ -236,6 +239,19 @@ export default function AddShipDialog({ children }: AddShipDialogProps) {
                                     value={formData.currentPort}
                                     onChange={(e) => handleFormChange('currentPort', e.target.value)}
                                     placeholder="İstanbul Port"
+                                    className="mt-1"
+                                />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="registrationPort" className="text-sm font-medium">
+                                    Sicil Limanı
+                                </Label>
+                                <Input
+                                    id="registrationPort"
+                                    value={formData.registrationPort}
+                                    onChange={(e) => handleFormChange('registrationPort', e.target.value)}
+                                    placeholder="İstanbul"
                                     className="mt-1"
                                 />
                             </div>
@@ -385,12 +401,12 @@ export default function AddShipDialog({ children }: AddShipDialogProps) {
                     <div className="space-y-4">
                         <h3 className="text-lg font-medium flex items-center gap-2">
                             <Building2 className="h-4 w-4" />
-                            Sertifikasyon ve İnşa
+                            Klas Bilgileri ve İnşa
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <Label htmlFor="classificationSociety" className="text-sm font-medium">
-                                    Klasifikasyon Kuruluşu
+                                    Klas Kuruluşu
                                 </Label>
                                 <Input
                                     id="classificationSociety"
@@ -403,7 +419,7 @@ export default function AddShipDialog({ children }: AddShipDialogProps) {
 
                             <div>
                                 <Label htmlFor="builder" className="text-sm font-medium">
-                                    İnşaatçı
+                                    İnşaat Eden Tersane
                                 </Label>
                                 <Input
                                     id="builder"

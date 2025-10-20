@@ -15,6 +15,7 @@ export interface Ship {
     flag: string;
     classificationSociety: string;
     currentPort: string;
+    registrationPort?: string;
     nextAvailableDate: string;
     ecoFriendly: boolean;
     available: boolean;
@@ -42,6 +43,7 @@ export interface ShipRequest {
     flag: string;
     classificationSociety?: string;
     currentPort: string;
+    registrationPort?: string;
     nextAvailableDate?: string;
     ecoFriendly: boolean;
 }
@@ -50,6 +52,7 @@ export interface ShipUpdateRequest {
     name?: string;
     shipType?: string;
     currentPort?: string;
+    registrationPort?: string;
     nextAvailableDate?: string;
     available?: boolean;
     ecoFriendly?: boolean;

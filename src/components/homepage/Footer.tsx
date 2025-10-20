@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Leaf, Phone, Mail, MapPin, Globe } from "lucide-react"
+import { Leaf, Globe } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/context/LanguageContext"
 
@@ -14,7 +14,7 @@ const Footer = () => {
     return (
         <footer className="w-full bg-green-50 border-t py-6 md:py-12">
             <div className="mx-auto px-4 md:px-6 max-w-7xl">
-                <div className="grid gap-8 lg:grid-cols-4">
+                <div className="grid gap-8 lg:grid-cols-2">
                     <div className="space-y-4">
                         <div className="flex items-center gap-2">
                             <Leaf className="h-6 w-6 text-green-600" />
@@ -49,26 +49,6 @@ const Footer = () => {
                         <ul className="space-y-2">
                             <li><Link href="#" className="text-sm hover:text-green-600 transition-colors">{t("services.items.0.title")}</Link></li>
                             <li><Link href="#" className="text-sm hover:text-green-600 transition-colors">{t("services.items.1.title")}</Link></li>
-                            <li><Link href="#" className="text-sm hover:text-green-600 transition-colors">{t("services.items.2.title")}</Link></li>
-                            <li><Link href="#" className="text-sm hover:text-green-600 transition-colors">{t("services.items.4.title")}</Link></li>
-                        </ul>
-                    </div>
-
-                    <div className="space-y-4">
-                        <h3 className="text-lg font-bold">{t("footer.contact")}</h3>
-                        <ul className="space-y-2">
-                            <li className="flex items-center gap-2">
-                                <Phone className="h-4 w-4 text-green-600" />
-                                <span className="text-sm">+90 (212) 123 45 67</span>
-                            </li>
-                            <li className="flex items-center gap-2">
-                                <Mail className="h-4 w-4 text-green-600" />
-                                <span className="text-sm">info@ekotasima.com</span>
-                            </li>
-                            <li className="flex items-center gap-2">
-                                <MapPin className="h-4 w-4 text-green-600" />
-                                <span className="text-sm">Levent, İstanbul</span>
-                            </li>
                         </ul>
                     </div>
                 </div>

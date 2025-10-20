@@ -187,6 +187,11 @@ export default function Sidebar() {
         menuItems = brokerMenuItems;
     }
 
+    // PENDING kullanıcılar için sidebar gösterme
+    if (user?.role === 'PENDING') {
+        return null;
+    }
+
     return (
         <>
             {/* Mobile Menu Button - sadece mobilde görünür */}

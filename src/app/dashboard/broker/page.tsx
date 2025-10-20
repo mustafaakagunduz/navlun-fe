@@ -35,12 +35,16 @@ import {
     MapPin
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import brokerService, { BrokerProfile, BrokerOfferResponse, OfferStatus } from "@/services/brokerService";
 
 export default function BrokerDashboard() {
     const { user, isAuthenticated, isLoading } = useAuth();
     const router = useRouter();
     const { t } = useLanguage();
     const [currentTime, setCurrentTime] = useState(new Date());
+    const [brokerProfile, setBrokerProfile] = useState<BrokerProfile | null>(null);
+    const [recentOffers, setRecentOffers] = useState<BrokerOfferResponse[]>([]);
+    const [dataLoading, setDataLoading] = useState(true);
 
     // Gerçek zamanlı saat güncellemesi
     useEffect(() => {
@@ -57,25 +61,72 @@ export default function BrokerDashboard() {
         }
     }, [isLoading, isAuthenticated, user, router]);
 
-    // Dummy data - yatırımcı sunumu için
+    // Broker verilerini yükle
+    useEffect(() => {
+        const loadBrokerData = async () => {
+            if (!user?.id) return;
+
+            try {
+                setDataLoading(true);
+
+                // Broker profilini yükle
+                const profile = await brokerService.getBrokerProfileByUserId(user.id);
+                setBrokerProfile(profile);
+
+                // Son teklifleri yükle
+                const offers = await brokerService.getCurrentBrokerOffers();
+                // En son 5 teklifi al
+                setRecentOffers(offers.slice(0, 5));
+
+            } catch (error) {
+                console.error('Broker verileri yüklenirken hata:', error);
+            } finally {
+                setDataLoading(false);
+            }
+        };
+
+        if (user?.id && user?.role === 'BROKER') {
+            loadBrokerData();
+        }
+    }, [user]);
+
+    // İstatistikleri hesapla
     const brokerStats = {
-        totalCommission: 125640,
-        monthlyGrowth: 31.2,
-        activeDeals: 47,
-        successRate: 96.8,
-        avgDealValue: 8750,
-        ecoDealsRatio: 73,
-        clientSatisfaction: 98.1,
-        marketShare: 15.4
+        totalCommission: brokerProfile?.totalCommissionEarned ? Number(brokerProfile.totalCommissionEarned) : 0,
+        monthlyGrowth: 31.2, // Bu değer ayrı bir endpoint'ten gelebilir
+        activeDeals: recentOffers.filter(o => o.status === OfferStatus.PENDING).length,
+        successRate: 96.8, // Bu değer ayrı bir endpoint'ten gelebilir
+        avgDealValue: 8750, // Bu değer ayrı bir endpoint'ten gelebilir
+        ecoDealsRatio: brokerProfile?.ecoFriendlyDealPercentage || 0,
+        clientSatisfaction: 98.1, // Bu değer ayrı bir endpoint'ten gelebilir
+        marketShare: 15.4 // Bu değer ayrı bir endpoint'ten gelebilir
     };
 
-    const recentDeals = [
-        { id: 'D001', client: 'MetalWorks Ltd.', route: 'İstanbul → Bursa', value: '₺15,500', status: 'completed', eco: true, time: '3 dakika önce' },
-        { id: 'D002', client: 'EkoGıda A.Ş.', route: 'Ankara → İzmir', value: '₺12,300', status: 'active', eco: true, time: '8 dakika önce' },
-        { id: 'D003', client: 'Tekstil Pro', route: 'Bursa → Adana', value: '₺9,750', status: 'pending', eco: false, time: '15 dakika önce' },
-        { id: 'D004', client: 'Çelik Yapı', route: 'İzmir → Antalya', value: '₺18,900', status: 'negotiating', eco: true, time: '22 dakika önce' },
-        { id: 'D005', client: 'Organik Tarım', route: 'Konya → İstanbul', value: '₺7,850', status: 'completed', eco: true, time: '28 dakika önce' }
-    ];
+    // Son teklifleri dashboard formatına dönüştür
+    const recentDeals = recentOffers.map(offer => {
+        const createdDate = new Date(offer.createdAt);
+        const now = new Date();
+        const diffMinutes = Math.floor((now.getTime() - createdDate.getTime()) / (1000 * 60));
+
+        let timeText = '';
+        if (diffMinutes < 60) {
+            timeText = `${diffMinutes} dakika önce`;
+        } else if (diffMinutes < 1440) {
+            timeText = `${Math.floor(diffMinutes / 60)} saat önce`;
+        } else {
+            timeText = `${Math.floor(diffMinutes / 1440)} gün önce`;
+        }
+
+        return {
+            id: offer.id,
+            client: offer.senderCompanyName || offer.senderName || 'Bilinmiyor',
+            route: `${offer.loadTitle || 'Yük'}`,
+            value: `₺${offer.freightRate.toLocaleString('tr-TR')}`,
+            status: offer.status.toLowerCase(),
+            eco: offer.ecoFriendly,
+            time: timeText
+        };
+    });
 
     const topPerformers = [
         { name: 'Sürdürülebilir Lojistik A.Ş.', deals: 156, commission: '₺87,450', rating: 4.9, ecoRatio: 89 },
@@ -86,32 +137,38 @@ export default function BrokerDashboard() {
     ];
 
     const getStatusColor = (status: string) => {
-        switch (status) {
+        switch (status.toLowerCase()) {
+            case 'accepted': return 'bg-green-100 text-green-800';
             case 'completed': return 'bg-green-100 text-green-800';
             case 'active': return 'bg-blue-100 text-blue-800';
             case 'pending': return 'bg-yellow-100 text-yellow-800';
             case 'negotiating': return 'bg-purple-100 text-purple-800';
+            case 'rejected': return 'bg-red-100 text-red-800';
+            case 'cancelled': return 'bg-gray-100 text-gray-800';
             default: return 'bg-gray-100 text-gray-800';
         }
     };
 
     const getStatusText = (status: string) => {
-        switch (status) {
+        switch (status.toLowerCase()) {
+            case 'accepted': return 'Kabul Edildi';
             case 'completed': return 'Tamamlandı';
             case 'active': return 'Aktif';
             case 'pending': return 'Beklemede';
             case 'negotiating': return 'Müzakere';
+            case 'rejected': return 'Reddedildi';
+            case 'cancelled': return 'İptal Edildi';
             default: return status;
         }
     };
 
     // Yükleme durumunda gösterilecek içerik
-    if (isLoading) {
+    if (isLoading || dataLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-green-50">
                 <div className="flex flex-col items-center gap-2">
                     <Loader2 className="h-8 w-8 text-green-600 animate-spin" />
-                    <p className="text-green-600 font-medium">{t("dashboard.page.loading")}</p>
+                    <p className="text-green-600 font-medium">{isLoading ? t("dashboard.page.loading") : "Broker verileri yükleniyor..."}</p>
                 </div>
             </div>
         );
@@ -133,24 +190,18 @@ export default function BrokerDashboard() {
                                 </h1>
                                 <p className="text-gray-600 mt-2 text-lg">Taşımacılık sektörünün güvenilir köprüsü</p>
                             </div>
-                            <div className="flex items-center gap-4">
-                                <div className="text-right">
-                                    <div className="text-2xl font-bold text-gray-900">
-                                        {currentTime.toLocaleTimeString('tr-TR')}
-                                    </div>
-                                    <div className="text-gray-600">
-                                        {currentTime.toLocaleDateString('tr-TR', {
-                                            weekday: 'long',
-                                            year: 'numeric',
-                                            month: 'long',
-                                            day: 'numeric'
-                                        })}
-                                    </div>
+                            <div className="text-right">
+                                <div className="text-2xl font-bold text-gray-900">
+                                    {currentTime.toLocaleTimeString('tr-TR')}
                                 </div>
-                                <Button className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-lg">
-                                    <PlusCircle className="h-4 w-4 mr-2" />
-                                    Yeni Anlaşma
-                                </Button>
+                                <div className="text-gray-600">
+                                    {currentTime.toLocaleDateString('tr-TR', {
+                                        weekday: 'long',
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    })}
+                                </div>
                             </div>
                         </div>
 
@@ -298,37 +349,46 @@ export default function BrokerDashboard() {
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
                                         <Activity className="h-5 w-5 text-green-600" />
-                                        Son Anlaşmalar
+                                        Son Teklifler
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="space-y-4">
-                                        {recentDeals.slice(0, 4).map((deal, index) => (
-                                            <div key={index} className="flex items-start gap-3 p-3 bg-gradient-to-r from-gray-50 to-amber-50 rounded-lg border border-amber-100">
-                                                <div className={`w-2 h-2 rounded-full mt-2 ${
-                                                    deal.status === 'completed' ? 'bg-green-500' :
-                                                        deal.status === 'active' ? 'bg-blue-500' :
-                                                            deal.status === 'pending' ? 'bg-yellow-500' : 'bg-purple-500'
-                                                }`}></div>
-                                                <div className="flex-1">
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <p className="text-sm font-medium text-gray-900">{deal.client}</p>
-                                                        {deal.eco && (
-                                                            <Leaf className="h-3 w-3 text-green-600" />
-                                                        )}
+                                    {recentDeals.length > 0 ? (
+                                        <div className="space-y-4">
+                                            {recentDeals.slice(0, 4).map((deal, index) => (
+                                                <div key={index} className="flex items-start gap-3 p-3 bg-gradient-to-r from-gray-50 to-amber-50 rounded-lg border border-amber-100">
+                                                    <div className={`w-2 h-2 rounded-full mt-2 ${
+                                                        deal.status === 'accepted' ? 'bg-green-500' :
+                                                            deal.status === 'active' ? 'bg-blue-500' :
+                                                                deal.status === 'pending' ? 'bg-yellow-500' :
+                                                                    deal.status === 'rejected' ? 'bg-red-500' : 'bg-gray-500'
+                                                    }`}></div>
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <p className="text-sm font-medium text-gray-900">{deal.client}</p>
+                                                            {deal.eco && (
+                                                                <Leaf className="h-3 w-3 text-green-600" />
+                                                            )}
+                                                        </div>
+                                                        <p className="text-xs text-gray-600 mb-1">{deal.route}</p>
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="text-sm font-bold text-amber-600">{deal.value}</span>
+                                                            <Badge className={getStatusColor(deal.status)} variant="outline">
+                                                                {getStatusText(deal.status)}
+                                                            </Badge>
+                                                        </div>
+                                                        <p className="text-xs text-gray-500 mt-1">{deal.time}</p>
                                                     </div>
-                                                    <p className="text-xs text-gray-600 mb-1">{deal.route}</p>
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="text-sm font-bold text-amber-600">{deal.value}</span>
-                                                        <Badge className={getStatusColor(deal.status)} variant="outline">
-                                                            {getStatusText(deal.status)}
-                                                        </Badge>
-                                                    </div>
-                                                    <p className="text-xs text-gray-500 mt-1">{deal.time}</p>
                                                 </div>
-                                            </div>
-                                        ))}
-                                    </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-8 text-gray-500">
+                                            <Activity className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                                            <p className="text-sm">Henüz teklif bulunmuyor</p>
+                                            <p className="text-xs mt-1">Yük tekliflerine göz atarak yeni teklifler oluşturabilirsiniz</p>
+                                        </div>
+                                    )}
                                 </CardContent>
                             </Card>
                         </div>
@@ -470,10 +530,12 @@ export default function BrokerDashboard() {
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-3xl font-bold text-amber-600">1,247</div>
+                                    <div className="text-3xl font-bold text-amber-600">
+                                        {brokerProfile?.facilitatedDeals || 0}
+                                    </div>
                                     <div className="text-sm text-gray-600 mt-1">
                                         <TrendingUp className="inline h-4 w-4 text-green-600 mr-1" />
-                                        +24% bu ay
+                                        Tüm zamanlar
                                     </div>
                                 </CardContent>
                             </Card>
@@ -486,8 +548,12 @@ export default function BrokerDashboard() {
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-3xl font-bold text-green-600">912</div>
-                                    <div className="text-sm text-gray-600 mt-1">Toplam anlaşmaların %73'ü</div>
+                                    <div className="text-3xl font-bold text-green-600">
+                                        {brokerProfile?.ecoFriendlyDeals || 0}
+                                    </div>
+                                    <div className="text-sm text-gray-600 mt-1">
+                                        Toplam anlaşmaların %{brokerStats.ecoDealsRatio.toFixed(0)}'ü
+                                    </div>
                                 </CardContent>
                             </Card>
 
@@ -495,14 +561,16 @@ export default function BrokerDashboard() {
                                 <CardHeader className="pb-2">
                                     <CardTitle className="text-lg font-semibold flex items-center gap-2">
                                         <DollarSign className="h-5 w-5 text-purple-600" />
-                                        Aylık Komisyon
+                                        Toplam Komisyon
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-3xl font-bold text-purple-600">₺67,850</div>
+                                    <div className="text-3xl font-bold text-purple-600">
+                                        ₺{brokerStats.totalCommission.toLocaleString('tr-TR')}
+                                    </div>
                                     <div className="text-sm text-gray-600 mt-1">
                                         <TrendingUp className="inline h-4 w-4 text-green-600 mr-1" />
-                                        +31% artış
+                                        Kazanılan komisyon
                                     </div>
                                 </CardContent>
                             </Card>
@@ -511,12 +579,16 @@ export default function BrokerDashboard() {
                                 <CardHeader className="pb-2">
                                     <CardTitle className="text-lg font-semibold flex items-center gap-2">
                                         <Clock className="h-5 w-5 text-blue-600" />
-                                        Bekleyen Komisyon
+                                        Bekleyen Teklifler
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-3xl font-bold text-blue-600">₺23,450</div>
-                                    <div className="text-sm text-gray-600 mt-1">17 anlaşma bekliyor</div>
+                                    <div className="text-3xl font-bold text-blue-600">
+                                        {recentOffers.filter(o => o.status === OfferStatus.PENDING).length}
+                                    </div>
+                                    <div className="text-sm text-gray-600 mt-1">
+                                        {recentOffers.length} toplam teklif
+                                    </div>
                                 </CardContent>
                             </Card>
                         </div>

@@ -12,7 +12,7 @@ export type User = {
     firstName?: string;
     lastName?: string;
     phone?: string;
-    role: 'ADMIN' | 'SENDER' | 'CARRIER' | 'BROKER';
+    role: 'ADMIN' | 'SENDER' | 'CARRIER' | 'BROKER' | 'PENDING';
     emailVerified?: boolean;
 };
 
@@ -64,6 +64,8 @@ const getDashboardRoute = (role: string): string => {
             return '/dashboard/broker';
         case 'ADMIN':
             return '/dashboard/admin';
+        case 'PENDING':
+            return '/auth/select-role';
         default:
             return '/dashboard';
     }
@@ -149,17 +151,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
             const user = await authService.signup(userData);
 
-            setState(prev => ({
-                ...prev,
-                isLoading: false,
-                needsVerification: true,
-                verificationUserId: user.id,
-                verificationEmail: userData.email,
-                verificationPassword: userData.password,
-                error: null,
-            }));
+            // GEÇICI: Email doğrulama pasif - direkt login yap
+            // Kayıttan sonra otomatik login
+            try {
+                const loginResponse = await authService.login(userData.email, userData.password);
 
-            return user;
+                // Token'ları kaydet
+                localStorage.setItem('accessToken', loginResponse.accessToken);
+                localStorage.setItem('refreshToken', loginResponse.refreshToken);
+
+                const currentUser = await authService.getCurrentUser();
+
+                setState({
+                    user: currentUser,
+                    isLoading: false,
+                    isAuthenticated: true,
+                    error: null,
+                    needsVerification: false,
+                    verificationUserId: null,
+                    verificationEmail: null,
+                    verificationPassword: null,
+                });
+
+                toast({
+                    title: "Kayıt Başarılı",
+                    description: "Hesabınız başarıyla oluşturuldu ve giriş yaptınız.",
+                    variant: "default"
+                });
+
+                const dashboardUrl = getDashboardRoute(currentUser.role);
+                router.push(dashboardUrl);
+
+                return user;
+            } catch (loginError) {
+                // Login başarısız olduysa, eski akışa geri dön
+                console.error('Auto-login failed:', loginError);
+                setState(prev => ({
+                    ...prev,
+                    isLoading: false,
+                    needsVerification: false,
+                    error: 'Kayıt başarılı ancak otomatik giriş yapılamadı. Lütfen manuel olarak giriş yapın.',
+                }));
+
+                toast({
+                    title: "Kayıt Başarılı",
+                    description: "Hesabınız oluşturuldu. Lütfen giriş yapın.",
+                    variant: "default"
+                });
+
+                return user;
+            }
         } catch (error: any) {
             setState(prev => ({
                 ...prev,

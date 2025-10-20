@@ -120,7 +120,7 @@ export default function DocumentUploadModal() {
 
         try {
             await dispatch(uploadDocument({
-                deliveryStatusId: selectedDelivery.loadId, // Bu aslında delivery status id olmalı
+                deliveryStatusId: selectedDelivery.loadId, // Backend'den gelen loadId aslında deliveryStatusId
                 file: formData.file,
                 description: formData.description,
                 documentType: formData.documentType

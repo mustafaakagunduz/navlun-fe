@@ -27,11 +27,11 @@
     "description": "2015 yılından bu yana, taşımacılık sektöründe çevre dostu çözümler sunuyoruz. Amacımız, karbon ayak izini azaltırken verimli ve ekonomik taşımacılık hizmetleri sağlamaktır.",
     "mission": {
       "title": "Misyonumuz",
-      "description": "Taşımacılık sektöründe ekolojik çözümler sunarak çevreye verilen zararı en aza indirmek ve sürdürülebilir bir gelecek için katkıda bulunmak."
+      "description": "Lojistik iş akış süreçlerinde karşılaşılan belirsizlik ve karmaşıklıkları ortadan kaldırmak, tüm taraflar arasında şeffaf ve sorgulanabilir iş birliklerinin oluşmasına zemin hazırlamak ve sürdürülebilir bir gelecek için kaynak kullanımını en verimli düzeye taşımaktır."
     },
     "vision": {
       "title": "Vizyonumuz",
-      "description": "Türkiye'nin en büyük ekolojik taşımacılık platformu olmak ve sektörde çevre dostu uygulamaların yaygınlaşmasına öncülük etmek."
+      "description": "Dünya ticaretinde sürdürülebilirlik ilkesi kapsamında güvenilir, şeffaf, yenilikçi ve çevreci çözümleriyle öne çıkan, yalnızca içinde bulunduğu zamanın ihtiyaçlarını karşılayan bir sistem değil; geleceğin ticaret standartlarını inşa eden bütüncül bir ekosistemi kurmak."
     },
     "values": {
       "title": "Değerlerimiz",
@@ -39,33 +39,17 @@
     }
   },
   "services": {
-    "title": "Ekolojik Taşımacılık Çözümlerimiz",
+    "title": "Taşımacılık Çözümlerimiz",
     "subtitle": "Hizmetlerimiz",
-    "description": "İhtiyacınıza uygun, çevre dostu taşımacılık hizmetlerimiz ile tanışın.",
+    "description": "İhtiyacınıza uygun taşımacılık hizmetlerimiz ile tanışın.",
     "items": [
       {
-        "title": "Şehir İçi Taşımacılık",
-        "description": "Şehir içinde hızlı ve güvenilir taşımacılık hizmetleri sunuyoruz."
+        "title": "Gemi Taşımacılığı",
+        "description": "Deniz yolu ile güvenilir ve ekonomik gemi taşımacılığı hizmetleri sunuyoruz."
       },
       {
-        "title": "Şehirler Arası Taşımacılık",
-        "description": "Şehirler arası ekolojik ve ekonomik taşımacılık çözümleri."
-      },
-      {
-        "title": "Uluslararası Taşımacılık",
-        "description": "Sınırları aşan, çevre dostu uluslararası taşımacılık hizmetleri."
-      },
-      {
-        "title": "Özel Eşya Taşımacılığı",
-        "description": "Değerli ve hassas eşyalarınız için özel taşımacılık çözümleri."
-      },
-      {
-        "title": "Ev & Ofis Taşımacılığı",
-        "description": "Ev ve ofis taşımacılığında profesyonel ve ekolojik hizmet."
-      },
-      {
-        "title": "Lojistik Danışmanlık",
-        "description": "Şirketiniz için sürdürülebilir lojistik çözümleri ve danışmanlık."
+        "title": "Karayolu Taşımacılığı",
+        "description": "Karayolu ile hızlı ve güvenilir taşımacılık çözümleri sağlıyoruz."
       }
     ],
     "moreInfo": "Detaylı Bilgi"
@@ -464,7 +448,7 @@
     "resetPasswordDescription": "E-posta adresinizi girin, şifrenizi sıfırlamanız için size bir bağlantı gönderelim.",
     "ecoFriendlyTransport": "Çevre Dostu Taşımacılık",
     "platformDescription": "Transyük ile karbon ayak izinizi azaltın ve sürdürülebilir lojistik çözümlerine katkıda bulunun.",
-
+    "orContinueWith": "veya devam edin",
 
     "errors": {
       "resetFailed": "Şifre sıfırlama başarısız oldu",

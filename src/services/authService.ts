@@ -7,7 +7,7 @@ export type User = {
     email: string;
     firstName?: string;
     lastName?: string;
-    role: 'ADMIN' | 'SENDER' | 'CARRIER' | 'BROKER';
+    role: 'ADMIN' | 'SENDER' | 'CARRIER' | 'BROKER' | 'PENDING';
     emailVerified?: boolean;
     phone?: string;
 };
@@ -26,7 +26,7 @@ export type SignupData = {
     firstName: string;
     lastName: string;
     phone?: string;
-    role: 'ADMIN' | 'SENDER' | 'CARRIER' | 'BROKER';
+    role: 'ADMIN' | 'SENDER' | 'CARRIER' | 'BROKER' | 'PENDING';
 };
 
 const authService = {
@@ -146,6 +146,19 @@ const authService = {
             return await apiService.post<LoginResponse>('/auth/verify-2fa', { userId, code });
         } catch (error) {
             console.error('2FA verification error:', error);
+            throw error;
+        }
+    },
+
+    /**
+     * Kullanıcının role'ünü günceller (OAuth için)
+     * @param role Yeni kullanıcı rolü
+     */
+    updateRole: async (role: 'SENDER' | 'CARRIER' | 'BROKER'): Promise<User> => {
+        try {
+            return await apiService.post<User>('/auth/update-role', { role });
+        } catch (error) {
+            console.error('Role update error:', error);
             throw error;
         }
     }

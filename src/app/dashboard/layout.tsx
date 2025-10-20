@@ -29,6 +29,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 return t("dashboard.layout.carrier");
             case 'BROKER':
                 return t("dashboard.layout.broker");
+            case 'PENDING':
+                return 'Beklemede';
             default:
                 return role;
         }
@@ -44,6 +46,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 return 'bg-purple-100 text-purple-800';
             case 'BROKER':
                 return 'bg-amber-100 text-amber-800';
+            case 'PENDING':
+                return 'bg-orange-100 text-orange-800';
             default:
                 return 'bg-gray-100 text-gray-800';
         }

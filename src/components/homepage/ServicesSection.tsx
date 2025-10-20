@@ -1,8 +1,7 @@
 // components/ServicesSection.tsx
 "use client"
 
-import { Truck, ArrowRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Truck } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { JSX } from "react"
 import { useLanguage } from "@/context/LanguageContext"
@@ -27,26 +26,6 @@ const ServicesSection = () => {
             icon: <Truck className="h-10 w-10 text-green-600" />,
             titleIndex: 1,
             descriptionIndex: 1,
-        },
-        {
-            icon: <Truck className="h-10 w-10 text-green-600" />,
-            titleIndex: 2,
-            descriptionIndex: 2,
-        },
-        {
-            icon: <Truck className="h-10 w-10 text-green-600" />,
-            titleIndex: 3,
-            descriptionIndex: 3,
-        },
-        {
-            icon: <Truck className="h-10 w-10 text-green-600" />,
-            titleIndex: 4,
-            descriptionIndex: 4,
-        },
-        {
-            icon: <Truck className="h-10 w-10 text-green-600" />,
-            titleIndex: 5,
-            descriptionIndex: 5,
         },
     ]
 
@@ -76,9 +55,6 @@ const ServicesSection = () => {
                                             {service.icon}
                                             <h3 className="text-xl font-bold">{t(`services.items.${service.titleIndex}.title`)}</h3>
                                             <p className="text-muted-foreground text-center">{t(`services.items.${service.descriptionIndex}.description`)}</p>
-                                            <Button variant="link" className="text-green-600 mt-2">
-                                                {t("services.moreInfo")} <ArrowRight className="ml-1 h-4 w-4" />
-                                            </Button>
                                         </div>
                                     </CardContent>
                                 </Card>

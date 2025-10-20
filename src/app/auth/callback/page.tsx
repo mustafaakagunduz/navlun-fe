@@ -19,7 +19,16 @@ function OAuth2Callback() {
                 const refreshToken = searchParams.get('refreshToken')
                 const userId = searchParams.get('userId')
                 const email = searchParams.get('email')
+                const needsRoleSelection = searchParams.get('needsRoleSelection')
                 const errorParam = searchParams.get('error')
+
+                console.log('=== OAuth2 Callback Debug ===')
+                console.log('Token:', token ? 'exists' : 'missing')
+                console.log('RefreshToken:', refreshToken ? 'exists' : 'missing')
+                console.log('UserId:', userId)
+                console.log('Email:', email)
+                console.log('NeedsRoleSelection:', needsRoleSelection)
+                console.log('Error:', errorParam)
 
                 // Hata varsa göster
                 if (errorParam) {
@@ -45,6 +54,13 @@ function OAuth2Callback() {
                 localStorage.setItem('userId', userId)
                 localStorage.setItem('userEmail', email)
 
+                // Eğer backend'den needsRoleSelection parametresi geliyorsa direkt role seçim sayfasına yönlendir
+                if (needsRoleSelection === 'true') {
+                    console.log('Redirecting to role selection page (from backend flag)')
+                    router.push(`/auth/select-role?token=${token}&userId=${userId}`)
+                    return
+                }
+
                 // User bilgilerini al ve context'e set et
                 try {
                     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'
@@ -57,9 +73,21 @@ function OAuth2Callback() {
 
                     if (response.ok) {
                         const data = await response.json()
+                        console.log('User data fetched:', data)
                         if (data.success && data.data) {
+                            console.log('User role:', data.data.role)
                             setUser(data.data)
+
+                            // Ekstra güvenlik: Eğer hala PENDING ise role seçim sayfasına yönlendir
+                            const userRole = data.data.role
+                            if (!userRole || userRole === 'PENDING') {
+                                console.log('Redirecting to role selection page (user role is PENDING)')
+                                router.push(`/auth/select-role?token=${token}&userId=${userId}`)
+                                return
+                            }
                         }
+                    } else {
+                        console.error('Failed to fetch user data, status:', response.status)
                     }
                 } catch (err) {
                     console.error('Failed to fetch user data:', err)
@@ -67,7 +95,9 @@ function OAuth2Callback() {
                 }
 
                 // Dashboard'a yönlendir
+                console.log('Redirecting to dashboard')
                 router.push('/dashboard')
+                console.log('=== OAuth2 Callback End ===')
             } catch (err) {
                 console.error('OAuth2 callback error:', err)
                 setError('Giriş işlemi sırasında bir hata oluştu')

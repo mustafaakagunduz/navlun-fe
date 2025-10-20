@@ -42,7 +42,8 @@ export type LocationUpdateRequest = {
 // Mevcut type'lardan sonra ekle:
 
 export type DeliveryTrackingData = {
-    loadId: string;
+    loadId: string; // Backend'den gelen loadId aslında deliveryStatusId
+    actualLoadId: string; // Gerçek load ID
     loadTitle: string;
     currentStatus: DeliveryStep;
     currentLocation?: string;
