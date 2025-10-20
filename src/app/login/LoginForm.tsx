@@ -102,7 +102,7 @@ const LoginForm = ({
             </div>
         </div>
 
-        {/* Social Login Buttons */}
+        {/* Social Login Buttonss */}
         <div className="space-y-3">
             <button
                 type="button"
