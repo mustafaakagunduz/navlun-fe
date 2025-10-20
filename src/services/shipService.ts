@@ -25,6 +25,7 @@ export interface Ship {
     insuranceValid?: boolean;
     classificationValid?: boolean;
     availableForBooking?: boolean;
+    maxSpeed?: number;
     createdAt: string;
     updatedAt?: string;
 }

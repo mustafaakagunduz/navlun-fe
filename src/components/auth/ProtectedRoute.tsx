@@ -28,7 +28,7 @@ export default function ProtectedRoute({ children, allowedRoles = [] }: Protecte
         }
 
         // Rol kontrolü
-        if (allowedRoles.length > 0 && user && !allowedRoles.includes(user.role)) {
+        if (allowedRoles.length > 0 && user && !allowedRoles.includes(user.role as any)) {
             // Yetkisiz erişim, dashboard'a yönlendir
             router.push('/dashboard');
         }
@@ -38,7 +38,7 @@ export default function ProtectedRoute({ children, allowedRoles = [] }: Protecte
     const isAllowed = (user: any, allowedRoles: ('ADMIN' | 'SENDER' | 'CARRIER' | 'BROKER')[]): boolean => {
         if (!user) return false;
         if (allowedRoles.length === 0) return true; // Hiç izin belirtilmemişse herkes erişebilir
-        return allowedRoles.includes(user.role);
+        return allowedRoles.includes(user.role as any);
     };
 
     // Yükleme durumunda veya kimlik doğrulama başarısız olduğunda boş sayfa göster

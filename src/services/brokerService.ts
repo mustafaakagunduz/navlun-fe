@@ -17,6 +17,8 @@ export type BrokerProfile = {
     ecoFriendlyDeals: number;
     totalCommissionEarned?: string;
     ecoFriendlyDealPercentage?: number;
+    companyRegistrationNumber?: string;
+    ecoFriendlyCertified?: boolean;
     createdAt?: string;
     updatedAt?: string;
 };
