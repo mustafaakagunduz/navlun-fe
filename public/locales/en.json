@@ -418,6 +418,7 @@
     "topSenders": "Top Senders"
   },
   "auth": {
+    "orContinueWith" : "or continue with",
     "login": "Login",
     "signup": "Sign Up",
     "email": "Email",

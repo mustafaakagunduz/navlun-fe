@@ -434,6 +434,7 @@
     "topSenders": "En İyi Göndericiler"
   },
   "auth": {
+    "orContinueWith" : "veya",
     "login": "Giriş Yap",
     "signup": "Kayıt Ol",
     "email": "E-posta",
