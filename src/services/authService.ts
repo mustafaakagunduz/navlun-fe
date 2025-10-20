@@ -29,6 +29,11 @@ export type SignupData = {
     role: 'ADMIN' | 'SENDER' | 'CARRIER' | 'BROKER' | 'PENDING';
 };
 
+export type UpdateRoleResponse = User & {
+    accessToken?: string;
+    refreshToken?: string;
+};
+
 const authService = {
     /**
      * Kullanıcı girişi yapar
@@ -154,9 +159,9 @@ const authService = {
      * Kullanıcının role'ünü günceller (OAuth için)
      * @param role Yeni kullanıcı rolü
      */
-    updateRole: async (role: 'SENDER' | 'CARRIER' | 'BROKER'): Promise<User> => {
+    updateRole: async (role: 'SENDER' | 'CARRIER' | 'BROKER'): Promise<UpdateRoleResponse> => {
         try {
-            return await apiService.post<User>('/auth/update-role', { role });
+            return await apiService.post<UpdateRoleResponse>('/auth/update-role', { role });
         } catch (error) {
             console.error('Role update error:', error);
             throw error;
