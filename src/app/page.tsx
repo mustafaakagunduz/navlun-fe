@@ -48,7 +48,7 @@ export default function Home() {
                     {/* Login olmamış kullanıcılar hero section'ı görür */}
                     {!user && <HeroSection />}
 
-                    {/* Login olmuş kullanıcılar için boşluk bırak */}
+                    {/* Login olmuş kullanıcılar için boşluk bırakk */}
                     {user && <div className="h-20"></div>}
 
                     <AboutSection />
