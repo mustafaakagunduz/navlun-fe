@@ -71,18 +71,12 @@ const ContactSection = () => {
                                             </p>
                                         </div>
                                         <div className="space-y-4">
-                                            <div className="flex items-start gap-4">
-                                                <Phone className="h-6 w-6 text-green-600 mt-1" />
-                                                <div>
-                                                    <h3 className="font-bold">{t("contact.phone")}</h3>
-                                                    <p className="text-muted-foreground">+90 (535) 602 11 68</p>
-                                                </div>
-                                            </div>
+
                                             <div className="flex items-start gap-4">
                                                 <Mail className="h-6 w-6 text-green-600 mt-1" />
                                                 <div>
                                                     <h3 className="font-bold">{t("contact.email")}</h3>
-                                                    <p className="text-muted-foreground">selhattinenc@gmail.com</p>
+                                                    <p className="text-muted-foreground">info@transyuk.com</p>
                                                 </div>
                                             </div>
                                             <div className="flex items-start gap-4">
