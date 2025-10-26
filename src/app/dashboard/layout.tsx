@@ -1,12 +1,12 @@
 "use client"
 
 import { ReactNode } from 'react';
-import { Leaf } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import Sidebar from "./Sidebar";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
@@ -57,15 +57,18 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         <div className="flex flex-col min-h-screen">
             {/* Header */}
             <header className="bg-white border-b shadow-sm">
-                <div className="container mx-auto flex h-16 items-center justify-between px-4">
-                    <div className="flex items-center gap-2">
-                        {/* Desktop'ta logo, mobile'da boş alan (hamburger için) */}
-                        <div className="ml-12 md:ml-0">
+                <div className="flex h-16 items-center justify-between px-4 w-full">
+                    <div className="flex items-center">
+                        {/* Mobile'da sidebar için boşluk, desktop'ta sol üstte */}
+                        <div className="ml-12 md:ml-4">
                             <Link href="/dashboard">
-                                <div className="flex items-center gap-2">
-                                    <Leaf className="h-6 w-6 text-green-600" />
-                                    <span className="text-xl font-bold">Transyük</span>
-                                </div>
+                                <Image
+                                    src="/assets/images/transyuk.png"
+                                    alt="TRANSYÜK Logo"
+                                    width={150}
+                                    height={40}
+                                    className="h-10 w-auto"
+                                />
                             </Link>
                         </div>
                     </div>
