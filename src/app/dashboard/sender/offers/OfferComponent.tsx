@@ -8,6 +8,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
     Loader2,
     Package,
     MapPin,
@@ -306,48 +312,58 @@ export default function SenderOffersPage() {
                     </CardContent>
                 </Card>
             ) : (
-                <div className="space-y-6">
+                <Accordion type="single" collapsible className="space-y-4">
                     {filteredLoads.map((loadWithOffers) => (
-                        <Card key={loadWithOffers.load.id} className="overflow-hidden">
-                            <CardHeader>
-                                <CardTitle className="flex items-center justify-between">
-                                    <span>{loadWithOffers.load.title}</span>
-                                    <div className="flex items-center space-x-2">
+                        <AccordionItem
+                            key={loadWithOffers.load.id}
+                            value={loadWithOffers.load.id}
+                            className="border rounded-lg bg-white"
+                        >
+                            <AccordionTrigger className="px-4 md:px-6 py-4 hover:no-underline hover:bg-gray-50">
+                                <div className="flex flex-col md:flex-row md:items-center justify-between w-full pr-4 gap-3">
+                                    <div className="flex items-start gap-3 md:gap-4 min-w-0 flex-1">
+                                        <Package className="h-5 w-5 text-gray-600 flex-shrink-0 mt-0.5" />
+                                        <div className="text-left min-w-0 flex-1">
+                                            <div className="font-semibold text-base md:text-lg truncate">{loadWithOffers.load.title}</div>
+                                            <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs md:text-sm text-muted-foreground mt-1">
+                                                <div className="flex items-center">
+                                                    <Weight className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                                                    {loadWithOffers.load.netWeight} kg
+                                                </div>
+                                                <div className="flex items-center">
+                                                    <Calendar className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                                                    {formatDate(loadWithOffers.load.loadingDate)}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-1.5 md:gap-2 md:flex-shrink-0">
                                         {loadWithOffers.load.insuranceRequested && (
-                                            <Badge variant="secondary">
+                                            <Badge variant="secondary" className="text-xs">
                                                 <Shield className="h-3 w-3 mr-1" />
                                                 Sigortalı
                                             </Badge>
                                         )}
-                                        <Badge variant="outline">
+                                        <Badge variant="outline" className="text-xs whitespace-nowrap">
                                             Carrier: {loadWithOffers.pendingOffersCount}
                                         </Badge>
-                                        <Badge variant="outline">
+                                        <Badge variant="outline" className="text-xs whitespace-nowrap">
                                             Broker: {brokerOffersByLoad[loadWithOffers.load.id]?.length || 0}
                                         </Badge>
                                     </div>
-                                </CardTitle>
-
-                                <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                                    <div className="flex items-center">
-                                        <Weight className="h-4 w-4 mr-1" />
-                                        {loadWithOffers.load.netWeight} kg
-                                    </div>
-                                    <div className="flex items-center">
-                                        <Calendar className="h-4 w-4 mr-1" />
-                                        Yükleme Tarihi : {formatDate(loadWithOffers.load.loadingDate)}
-                                    </div>
                                 </div>
-                            </CardHeader>
+                            </AccordionTrigger>
 
-                            <CardContent>
+                            <AccordionContent className="px-3 md:px-6 pb-4">
                                 <div className="space-y-4">
                                     {/* Yük Detayları */}
-                                    <div className="p-4 bg-muted rounded-lg">
-                                        <div className="flex items-center text-sm text-muted-foreground mb-2">
-                                            <MapPin className="h-4 w-4 mr-2" />
-                                            <span className="truncate">
-                                                {loadWithOffers.load.loadingAddress} → {loadWithOffers.load.deliveryAddress}
+                                    <div className="p-3 md:p-4 bg-muted rounded-lg">
+                                        <div className="flex items-start text-xs md:text-sm text-muted-foreground">
+                                            <MapPin className="h-4 w-4 mr-2 flex-shrink-0 mt-0.5" />
+                                            <span className="break-words min-w-0">
+                                                <span className="block md:inline">{loadWithOffers.load.loadingAddress}</span>
+                                                <span className="mx-1">→</span>
+                                                <span className="block md:inline">{loadWithOffers.load.deliveryAddress}</span>
                                             </span>
                                         </div>
 
@@ -356,28 +372,34 @@ export default function SenderOffersPage() {
                                     {/* Çevreci Teklif Uyarısı */}
                                     {loadService.hasEcoFriendlyOffers(loadWithOffers) && (
                                         <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                                            <div className="flex items-center">
-                                                <Leaf className="h-4 w-4 text-green-600 mr-2" />
-                                                <span className="text-sm text-green-700 font-medium">
-                                                    🌱 Doğaya dost bir tercih yapmak ister misiniz?
-                                                </span>
+                                            <div className="flex items-start">
+                                                <Leaf className="h-4 w-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
+                                                <div>
+                                                    <span className="text-xs md:text-sm text-green-700 font-medium">
+                                                        🌱 Doğaya dost bir tercih yapmak ister misiniz?
+                                                    </span>
+                                                    <p className="text-xs text-green-600 mt-1">
+                                                        Bu yük için çevreci araç seçenekleri mevcut! Aynı kalitede hizmet, daha az karbon emisyonu.
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <p className="text-xs text-green-600 mt-1">
-                                                Bu yük için çevreci araç seçenekleri mevcut! Aynı kalitede hizmet, daha az karbon emisyonu.
-                                            </p>
                                         </div>
                                     )}
 
                                     {/* Carrier ve Broker Teklifleri - Tabs */}
                                     <Tabs defaultValue="carrier" className="w-full">
                                         <TabsList className="grid w-full grid-cols-2">
-                                            <TabsTrigger value="carrier" className="flex items-center gap-2">
-                                                <TruckIcon className="h-4 w-4" />
-                                                Carrier Teklifleri ({loadWithOffers.offers.length})
+                                            <TabsTrigger value="carrier" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
+                                                <TruckIcon className="h-3 w-3 md:h-4 md:w-4" />
+                                                <span className="hidden sm:inline">Carrier</span>
+                                                <span className="sm:hidden">C</span>
+                                                ({loadWithOffers.offers.length})
                                             </TabsTrigger>
-                                            <TabsTrigger value="broker" className="flex items-center gap-2">
-                                                <Ship className="h-4 w-4" />
-                                                Broker Teklifleri ({brokerOffersByLoad[loadWithOffers.load.id]?.length || 0})
+                                            <TabsTrigger value="broker" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
+                                                <Ship className="h-3 w-3 md:h-4 md:w-4" />
+                                                <span className="hidden sm:inline">Broker</span>
+                                                <span className="sm:hidden">B</span>
+                                                ({brokerOffersByLoad[loadWithOffers.load.id]?.length || 0})
                                             </TabsTrigger>
                                         </TabsList>
 
@@ -400,43 +422,44 @@ export default function SenderOffersPage() {
                                                         .map((offer) => (
                                                             <div
                                                                 key={offer.offerId}
-                                                                className={`p-4 border rounded-lg cursor-pointer transition-colors hover:bg-muted/50 ${
+                                                                className={`p-3 md:p-4 border rounded-lg cursor-pointer transition-colors hover:bg-muted/50 ${
                                                                     offer.vehicleEcoCertified ? 'border-green-300 bg-green-50/50' : ''
                                                                 }`}
                                                                 onClick={() => openOfferDetail(offer, loadWithOffers)}
                                                             >
-                                                                <div className="flex items-center justify-between">
-                                                                    <div className="flex-1">
-                                                                        <div className="flex items-center space-x-2">
-                                                                            <h4 className="font-semibold">{offer.carrierName}</h4>
+                                                                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <div className="flex flex-wrap items-center gap-1.5 md:gap-2">
+                                                                            <h4 className="font-semibold text-sm md:text-base">{offer.carrierName}</h4>
                                                                             {offer.vehicleEcoCertified && (
-                                                                                <Badge variant="secondary" className="bg-green-100 text-green-800">
+                                                                                <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
                                                                                     <Leaf className="h-3 w-3 mr-1" />
-                                                                                    Çevreci Araç
+                                                                                    <span className="hidden sm:inline">Çevreci Araç</span>
+                                                                                    <span className="sm:hidden">Çevreci</span>
                                                                                 </Badge>
                                                                             )}
-                                                                            <Badge variant={getStatusVariant(offer.status)}>
+                                                                            <Badge variant={getStatusVariant(offer.status)} className="text-xs">
                                                                                 {getStatusIcon(offer.status)}
                                                                                 <span className="ml-1">{getStatusText(offer.status)}</span>
                                                                             </Badge>
                                                                         </div>
 
-                                                                        <div className="flex items-center space-x-4 mt-2 text-sm text-muted-foreground">
+                                                                        <div className="flex flex-wrap items-center gap-2 md:gap-4 mt-2 text-xs md:text-sm text-muted-foreground">
                                                                             <div className="flex items-center">
-                                                                                <TruckIcon className="h-4 w-4 mr-1" />
-                                                                                {offer.vehiclePlateNumber} - {offer.vehicleType}
+                                                                                <TruckIcon className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                                                                                <span className="truncate">{offer.vehiclePlateNumber} - {offer.vehicleType}</span>
                                                                             </div>
                                                                             {offer.insuranceAccepted && (
                                                                                 <div className="flex items-center">
-                                                                                    <Shield className="h-4 w-4 mr-1" />
-                                                                                    Sigorta Kabul
+                                                                                    <Shield className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                                                                                    Sigorta
                                                                                 </div>
                                                                             )}
                                                                         </div>
                                                                     </div>
 
-                                                                    <div className="text-right">
-                                                                        <div className="text-2xl font-bold text-primary">
+                                                                    <div className="flex items-center justify-between md:block md:text-right">
+                                                                        <div className="text-lg md:text-2xl font-bold text-primary">
                                                                             {formatCurrency(offer.price)}
                                                                         </div>
                                                                         <div className="text-xs text-muted-foreground">
@@ -475,43 +498,44 @@ export default function SenderOffersPage() {
                                                         .map((offer) => (
                                                             <div
                                                                 key={offer.id}
-                                                                className={`p-4 border rounded-lg cursor-pointer transition-colors hover:bg-muted/50 ${
+                                                                className={`p-3 md:p-4 border rounded-lg cursor-pointer transition-colors hover:bg-muted/50 ${
                                                                     offer.ecoFriendly ? 'border-green-300 bg-green-50/50' : 'border-blue-300 bg-blue-50/50'
                                                                 }`}
                                                                 onClick={() => handleBrokerOfferDetailClick(offer)}
                                                             >
-                                                                <div className="flex items-center justify-between">
-                                                                    <div className="flex-1">
-                                                                        <div className="flex items-center space-x-2">
-                                                                            <h4 className="font-semibold">{offer.brokerName}</h4>
+                                                                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <div className="flex flex-wrap items-center gap-1.5 md:gap-2">
+                                                                            <h4 className="font-semibold text-sm md:text-base">{offer.brokerName}</h4>
                                                                             {offer.ecoFriendly && (
-                                                                                <Badge variant="secondary" className="bg-green-100 text-green-800">
+                                                                                <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
                                                                                     <Leaf className="h-3 w-3 mr-1" />
-                                                                                    Çevreci Gemi
+                                                                                    <span className="hidden sm:inline">Çevreci Gemi</span>
+                                                                                    <span className="sm:hidden">Çevreci</span>
                                                                                 </Badge>
                                                                             )}
-                                                                            <Badge variant={getStatusVariant(offer.status)}>
+                                                                            <Badge variant={getStatusVariant(offer.status)} className="text-xs">
                                                                                 {getStatusIcon(offer.status)}
                                                                                 <span className="ml-1">{getStatusText(offer.status)}</span>
                                                                             </Badge>
                                                                         </div>
 
-                                                                        <div className="flex items-center space-x-4 mt-2 text-sm text-muted-foreground">
+                                                                        <div className="flex flex-wrap items-center gap-2 md:gap-4 mt-2 text-xs md:text-sm text-muted-foreground">
                                                                             <div className="flex items-center">
-                                                                                <Ship className="h-4 w-4 mr-1" />
-                                                                                {offer.shipName} - {offer.shipType}
+                                                                                <Ship className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                                                                                <span className="truncate">{offer.shipName} - {offer.shipType}</span>
                                                                             </div>
                                                                             {offer.insuranceAccepted && (
                                                                                 <div className="flex items-center">
-                                                                                    <Shield className="h-4 w-4 mr-1" />
-                                                                                    Sigorta Kabul
+                                                                                    <Shield className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                                                                                    Sigorta
                                                                                 </div>
                                                                             )}
                                                                         </div>
                                                                     </div>
 
-                                                                    <div className="text-right">
-                                                                        <div className="text-2xl font-bold text-blue-600">
+                                                                    <div className="flex flex-col gap-1 md:text-right">
+                                                                        <div className="text-lg md:text-2xl font-bold text-blue-600">
                                                                             {formatCurrency(offer.freightRate)}
                                                                         </div>
                                                                         <div className="text-xs text-muted-foreground">
@@ -535,10 +559,10 @@ export default function SenderOffersPage() {
                                         </TabsContent>
                                     </Tabs>
                                 </div>
-                            </CardContent>
-                        </Card>
+                            </AccordionContent>
+                        </AccordionItem>
                     ))}
-                </div>
+                </Accordion>
             )}
 
             {/* Carrier Teklif Detay Modal */}
