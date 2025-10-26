@@ -196,6 +196,15 @@
     "pickup": "YÜKLEME",
     "delivery": "TESLİMAT",
     "insured": "Sigortalı",
+    "table": {
+      "name": "İsim",
+      "weight": "Ağırlık",
+      "pickup": "Yükleme",
+      "delivery": "Teslimat",
+      "date": "Tarih",
+      "status": "Durum",
+      "actions": "İşlemler"
+    },
     "filters": {
       "all": "Tümü",
       "pending": "Bekleyen",

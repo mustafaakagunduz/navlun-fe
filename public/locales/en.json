@@ -211,6 +211,15 @@
     "pickup": "PICKUP",
     "delivery": "DELIVERY",
     "insured": "Insured",
+    "table": {
+      "name": "Name",
+      "weight": "Weight",
+      "pickup": "Pickup",
+      "delivery": "Delivery",
+      "date": "Date",
+      "status": "Status",
+      "actions": "Actions"
+    },
     "filters": {
       "all": "All",
       "pending": "Pending",

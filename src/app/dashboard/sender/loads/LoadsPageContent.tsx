@@ -8,11 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Search, Plus, Filter, Package, Calendar, MapPin, Weight, AlertCircle } from "lucide-react";
+import { Search, Plus, Filter, Package, Calendar, MapPin, Weight, AlertCircle, Eye } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import loadService, { Load, LoadStatus } from '@/services/loadService';
-import LoadCard from './LoadCard';
 import LoadDetailsDialog from './LoadDetailsDialog';
+import { Badge } from "@/components/ui/badge";
 import senderService from "@/services/senderService";
 import authService from "@/services/authService";
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
@@ -100,6 +100,21 @@ export default function LoadsPageContent() {
 
     const getStatusText = (status: LoadStatus) => {
         return t(`loads.status.${status.toLowerCase()}`);
+    };
+
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleDateString('tr-TR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+    };
+
+    const formatWeight = (weight: number) => {
+        if (weight >= 1000) {
+            return `${(weight / 1000).toFixed(1)} ${t('loads.units.ton')}`;
+        }
+        return `${weight} ${t('loads.units.kg')}`;
     };
 
     if (myLoadsLoading) {
@@ -199,17 +214,97 @@ export default function LoadsPageContent() {
                         </CardContent>
                     </Card>
                 ) : (
-                    <div className="grid gap-4">
-                        {filteredLoads.map((load) => (
-                            <LoadCard
-                                key={load.id}
-                                load={load}
-                                onClick={() => handleLoadClick(load)}
-                                getStatusColor={getStatusColor}
-                                getStatusText={getStatusText}
-                            />
-                        ))}
-                    </div>
+                    <Card>
+                        <CardContent className="p-0">
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead className="bg-gray-50 border-b">
+                                        <tr>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                {t('loads.table.name')}
+                                            </th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                {t('loads.table.weight')}
+                                            </th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                {t('loads.table.pickup')}
+                                            </th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                {t('loads.table.delivery')}
+                                            </th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                {t('loads.table.date')}
+                                            </th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                {t('loads.table.status')}
+                                            </th>
+                                            <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                {t('loads.table.actions')}
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                        {filteredLoads.map((load) => (
+                                            <tr
+                                                key={load.id}
+                                                className="hover:bg-gray-50 cursor-pointer transition-colors"
+                                                onClick={() => handleLoadClick(load)}
+                                            >
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-2">
+                                                        <Package className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                                                        <span className="font-medium text-gray-900">{load.title}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-2 text-gray-700">
+                                                        <Weight className="h-4 w-4 text-gray-400" />
+                                                        <span>{formatWeight(load.netWeight)}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-2 text-gray-700">
+                                                        <MapPin className="h-4 w-4 text-green-600 flex-shrink-0" />
+                                                        <span className="truncate max-w-xs">{load.loadingAddress}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-2 text-gray-700">
+                                                        <MapPin className="h-4 w-4 text-red-600 flex-shrink-0" />
+                                                        <span className="truncate max-w-xs">{load.deliveryAddress}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-2 text-gray-700">
+                                                        <Calendar className="h-4 w-4 text-gray-400" />
+                                                        <span>{formatDate(load.loadingDate)}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <Badge className={`${getStatusColor(load.status)} border-0`}>
+                                                        {getStatusText(load.status)}
+                                                    </Badge>
+                                                </td>
+                                                <td className="px-6 py-4 text-center">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleLoadClick(load);
+                                                        }}
+                                                        className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                                    >
+                                                        <Eye className="h-4 w-4" />
+                                                    </Button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </CardContent>
+                    </Card>
                 )}
 
                 {/* Load Details Dialog */}

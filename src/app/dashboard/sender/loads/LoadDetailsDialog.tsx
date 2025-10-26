@@ -77,7 +77,7 @@ export default function LoadDetailsDialog({ load, isOpen, onClose }: LoadDetails
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="w-full max-w-md md:max-w-3xl lg:max-w-5xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <div className="flex items-center justify-between">
                         <DialogTitle className="text-xl font-bold">

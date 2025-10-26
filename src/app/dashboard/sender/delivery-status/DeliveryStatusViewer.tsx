@@ -171,18 +171,128 @@ export default function DeliveryStatusViewer() {
                             </CardContent>
                         </Card>
                     ) : (
-                        <div className="grid gap-6">
-                            {filteredTrackings.map((tracking) => (
-                                <TrackingCard
-                                    key={tracking.loadId}
-                                    tracking={tracking}
-                                    onViewDetails={setSelectedTracking}
-                                    onViewDocument={openDocumentViewer}
-                                    formatDate={formatDate}
-                                    getStatusBadgeColor={getStatusBadgeColor}
-                                />
-                            ))}
-                        </div>
+                        <Card>
+                            <CardContent className="p-0">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full">
+                                        <thead className="bg-gray-50 border-b">
+                                            <tr>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                    Yük
+                                                </th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                    Taşıyıcı
+                                                </th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                    Araç
+                                                </th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                    Durum
+                                                </th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                    İlerleme
+                                                </th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                    Son Güncelleme
+                                                </th>
+                                                <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                    İşlemler
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="bg-white divide-y divide-gray-200">
+                                            {filteredTrackings.map((tracking) => {
+                                                const progress = deliveryService.getStatusProgress(tracking.currentStatus);
+                                                return (
+                                                    <tr
+                                                        key={tracking.loadId}
+                                                        className="hover:bg-gray-50 cursor-pointer transition-colors"
+                                                        onClick={() => setSelectedTracking(tracking)}
+                                                    >
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex items-center gap-2">
+                                                                <Package className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                                                                <div>
+                                                                    <div className="font-medium text-gray-900">{tracking.loadTitle}</div>
+                                                                    {tracking.currentLocation && (
+                                                                        <div className="text-xs text-gray-500 flex items-center gap-1 mt-1">
+                                                                            <MapPin className="h-3 w-3" />
+                                                                            {tracking.currentLocation}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex items-center gap-2">
+                                                                <div>
+                                                                    <div className="text-gray-900">{tracking.carrier.name}</div>
+                                                                    {tracking.carrier.phone && (
+                                                                        <div className="text-xs text-gray-500 flex items-center gap-1 mt-1">
+                                                                            <Phone className="h-3 w-3" />
+                                                                            {tracking.carrier.phone}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                {tracking.carrier.isEcoFriendly && (
+                                                                    <div title="Çevreci Taşıyıcı">
+                                                                        <Leaf className="h-4 w-4 text-green-600 flex-shrink-0" />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex items-center gap-2 text-gray-700">
+                                                                <Truck className="h-4 w-4 text-gray-400" />
+                                                                <div>
+                                                                    <div className="font-medium">{tracking.vehicle.plateNumber}</div>
+                                                                    <div className="text-xs text-gray-500">{tracking.vehicle.type}</div>
+                                                                </div>
+                                                                {tracking.vehicle.ecoCertified && (
+                                                                    <div title="Çevreci Araç">
+                                                                        <Leaf className="h-3 w-3 text-green-600" />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <Badge className={getStatusBadgeColor(tracking.currentStatus)}>
+                                                                {deliveryService.getStatusDisplayName(tracking.currentStatus)}
+                                                            </Badge>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex items-center gap-2">
+                                                                <Progress value={progress} className="h-2 w-24" />
+                                                                <span className="text-sm text-gray-600">{progress}%</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex items-center gap-2 text-gray-700">
+                                                                <Clock className="h-4 w-4 text-gray-400" />
+                                                                <span className="text-sm">{formatDate(tracking.lastUpdate)}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4 text-center">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setSelectedTracking(tracking);
+                                                                }}
+                                                                className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                                            >
+                                                                <Eye className="h-4 w-4" />
+                                                            </Button>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </CardContent>
+                        </Card>
                     )}
                 </TabsContent>
             </Tabs>
