@@ -1,6 +1,6 @@
 "use client"
 
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -10,7 +10,7 @@ import Image from 'next/image';
 import Sidebar from "./Sidebar";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
-    const { logout, user } = useAuth();
+    const { logout, user, isLoading } = useAuth();
     const { t } = useLanguage();
     const router = useRouter();
 
@@ -52,6 +52,23 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 return 'bg-gray-100 text-gray-800';
         }
     };
+
+    // Sadece loading state kontrolü - middleware zaten protected route kontrolü yapıyor
+    if (isLoading) {
+        return (
+            <div className="flex min-h-screen items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Yükleniyor...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // User yoksa middleware yönlendirecek, burada null check yapalım
+    if (!user) {
+        return null;
+    }
 
     return (
         <div className="flex flex-col min-h-screen">

@@ -1,5 +1,6 @@
 // src/lib/axios.ts
 import axios from 'axios';
+import { setCookie, clearAllAuthCookies } from './cookieUtils';
 
 const getBaseURL = () => {
     // Production check - domain ile kontrol ekle
@@ -103,9 +104,13 @@ axiosInstance.interceptors.response.use(
                 );
 
                 if (response.data.accessToken) {
+                    // Token'ları hem localStorage hem cookie'ye kaydet
                     localStorage.setItem('accessToken', response.data.accessToken);
+                    setCookie('accessToken', response.data.accessToken, 7);
+
                     if (response.data.refreshToken) {
                         localStorage.setItem('refreshToken', response.data.refreshToken);
+                        setCookie('refreshToken', response.data.refreshToken, 7);
                     }
 
                     // Orijinal isteği yeni token ile tekrar dene
@@ -113,9 +118,10 @@ axiosInstance.interceptors.response.use(
                     return axios(originalRequest);
                 }
             } catch (refreshError) {
-                // Token yenileme başarısız ise çıkış yap
-                localStorage.removeItem('accessToken');
-                localStorage.removeItem('refreshToken');
+                // Token yenileme başarısız ise çıkış yap - tüm storage ve cookie'leri temizle
+                localStorage.clear();
+                sessionStorage.clear();
+                clearAllAuthCookies();
                 window.location.href = '/';
                 return Promise.reject(refreshError);
             }

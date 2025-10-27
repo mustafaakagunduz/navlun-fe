@@ -280,6 +280,35 @@ export default function MessagesPage() {
                     </CardContent>
                 </Card>
 
+                {/* Admin Contact Card */}
+                <Card className="border-2 border-green-500 bg-green-50/50">
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="h-12 w-12 rounded-full bg-green-500 flex items-center justify-center">
+                                    <User className="h-6 w-6 text-white" />
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold text-lg text-gray-900">Sistem Yöneticisi (Admin)</h3>
+                                    <p className="text-sm text-gray-600">
+                                        Sorularınız için admin ile iletişime geçin
+                                    </p>
+                                </div>
+                            </div>
+                            <Button
+                                className="bg-green-600 hover:bg-green-700"
+                                onClick={() => {
+                                    // Admin ile genel konuşma için özel bir "system-admin" load ID kullan
+                                    router.push(`/dashboard/messages/admin-contact`);
+                                }}
+                            >
+                                <MessageSquare className="h-4 w-4 mr-2" />
+                                Admin ile Mesajlaş
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+
                 {/* Conversations */}
                 <Card>
                     <CardHeader>

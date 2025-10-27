@@ -62,6 +62,45 @@ export interface SystemHealth {
   uptime: string;
 }
 
+export interface DeliveryManagement {
+  id: string;
+  loadId: string;
+  loadTitle: string;
+  currentStatus: 'ON_THE_WAY' | 'PICKED_UP' | 'DELIVERED' | 'CANCELLED';
+  currentLocation: string | null;
+  lastUpdate: string;
+  statusNote: string | null;
+  pickupDocuments: string[];
+  deliveryDocuments: string[];
+  cancellationDocuments: string[];
+  senderInfo: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+  };
+  carrierInfo: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+  };
+  vehicleInfo: {
+    plateNumber: string;
+    type: string;
+  } | null;
+  pickupTime: string | null;
+  deliveryTime: string | null;
+  loadDetails: {
+    goodsType: string;
+    weight: number;
+    loadingCity: string;
+    deliveryCity: string;
+    loadingAddress: string;
+    deliveryAddress: string;
+  };
+}
+
 export interface PageResponse<T> {
   content: T[];
   totalPages: number;
@@ -168,6 +207,38 @@ export const adminService = {
   // System Health
   async getSystemHealth(): Promise<SystemHealth> {
     const response = await apiClient.get('/admin/health');
+    return response.data.data;
+  },
+
+  // Delivery Management
+  async getActiveDeliveries(page = 0, size = 10): Promise<PageResponse<DeliveryManagement>> {
+    const response = await apiClient.get('/admin/deliveries/active', {
+      params: { page, size }
+    });
+    return response.data.data;
+  },
+
+  async getCompletedDeliveries(page = 0, size = 10): Promise<PageResponse<DeliveryManagement>> {
+    const response = await apiClient.get('/admin/deliveries/completed', {
+      params: { page, size }
+    });
+    return response.data.data;
+  },
+
+  async getDeliveryById(deliveryId: string): Promise<DeliveryManagement> {
+    const response = await apiClient.get(`/admin/deliveries/${deliveryId}`);
+    return response.data.data;
+  },
+
+  async searchDeliveries(
+    search?: string,
+    status?: string,
+    page = 0,
+    size = 10
+  ): Promise<PageResponse<DeliveryManagement>> {
+    const response = await apiClient.get('/admin/deliveries/search', {
+      params: { search, status, page, size }
+    });
     return response.data.data;
   }
 };

@@ -13,17 +13,17 @@ import { useRouter, useSearchParams } from "next/navigation"
 
 const LoginContent = () => {
     const { t } = useLanguage()
-    const { isAuthenticated } = useAuth()
+    const { isAuthenticated, user, isLoading } = useAuth()
     const router = useRouter()
     const searchParams = useSearchParams()
     const roleParam = searchParams.get('role') as 'SENDER' | 'CARRIER' | 'BROKER' | null
 
-    // Redirect if already logged in
+    // Redirect if already logged in - sadece user varsa ve loading bittiyse
     useEffect(() => {
-        if (isAuthenticated) {
+        if (!isLoading && isAuthenticated && user) {
             router.push("/dashboard")
         }
-    }, [isAuthenticated, router])
+    }, [isAuthenticated, user, isLoading, router])
 
     return (
         <div className="min-h-screen flex flex-col relative">

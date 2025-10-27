@@ -11,6 +11,7 @@ import { useLanguage } from "@/context/LanguageContext"
 import { useToast } from "@/hooks/use-toast"
 import authService from "@/services/authService"
 import { useAuth } from "@/context/AuthContext"
+import { setCookie } from '@/lib/cookieUtils'
 
 function SelectRoleContent() {
     const router = useRouter()
@@ -63,10 +64,12 @@ function SelectRoleContent() {
             // Backend'e role bilgisini gönder ve güncellenen user bilgilerini al
             const response = await authService.updateRole(selectedRole)
 
-            // Eğer response'da yeni token'lar varsa, localStorage'ı güncelle
+            // Eğer response'da yeni token'lar varsa, hem localStorage hem cookie'yi güncelle
             if (response.accessToken && response.refreshToken) {
                 localStorage.setItem('accessToken', response.accessToken)
                 localStorage.setItem('refreshToken', response.refreshToken)
+                setCookie('accessToken', response.accessToken, 7)
+                setCookie('refreshToken', response.refreshToken, 7)
             }
 
             // Context'i güncelle
@@ -79,13 +82,16 @@ function SelectRoleContent() {
                 emailVerified: true
             })
 
-            // Başarılı olduysa dashboard'a yönlendir
+            // Başarılı olduysa dashboard'a hard refresh ile yönlendir
             toast({
                 title: "Başarılı",
                 description: "Hesap türünüz başarıyla ayarlandı.",
             })
 
-            router.push('/dashboard')
+            // Hard refresh ile dashboard'a git
+            setTimeout(() => {
+                window.location.href = '/dashboard'
+            }, 500)
         } catch (error) {
             console.error('Role update error:', error)
             toast({

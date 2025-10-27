@@ -24,7 +24,7 @@ const getDashboardRoute = (role: string): string => {
 };
 
 export default function Dashboard() {
-    const { user } = useAuth();
+    const { user, isLoading } = useAuth();
     const { t } = useLanguage();
     const router = useRouter();
 
@@ -36,6 +36,23 @@ export default function Dashboard() {
             }
         }
     }, [user, router]);
+
+    // Sadece loading kontrolü - middleware protected route kontrolü yapıyor
+    if (isLoading) {
+        return (
+            <div className="flex min-h-screen items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Yükleniyor...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // User yoksa middleware yönlendirecek
+    if (!user) {
+        return null;
+    }
 
     return (
         <div className="p-8">

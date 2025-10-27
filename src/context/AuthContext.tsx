@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { useRouter } from 'next/navigation';
 import authService from '@/services/authService';
 import { useToast } from '@/hooks/use-toast';
+import { setCookie, removeCookie, clearAllAuthCookies } from '@/lib/cookieUtils';
 
 // User type definition
 export type User = {
@@ -116,9 +117,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
             const response = await authService.login(email, password);
 
-            // Token'ları kaydet
+            // Token'ları hem localStorage hem cookie'ye kaydet
             localStorage.setItem('accessToken', response.accessToken);
             localStorage.setItem('refreshToken', response.refreshToken);
+            setCookie('accessToken', response.accessToken, 7);
+            setCookie('refreshToken', response.refreshToken, 7);
 
             const user = await authService.getCurrentUser();
 
@@ -133,8 +136,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 verificationPassword: null,
             });
 
+            // Dashboard'a yönlendir ve hard refresh yap
             const dashboardUrl = getDashboardRoute(user.role);
-            router.push(dashboardUrl);
+            window.location.href = dashboardUrl; // Hard refresh için
 
         } catch (error: any) {
             setState(prev => ({
@@ -156,9 +160,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             try {
                 const loginResponse = await authService.login(userData.email, userData.password);
 
-                // Token'ları kaydet
+                // Token'ları hem localStorage hem cookie'ye kaydet
                 localStorage.setItem('accessToken', loginResponse.accessToken);
                 localStorage.setItem('refreshToken', loginResponse.refreshToken);
+                setCookie('accessToken', loginResponse.accessToken, 7);
+                setCookie('refreshToken', loginResponse.refreshToken, 7);
 
                 const currentUser = await authService.getCurrentUser();
 
@@ -179,8 +185,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     variant: "default"
                 });
 
+                // Dashboard'a yönlendir ve hard refresh yap
                 const dashboardUrl = getDashboardRoute(currentUser.role);
-                router.push(dashboardUrl);
+                window.location.href = dashboardUrl; // Hard refresh için
 
                 return user;
             } catch (loginError) {
@@ -217,9 +224,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const refreshTokenValue = localStorage.getItem('refreshToken');
             if (refreshTokenValue) await authService.logout(refreshTokenValue);
         } finally {
+            // Tüm storage ve cookie'leri temizle
             localStorage.clear();
+            sessionStorage.clear();
+            clearAllAuthCookies();
+
             setState({ ...defaultState, isLoading: false });
-            router.push('/');
+
+            // Hard refresh ile ana sayfaya git
+            window.location.href = '/';
         }
     };
 
@@ -229,8 +242,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         try {
             const response = await authService.refreshToken(refreshTokenValue);
+            // Token'ları hem localStorage hem cookie'ye kaydet
             localStorage.setItem('accessToken', response.accessToken);
             localStorage.setItem('refreshToken', response.refreshToken);
+            setCookie('accessToken', response.accessToken, 7);
+            setCookie('refreshToken', response.refreshToken, 7);
             return true;
         } catch {
             return false;
@@ -254,10 +270,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 // Token'lar sağlandıysa direkt login yap
                 console.log('Completing email verification with auto-login');
 
-                // Token'ları kaydet
+                // Token'ları hem localStorage hem cookie'ye kaydet
                 localStorage.setItem('accessToken', accessToken);
                 localStorage.setItem('refreshToken', refreshToken);
                 localStorage.setItem('userEmail', userEmail);
+                setCookie('accessToken', accessToken, 7);
+                setCookie('refreshToken', refreshToken, 7);
 
                 // Kullanıcı bilgilerini çek
                 const userData = await authService.getCurrentUser();
@@ -274,14 +292,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     verificationPassword: null,
                 });
 
-                // Ana sayfaya yönlendir
-                router.push('/');
-
                 toast({
                     title: "Kayıt Başarılı",
                     description: "Hesabınız başarıyla oluşturuldu ve giriş yaptınız.",
                     variant: "default"
                 });
+
+                // Ana sayfaya hard refresh ile yönlendir
+                window.location.href = '/';
             } else {
                 // Normal verification completion (eski yöntem)
                 setState(prev => ({

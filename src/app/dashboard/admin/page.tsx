@@ -12,6 +12,8 @@ import adminService, { AdminDashboardStats } from "@/services/adminService";
 import UserManagementTab from "./UserManagementTab";
 import LoadManagementTab from "./LoadManagementTab";
 import SystemSettingsTab from "./SystemSettingsTab";
+import DeliveryManagementTab from "./DeliveryManagementTab";
+import MessagesTab from "./MessagesTab";
 
 export default function AdminDashboard() {
     const { user, isAuthenticated, isLoading } = useAuth();
@@ -174,9 +176,11 @@ export default function AdminDashboard() {
 
                         {/* Management Tabs */}
                         <Tabs defaultValue="users" className="w-full">
-                            <TabsList className="grid w-full grid-cols-3 mb-6">
+                            <TabsList className="grid w-full grid-cols-5 mb-6">
                                 <TabsTrigger value="users">{t("adminPage.userManagement")}</TabsTrigger>
                                 <TabsTrigger value="loads">{t("adminPage.loadManagement")}</TabsTrigger>
+                                <TabsTrigger value="deliveries">Teslimat Yönetimi</TabsTrigger>
+                                <TabsTrigger value="messages">Mesajlar</TabsTrigger>
                                 <TabsTrigger value="settings">{t("adminPage.systemSettings")}</TabsTrigger>
                             </TabsList>
 
@@ -186,6 +190,14 @@ export default function AdminDashboard() {
 
                             <TabsContent value="loads">
                                 <LoadManagementTab />
+                            </TabsContent>
+
+                            <TabsContent value="deliveries">
+                                <DeliveryManagementTab />
+                            </TabsContent>
+
+                            <TabsContent value="messages">
+                                <MessagesTab />
                             </TabsContent>
 
                             <TabsContent value="settings">

@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import { setCookie } from '@/lib/cookieUtils'
 
 function OAuth2Callback() {
     const router = useRouter()
@@ -48,16 +49,20 @@ function OAuth2Callback() {
                     return
                 }
 
-                // Token'ları localStorage'a kaydet
+                // Token'ları hem localStorage hem cookie'ye kaydet
                 localStorage.setItem('accessToken', token)
                 localStorage.setItem('refreshToken', refreshToken)
                 localStorage.setItem('userId', userId)
                 localStorage.setItem('userEmail', email)
 
+                // Cookie'ye de kaydet (middleware için önemli)
+                setCookie('accessToken', token, 7)
+                setCookie('refreshToken', refreshToken, 7)
+
                 // Eğer backend'den needsRoleSelection parametresi geliyorsa direkt role seçim sayfasına yönlendir
                 if (needsRoleSelection === 'true') {
                     console.log('Redirecting to role selection page (from backend flag)')
-                    router.push(`/auth/select-role?token=${token}&userId=${userId}`)
+                    window.location.href = `/auth/select-role?token=${token}&userId=${userId}`
                     return
                 }
 
@@ -82,7 +87,7 @@ function OAuth2Callback() {
                             const userRole = data.data.role
                             if (!userRole || userRole === 'PENDING') {
                                 console.log('Redirecting to role selection page (user role is PENDING)')
-                                router.push(`/auth/select-role?token=${token}&userId=${userId}`)
+                                window.location.href = `/auth/select-role?token=${token}&userId=${userId}`
                                 return
                             }
                         }
@@ -94,9 +99,9 @@ function OAuth2Callback() {
                     // User bilgilerini alamasak bile token'lar var, dashboard'a yönlendir
                 }
 
-                // Dashboard'a yönlendir
-                console.log('Redirecting to dashboard')
-                router.push('/dashboard')
+                // Dashboard'a hard refresh ile yönlendir (token'ların düzgün yüklenmesi için)
+                console.log('Redirecting to dashboard with hard refresh')
+                window.location.href = '/dashboard'
                 console.log('=== OAuth2 Callback End ===')
             } catch (err) {
                 console.error('OAuth2 callback error:', err)
