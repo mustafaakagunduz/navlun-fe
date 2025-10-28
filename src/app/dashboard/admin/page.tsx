@@ -59,16 +59,16 @@ export default function AdminDashboard() {
     return (
         <ProtectedRoute allowedRoles={['ADMIN']}>
             <div className="flex h-[calc(100vh-4rem)]">
-                <div className="flex-1 overflow-auto bg-gray-50 p-8">
+                <div className="flex-1 overflow-auto bg-gray-50 p-4 sm:p-6 md:p-8">
                     <div className="max-w-7xl mx-auto">
-                        <div className="mb-8">
-                            <h1 className="text-3xl font-bold mb-2">{t("adminPage.title")}</h1>
-                            <p className="text-gray-600">{t("adminPage.description")}</p>
+                        <div className="mb-6 sm:mb-8">
+                            <h1 className="text-2xl sm:text-3xl font-bold mb-2">{t("adminPage.title")}</h1>
+                            <p className="text-sm sm:text-base text-gray-600">{t("adminPage.description")}</p>
                         </div>
 
                         {/* Statistics Overview */}
                         {stats && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
                                 <StatCard
                                     icon={<Users className="h-6 w-6" />}
                                     title={t("adminPage.totalUsers")}
@@ -102,7 +102,7 @@ export default function AdminDashboard() {
 
                         {/* Detailed Stats Grid */}
                         {stats && (
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
                                 <Card className="shadow-md">
                                     <CardHeader className="pb-3">
                                         <CardTitle className="text-lg font-semibold flex items-center gap-2">
@@ -176,13 +176,29 @@ export default function AdminDashboard() {
 
                         {/* Management Tabs */}
                         <Tabs defaultValue="users" className="w-full">
-                            <TabsList className="grid w-full grid-cols-5 mb-6">
-                                <TabsTrigger value="users">{t("adminPage.userManagement")}</TabsTrigger>
-                                <TabsTrigger value="loads">{t("adminPage.loadManagement")}</TabsTrigger>
-                                <TabsTrigger value="deliveries">Teslimat Yönetimi</TabsTrigger>
-                                <TabsTrigger value="messages">Mesajlar</TabsTrigger>
-                                <TabsTrigger value="settings">{t("adminPage.systemSettings")}</TabsTrigger>
-                            </TabsList>
+                            <div className="overflow-x-auto mb-6">
+                                <TabsList className="inline-flex w-full min-w-max sm:grid sm:grid-cols-3 lg:grid-cols-5">
+                                    <TabsTrigger value="users" className="whitespace-nowrap px-3 sm:px-4">
+                                        <span className="hidden sm:inline">{t("adminPage.userManagement")}</span>
+                                        <span className="sm:hidden">Kullanıcılar</span>
+                                    </TabsTrigger>
+                                    <TabsTrigger value="loads" className="whitespace-nowrap px-3 sm:px-4">
+                                        <span className="hidden sm:inline">{t("adminPage.loadManagement")}</span>
+                                        <span className="sm:hidden">Yükler</span>
+                                    </TabsTrigger>
+                                    <TabsTrigger value="deliveries" className="whitespace-nowrap px-3 sm:px-4">
+                                        <span className="hidden sm:inline">Teslimat Yönetimi</span>
+                                        <span className="sm:hidden">Teslimatlar</span>
+                                    </TabsTrigger>
+                                    <TabsTrigger value="messages" className="whitespace-nowrap px-3 sm:px-4">
+                                        Mesajlar
+                                    </TabsTrigger>
+                                    <TabsTrigger value="settings" className="whitespace-nowrap px-3 sm:px-4">
+                                        <span className="hidden sm:inline">{t("adminPage.systemSettings")}</span>
+                                        <span className="sm:hidden">Ayarlar</span>
+                                    </TabsTrigger>
+                                </TabsList>
+                            </div>
 
                             <TabsContent value="users">
                                 <UserManagementTab />
@@ -229,16 +245,16 @@ function StatCard({ icon, title, value, color, subtitle }: StatCardProps) {
 
     return (
         <Card className="shadow-md hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                        <p className="text-sm text-gray-600 mb-1">{title}</p>
-                        <h3 className="text-3xl font-bold mb-1">{value}</h3>
+            <CardContent className="p-4 sm:p-6">
+                <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                        <p className="text-xs sm:text-sm text-gray-600 mb-1 truncate">{title}</p>
+                        <h3 className="text-2xl sm:text-3xl font-bold mb-1">{value}</h3>
                         {subtitle && (
-                            <p className="text-xs text-gray-500">{subtitle}</p>
+                            <p className="text-xs text-gray-500 truncate">{subtitle}</p>
                         )}
                     </div>
-                    <div className={`p-3 rounded-full ${colorClasses[color]}`}>
+                    <div className={`p-2 sm:p-3 rounded-full flex-shrink-0 ${colorClasses[color]}`}>
                         {icon}
                     </div>
                 </div>

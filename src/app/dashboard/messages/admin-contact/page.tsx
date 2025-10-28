@@ -16,22 +16,33 @@ export default function AdminContactPage() {
             if (!user?.id) return;
 
             try {
-                // Admin kullanıcıları bul
-                const response = await adminService.searchUsers('', 'ADMIN', undefined, 0, 1);
+                // Public endpoint ile admin ID'yi al (yetki gerektirmez)
+                console.log('Admin aranıyor...');
+                const adminId = await adminService.getSystemAdminId();
+                console.log('Admin ID bulundu:', adminId);
 
-                if (response.content && response.content.length > 0) {
-                    const adminUser = response.content[0];
-
+                if (adminId) {
                     // Özel bir "admin-support" load ID ile admin mesajlaşmasına yönlendir
-                    // Bu load ID backend'de özel olarak handle edilecek
-                    router.replace(`/dashboard/messages/load/admin-support?otherUserId=${adminUser.id}`);
+                    router.replace(`/dashboard/messages/load/admin-support?otherUserId=${adminId}`);
                 } else {
-                    // Admin bulunamazsa mesajlar sayfasına geri dön
+                    console.error('Admin kullanıcı bulunamadı');
+                    alert('Sistem yöneticisi bulunamadı. Lütfen daha sonra tekrar deneyin.');
                     router.replace('/dashboard/messages');
                 }
-            } catch (error) {
-                console.error('Admin bulunamadı:', error);
+            } catch (error: any) {
+                console.error('Admin bulma hatası:', error);
+                console.error('Error details:', error.response?.data);
+                console.error('Error status:', error.response?.status);
+
+                // Kullanıcıya hata mesajı göster
+                alert(
+                    'Sistem yöneticisi ile iletişim kurulamadı.\n\n' +
+                    'Backend\'de /api/v1/public/system-admin-id endpoint\'i bulunamadı.\n' +
+                    'Lütfen backend geliştiricisine başvurun.'
+                );
                 router.replace('/dashboard/messages');
+            } finally {
+                setLoading(false);
             }
         };
 

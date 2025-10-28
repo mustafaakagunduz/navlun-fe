@@ -110,6 +110,13 @@ export interface PageResponse<T> {
 }
 
 export const adminService = {
+  // Public - Get System Admin ID (no auth required)
+  async getSystemAdminId(): Promise<string> {
+    const response = await apiClient.get('/public/system-admin-id');
+    // Backend direkt UUID string dönüyor (quoted JSON)
+    return response.data;
+  },
+
   // Dashboard Stats
   async getDashboardStats(): Promise<AdminDashboardStats> {
     const response = await apiClient.get('/admin/stats');

@@ -109,7 +109,10 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
                 try {
                     let finalOtherUserId = null;
 
-                    if (user?.role === 'BROKER' || user?.role === 'CARRIER') {
+                    if (loadId === 'admin-support' || loadId === 'null') {
+                        // Admin mesajlaşması için otherUser ID'sini direkt kullan
+                        finalOtherUserId = otherUser.id;
+                    } else if (user?.role === 'BROKER' || user?.role === 'CARRIER') {
                         // Broker/Carrier için sender'ın user ID'sini kullan
                         const loadData = await loadService.getLoadById(loadId);
                         finalOtherUserId = loadData.sender?.userId;
@@ -119,7 +122,9 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
                     }
 
                     if (finalOtherUserId) {
-                        const newMessages = await messageService.getLoadConversation(loadId, user.id, finalOtherUserId);
+                        // "null" string'ini "admin-support" olarak değiştir
+                        const apiLoadId = loadId === 'null' ? 'admin-support' : loadId;
+                        const newMessages = await messageService.getLoadConversation(apiLoadId, user.id, finalOtherUserId);
 
                         // TAMAMEN YENİ YAKLAŞIM: Tüm mesaj listesini karşılaştır
                         setMessages(prevMessages => {
@@ -192,58 +197,87 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
             console.log('Debug - User Role:', user?.role);
             console.log('Debug - API URL will be:', `/messages/load/${loadId}/conversation?userId=${user?.id}&otherUserId=${otherUserId}`);
 
-            // Load bilgilerini getir
-            const loadData = await loadService.getLoadById(loadId);
-            console.log('Debug - Load data:', loadData);
+            // Admin mesajlaşması için özel durum (admin-support veya null)
+            if (loadId === 'admin-support' || loadId === 'null') {
+                // Admin mesajlaşması için mock load bilgisi
+                setLoadInfo({
+                    id: 'admin-support',
+                    title: 'Sistem Yöneticisi ile İletişim',
+                    status: 'ACTIVE',
+                    origin: 'Destek Merkezi',
+                    destination: 'Yardım Masası',
+                    weight: 0,
+                    goodsType: 'Destek Talebi',
+                    senderName: 'Admin'
+                });
 
-            setLoadInfo({
-                id: loadData.id,
-                title: loadData.title,
-                status: loadData.status,
-                origin: loadData.loadingAddress,
-                destination: loadData.deliveryAddress,
-                weight: loadData.netWeight || 0,
-                goodsType: loadData.goodsType,
-                senderName: loadData.sender?.companyName || loadData.sender?.contactPerson || "Bilinmeyen"
-            });
-
-            // Diğer kullanıcı bilgisini belirle
-            if (user?.role === 'BROKER') {
-                // Broker ise, sender ile konuşuyor
-                if (loadData.sender?.userId) {
-                    setOtherUser({
-                        id: loadData.sender.userId, // User ID kullan
-                        name: loadData.sender.companyName || loadData.sender.contactPerson || "Bilinmeyen",
-                        role: 'SENDER'
-                    });
-                }
-            } else if (user?.role === 'CARRIER') {
-                // Carrier ise, sender ile konuşuyor
-                if (loadData.sender?.userId) {
-                    setOtherUser({
-                        id: loadData.sender.userId, // User ID kullan
-                        name: loadData.sender.companyName || loadData.sender.contactPerson || "Bilinmeyen",
-                        role: 'SENDER'
-                    });
-                }
-            } else {
-                // Sender ise, broker/carrier ile konuşuyor (otherUserId'den belirle)
+                // Admin kullanıcı bilgisini set et
                 if (otherUserId) {
                     setOtherUser({
                         id: otherUserId,
-                        name: "Taşıyıcı/Broker", // Bu bilgi daha detaylı API'den alınabilir
-                        role: 'CARRIER' // Default olarak carrier, gerçekte API'den alınmalı
+                        name: 'Sistem Yöneticisi',
+                        role: 'ADMIN'
                     });
+                }
+            } else {
+                // Normal yük için load bilgilerini getir
+                const loadData = await loadService.getLoadById(loadId);
+                console.log('Debug - Load data:', loadData);
+
+                setLoadInfo({
+                    id: loadData.id,
+                    title: loadData.title,
+                    status: loadData.status,
+                    origin: loadData.loadingAddress,
+                    destination: loadData.deliveryAddress,
+                    weight: loadData.netWeight || 0,
+                    goodsType: loadData.goodsType,
+                    senderName: loadData.sender?.companyName || loadData.sender?.contactPerson || "Bilinmeyen"
+                });
+
+                // Diğer kullanıcı bilgisini belirle
+                if (user?.role === 'BROKER') {
+                    // Broker ise, sender ile konuşuyor
+                    if (loadData.sender?.userId) {
+                        setOtherUser({
+                            id: loadData.sender.userId, // User ID kullan
+                            name: loadData.sender.companyName || loadData.sender.contactPerson || "Bilinmeyen",
+                            role: 'SENDER'
+                        });
+                    }
+                } else if (user?.role === 'CARRIER') {
+                    // Carrier ise, sender ile konuşuyor
+                    if (loadData.sender?.userId) {
+                        setOtherUser({
+                            id: loadData.sender.userId, // User ID kullan
+                            name: loadData.sender.companyName || loadData.sender.contactPerson || "Bilinmeyen",
+                            role: 'SENDER'
+                        });
+                    }
+                } else {
+                    // Sender ise, broker/carrier ile konuşuyor (otherUserId'den belirle)
+                    if (otherUserId) {
+                        setOtherUser({
+                            id: otherUserId,
+                            name: "Taşıyıcı/Broker", // Bu bilgi daha detaylı API'den alınabilir
+                            role: 'CARRIER' // Default olarak carrier, gerçekte API'den alınmalı
+                        });
+                    }
                 }
             }
 
             // Mesajları getir - otherUser bilgisi belirlendikten sonra
             let finalOtherUserId = null;
+            let actualLoadData = null;
 
-            if (user?.role === 'BROKER' || user?.role === 'CARRIER') {
+            if (loadId === 'admin-support' || loadId === 'null') {
+                // Admin mesajlaşması için otherUserId'yi direkt kullan
+                finalOtherUserId = otherUserId;
+            } else if (user?.role === 'BROKER' || user?.role === 'CARRIER') {
                 // Broker/Carrier ise sender ile konuşuyor
                 // sender.id profile ID'si, sender.userId ise User ID'si
-                finalOtherUserId = loadData.sender?.userId;
+                actualLoadData = await loadService.getLoadById(loadId);
+                finalOtherUserId = actualLoadData.sender?.userId;
             } else {
                 // Sender ise URL'den gelen otherUserId'yi kullan
                 finalOtherUserId = otherUserId;
@@ -251,10 +285,16 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
 
             if (user?.id && finalOtherUserId) {
                 console.log('Debug - Final other user ID:', finalOtherUserId);
-                console.log('Debug - Sender Profile ID:', loadData.sender?.id);
-                console.log('Debug - Sender User ID:', loadData.sender?.userId);
+                if (loadId !== 'admin-support' && loadId !== 'null' && actualLoadData) {
+                    console.log('Debug - Sender Profile ID:', actualLoadData.sender?.id);
+                    console.log('Debug - Sender User ID:', actualLoadData.sender?.userId);
+                }
+
+                // "null" string'ini "admin-support" olarak değiştir
+                const apiLoadId = loadId === 'null' ? 'admin-support' : loadId;
+
                 // loadData fonksiyonunda, mesajları aldıktan sonra:
-                const messagesData = await messageService.getLoadConversation(loadId, user.id, finalOtherUserId);
+                const messagesData = await messageService.getLoadConversation(apiLoadId, user.id, finalOtherUserId);
                 console.log('Debug - Mesaj tarihleri:', messagesData.map(msg => ({
                     id: msg.id,
                     content: msg.content.substring(0, 20),
@@ -387,8 +427,11 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
             // Mesaj gönderilirken polling'i durdur
             isPollingActiveRef.current = false;
 
+            // "null" string'ini "admin-support" olarak değiştir
+            const apiLoadId = loadId === 'null' ? 'admin-support' : loadId;
+
             const messageData = {
-                loadId,
+                loadId: apiLoadId,
                 senderUserId: user.id,
                 receiverUserId: otherUser.id,
                 subject: `Yük Mesajı: ${loadInfo?.title || ""}`,
@@ -450,6 +493,10 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
                 return 'bg-blue-100 text-blue-800';
             case 'BROKER':
                 return 'bg-green-100 text-green-800';
+            case 'CARRIER':
+                return 'bg-purple-100 text-purple-800';
+            case 'ADMIN':
+                return 'bg-red-100 text-red-800';
             default:
                 return 'bg-gray-100 text-gray-800';
         }
@@ -461,6 +508,10 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
                 return 'Gönderici';
             case 'BROKER':
                 return 'Broker';
+            case 'CARRIER':
+                return 'Taşıyıcı';
+            case 'ADMIN':
+                return 'Yönetici';
             default:
                 return role;
         }

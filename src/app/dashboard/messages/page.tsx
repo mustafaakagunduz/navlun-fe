@@ -164,7 +164,10 @@ export default function MessagesPage() {
     };
 
     const handleConversationClick = (loadId: string, otherUserId: string) => {
-        router.push(`/dashboard/messages/load/${loadId}?otherUserId=${otherUserId}`);
+        // Admin destek konuşması için null yerine "admin-support" kullan
+        const finalLoadId = loadId === null || loadId === 'null' ? 'admin-support' : loadId;
+
+        router.push(`/dashboard/messages/load/${finalLoadId}?otherUserId=${otherUserId}`);
 
         // Konuşmaya girince o konuşmanın unread count'ını sıfırla (UI güncelleme)
         setTimeout(() => {
