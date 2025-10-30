@@ -71,7 +71,11 @@ export default function SenderDashboard() {
                 // Try to fetch loads, but don't fail if they don't exist
                 try {
                     const loads = await loadService.getCurrentUserActiveLoads();
-                    setActiveLoads(loads || []);
+                    // Sadece bekleyen yükleri göster (DELIVERED ve COMPLETED hariç)
+                    const activeLoadsFiltered = (loads || []).filter(load =>
+                        load.status !== 'DELIVERED' && load.status !== 'COMPLETED'
+                    );
+                    setActiveLoads(activeLoadsFiltered);
                 } catch (loadErr: any) {
                     console.warn('Active loads not available:', loadErr);
                     setActiveLoads([]);

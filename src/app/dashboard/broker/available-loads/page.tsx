@@ -88,6 +88,12 @@ export default function BrokerAvailableLoads() {
 
     useEffect(() => {
         if (availableLoads.length > 0) {
+            // Debug: Log all transport types
+            console.log('📦 Available loads transport types:', availableLoads.map(load => ({
+                title: load.title,
+                transportType: load.transportType
+            })));
+
             const loadIds = availableLoads.map(load => load.id);
             dispatch(checkOfferedLoads(loadIds));
         }
@@ -111,6 +117,11 @@ export default function BrokerAvailableLoads() {
     const filteredLoads = availableLoads.filter((load) => {
         // Transport type filter
         const matchesTransportType = load.transportType === activeTransportType;
+
+        // Debug: Log transport types
+        if (!matchesTransportType) {
+            console.log(`🚫 Load filtered out - Transport Type: ${load.transportType}, Expected: ${activeTransportType}`, load.title);
+        }
 
         const matchesSearch = filters.searchQuery === '' ||
             load.goodsType.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
@@ -271,15 +282,18 @@ export default function BrokerAvailableLoads() {
                 {/* Header */}
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900">Açık Yük Talepleri</h1>
+                        <h1 className="text-3xl font-bold text-gray-900">Açık Deniz Yükü Talepleri</h1>
                         <p className="text-gray-600 mt-1">
-                            Teklif verebileceğiniz açık yükleri görüntüleyin ve değerlendirin
+                            Teklif verebileceğiniz açık deniz yüklerini görüntüleyin ve değerlendirin
+                        </p>
+                        <p className="text-sm text-blue-600 mt-1">
+                            Toplam: {availableLoads.length} yük | Deniz: {sortedLoads.length} yük | Filtrelenen: {availableLoads.length - sortedLoads.length} yük
                         </p>
                     </div>
                     <div className="flex items-center gap-3">
                         <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
                             <Package className="h-4 w-4 mr-1" />
-                            {sortedLoads.length} yük
+                            {sortedLoads.length} deniz yükü
                         </Badge>
                         <Button
                             variant="outline"

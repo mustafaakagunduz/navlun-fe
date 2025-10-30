@@ -28,7 +28,9 @@ import {
     Shield,
     Leaf,
     AlertCircle,
-    CheckCircle2
+    CheckCircle2,
+    Ship,
+    Truck
 } from "lucide-react";
 import loadService, { LoadRequest, InsurancePolicy, TransportType } from '@/services/loadService';
 import GoodsTypeSelect from "@/app/dashboard/sender/loads/new-load/GoodsTypeSelect";
@@ -334,6 +336,56 @@ export default function NewLoadForm() {
                                 {errors.netWeight && (
                                     <p className="text-sm text-red-600">{errors.netWeight.message}</p>
                                 )}
+                            </div>
+
+                            {/* Transport Type */}
+                            <div className="space-y-3">
+                                <Label className="text-sm font-medium">
+                                    Taşıma Tipi *
+                                </Label>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div
+                                        className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                                            watch('transportType') === TransportType.LAND
+                                                ? 'border-green-600 bg-green-50'
+                                                : 'border-gray-200 hover:border-green-300'
+                                        }`}
+                                        onClick={() => setValue('transportType', TransportType.LAND)}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <Truck className={`h-6 w-6 ${
+                                                watch('transportType') === TransportType.LAND
+                                                    ? 'text-green-600'
+                                                    : 'text-gray-400'
+                                            }`} />
+                                            <div>
+                                                <p className="font-semibold">Kara Taşımacılığı</p>
+                                                <p className="text-xs text-gray-600">Karayolu ile taşıma</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div
+                                        className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                                            watch('transportType') === TransportType.SEA
+                                                ? 'border-blue-600 bg-blue-50'
+                                                : 'border-gray-200 hover:border-blue-300'
+                                        }`}
+                                        onClick={() => setValue('transportType', TransportType.SEA)}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <Ship className={`h-6 w-6 ${
+                                                watch('transportType') === TransportType.SEA
+                                                    ? 'text-blue-600'
+                                                    : 'text-gray-400'
+                                            }`} />
+                                            <div>
+                                                <p className="font-semibold">Deniz Taşımacılığı</p>
+                                                <p className="text-xs text-gray-600">Deniz yolu ile taşıma</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </CardContent>
                     </Card>

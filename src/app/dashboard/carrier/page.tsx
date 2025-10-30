@@ -110,7 +110,10 @@ export default function CarrierDashboard() {
         ecoScore: 0
     };
 
-    const activeDeliveries = statistics?.recentDeliveries || [];
+    // Sadece bekleyen teslimatları göster (delivered hariç)
+    const activeDeliveries = (statistics?.recentDeliveries || []).filter(delivery =>
+        delivery.status !== 'delivered'
+    );
     const topRoutes = statistics?.topRoutes || [];
 
     const getStatusColor = (status: string) => {

@@ -28,7 +28,7 @@ import {
     Clock,
     DollarSign
 } from 'lucide-react';
-import loadService, { Load, LoadStatus } from '@/services/loadService';
+import loadService, { Load, LoadStatus, TransportType } from '@/services/loadService';
 import offerService, { OfferRequest, VehicleInfo } from '@/services/offerService';
 import vehicleService from '@/services/vehicleService';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
@@ -184,6 +184,9 @@ export default function AvailableLoadsPage() {
         }
     };
 
+    // Sadece LAND (kara) taşıma tipindeki yükleri göster
+    const filteredLoads = availableLoads.filter(load => load.transportType === TransportType.LAND);
+
     if (availableLoadsLoading) {
         return (
             <div className="flex items-center justify-center h-64">
@@ -202,18 +205,18 @@ export default function AvailableLoadsPage() {
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">Müsait Yükler</h1>
                     <p className="text-gray-600 mt-1">
-                        Teklif verebileceğiniz müsait yükleri görüntüleyin ve teklif gönderin
+                        Teklif verebileceğiniz müsait kara yüklerini görüntüleyin ve teklif gönderin
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
                     <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                         <Package className="h-4 w-4 mr-1" />
-                        {availableLoads.length} müsait yük
+                        {filteredLoads.length} müsait yük
                     </Badge>
                 </div>
             </div>
 
-            {availableLoads.length === 0 ? (
+            {filteredLoads.length === 0 ? (
                 <Card>
                     <CardContent className="flex flex-col items-center justify-center py-12">
                         <Package className="h-12 w-12 text-muted-foreground mb-4" />
@@ -225,7 +228,7 @@ export default function AvailableLoadsPage() {
                 </Card>
             ) : (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {availableLoads.map((load) => (
+                    {filteredLoads.map((load) => (
                         <Card key={load.id} className="hover:shadow-lg transition-shadow">
                             <CardHeader>
                                 <CardTitle className="flex items-center justify-between">
