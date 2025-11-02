@@ -26,6 +26,15 @@ export default function LoadsPageContent() {
 
     const dispatch = useAppDispatch()
     const { myLoads, myLoadsLoading, statusFilter, searchQuery } = useAppSelector(state => state.loads)
+
+    // URL query parametresinden tab değerini oku
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const tabParam = params.get('tab');
+        if (tabParam) {
+            dispatch(setStatusFilter(tabParam as LoadStatus | 'ALL'));
+        }
+    }, [dispatch]);
     const filteredLoads = useAppSelector(state => {
         const { myLoads, statusFilter, searchQuery } = state.loads;
         let result = myLoads;
@@ -165,7 +174,7 @@ export default function LoadsPageContent() {
                             </div>
 
                             {/* Status Filter Tabs */}
-                            <Tabs defaultValue="ALL" onValueChange={handleStatusFilterChange} className="w-full">
+                            <Tabs value={statusFilter} onValueChange={handleStatusFilterChange} className="w-full">
                                 <TabsList className="w-full h-auto flex-wrap justify-start gap-1 p-1">
                                     <TabsTrigger value="ALL" className="text-xs md:text-sm px-2 md:px-3 py-1.5">
                                         {t('loads.filters.all')}

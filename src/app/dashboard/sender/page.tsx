@@ -71,9 +71,9 @@ export default function SenderDashboard() {
                 // Try to fetch loads, but don't fail if they don't exist
                 try {
                     const loads = await loadService.getCurrentUserActiveLoads();
-                    // Sadece bekleyen yükleri göster (DELIVERED ve COMPLETED hariç)
+                    // Sadece PENDING statusundeki yükleri göster
                     const activeLoadsFiltered = (loads || []).filter(load =>
-                        load.status !== 'DELIVERED' && load.status !== 'COMPLETED'
+                        load.status === 'PENDING'
                     );
                     setActiveLoads(activeLoadsFiltered);
                 } catch (loadErr: any) {
@@ -202,7 +202,10 @@ export default function SenderDashboard() {
 
                         {/* Key Performance Indicators */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                            <Card className="shadow-lg border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-white">
+                            <Card
+                                className="shadow-lg border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-white cursor-pointer hover:shadow-xl transition-shadow"
+                                onClick={() => router.push('/dashboard/sender/loads')}
+                            >
                                 <CardContent className="p-6">
                                     <div className="flex items-center justify-between">
                                         <div>
@@ -222,7 +225,10 @@ export default function SenderDashboard() {
                                 </CardContent>
                             </Card>
 
-                            <Card className="shadow-lg border-l-4 border-l-green-500 bg-gradient-to-r from-green-50 to-white">
+                            <Card
+                                className="shadow-lg border-l-4 border-l-green-500 bg-gradient-to-r from-green-50 to-white cursor-pointer hover:shadow-xl transition-shadow"
+                                onClick={() => router.push('/dashboard/sender/sender-completed-deliveries')}
+                            >
                                 <CardContent className="p-6">
                                     <div className="flex items-center justify-between">
                                         <div>
@@ -242,7 +248,10 @@ export default function SenderDashboard() {
                                 </CardContent>
                             </Card>
 
-                            <Card className="shadow-lg border-l-4 border-l-purple-500 bg-gradient-to-r from-purple-50 to-white">
+                            <Card
+                                className="shadow-lg border-l-4 border-l-purple-500 bg-gradient-to-r from-purple-50 to-white cursor-pointer hover:shadow-xl transition-shadow"
+                                onClick={() => router.push('/dashboard/sender/loads?tab=PENDING')}
+                            >
                                 <CardContent className="p-6">
                                     <div className="flex items-center justify-between">
                                         <div>
@@ -262,91 +271,40 @@ export default function SenderDashboard() {
                                 </CardContent>
                             </Card>
 
-                            <Card className="shadow-lg border-l-4 border-l-emerald-500 bg-gradient-to-r from-emerald-50 to-white">
+                            <Card
+                                className="shadow-lg border-l-4 border-l-amber-500 bg-gradient-to-r from-amber-50 to-white cursor-pointer hover:shadow-xl transition-shadow"
+                                onClick={() => router.push('/dashboard/sender/offers')}
+                            >
                                 <CardContent className="p-6">
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <p className="text-sm font-medium text-gray-600">Ort. Ağırlık</p>
-                                            <p className="text-3xl font-bold text-emerald-600">{avgWeightTons} ton</p>
+                                            <p className="text-sm font-medium text-gray-600">Bekleyen Teklifler</p>
+                                            <p className="text-3xl font-bold text-amber-600">
+                                                {pendingOffersCount}
+                                            </p>
                                             <div className="flex items-center mt-2">
-                                                <Leaf className="h-4 w-4 text-emerald-600 mr-1" />
-                                                <span className="text-sm text-emerald-600 font-medium">
-                                                    Yük başına
+                                                <FileText className="h-4 w-4 text-amber-600 mr-1" />
+                                                <span className="text-sm text-amber-600 font-medium">
+                                                    Teklif bekliyor
                                                 </span>
                                             </div>
                                         </div>
-                                        <Leaf className="h-12 w-12 text-emerald-600 opacity-20" />
+                                        <FileText className="h-12 w-12 text-amber-600 opacity-20" />
                                     </div>
                                 </CardContent>
                             </Card>
                         </div>
 
-                        {/* Quick Action Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                            <Card
-                                className="shadow-md bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 cursor-pointer hover:shadow-lg transition-shadow"
-                                onClick={() => router.push('/dashboard/sender/loads')}
-                            >
-                                <CardContent className="p-6">
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-3 rounded-full bg-blue-100">
-                                            <Package className="h-6 w-6 text-blue-600" />
-                                        </div>
+                        {/* Average Weight Info Card */}
+                        <div className="mb-8">
+                            <Card className="shadow-lg border-l-4 border-l-emerald-500 bg-gradient-to-r from-emerald-50 to-white">
+                                <CardContent className="p-3">
+                                    <div className="flex items-center justify-between">
                                         <div>
-                                            <h3 className="font-bold text-lg text-blue-900">{t("senderPage.myLoads")}</h3>
-                                            <span className="text-blue-700 text-2xl font-bold">{statistics?.totalLoads || 0}</span>
+                                            <p className="text-xs font-medium text-gray-600">Yük başına ortalama ağırlık</p>
+                                            <p className="text-xl font-bold text-emerald-600">{avgWeightTons} ton</p>
                                         </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card
-                                className="shadow-md bg-gradient-to-r from-amber-50 to-amber-100 border-amber-200 cursor-pointer hover:shadow-lg transition-shadow"
-                                onClick={() => router.push('/dashboard/sender/offers')}
-                            >
-                                <CardContent className="p-6">
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-3 rounded-full bg-amber-100">
-                                            <FileText className="h-6 w-6 text-amber-600" />
-                                        </div>
-                                        <div>
-                                            <h3 className="font-bold text-lg text-amber-900">{t("senderPage.pendingOffers")}</h3>
-                                            <span className="text-amber-700 text-2xl font-bold">{pendingOffersCount}</span>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card
-                                className="shadow-md bg-gradient-to-r from-green-50 to-green-100 border-green-200 cursor-pointer hover:shadow-lg transition-shadow"
-                                onClick={() => router.push('/dashboard/sender/loads')}
-                            >
-                                <CardContent className="p-6">
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-3 rounded-full bg-green-100">
-                                            <TruckIcon className="h-6 w-6 text-green-600" />
-                                        </div>
-                                        <div>
-                                            <h3 className="font-bold text-lg text-green-900">{t("senderPage.activeShipments")}</h3>
-                                            <span className="text-green-700 text-2xl font-bold">{activeLoads.length}</span>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card
-                                className="shadow-md bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200 cursor-pointer hover:shadow-lg transition-shadow"
-                                onClick={() => router.push('/dashboard/sender/loads')}
-                            >
-                                <CardContent className="p-6">
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-3 rounded-full bg-purple-100">
-                                            <ClockIcon className="h-6 w-6 text-purple-600" />
-                                        </div>
-                                        <div>
-                                            <h3 className="font-bold text-lg text-purple-900">{t("senderPage.completedLoads")}</h3>
-                                            <span className="text-purple-700 text-2xl font-bold">{statistics?.completedLoads || 0}</span>
-                                        </div>
+                                        <Leaf className="h-8 w-8 text-emerald-600 opacity-20" />
                                     </div>
                                 </CardContent>
                             </Card>

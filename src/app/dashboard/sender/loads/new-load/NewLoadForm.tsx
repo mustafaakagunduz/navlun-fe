@@ -240,7 +240,8 @@ export default function NewLoadForm() {
 
     return (
         <ProtectedRoute allowedRoles={['SENDER']}>
-            <div className="p-4 lg:p-8 max-w-6xl mx-auto">
+            <div className="min-h-screen bg-gradient-to-br from-green-100 to-emerald-100">
+                <div className="p-4 lg:p-8 max-w-6xl mx-auto">
                 {/* Header */}
                 <div className="flex items-center gap-4 mb-8">
                     <Button
@@ -277,7 +278,7 @@ export default function NewLoadForm() {
                 {/* Form */}
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                     {/* Basic Information */}
-                    <Card>
+                    <Card className="bg-gradient-to-br from-green-50 to-emerald-50">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Package className="h-5 w-5 text-green-600" />
@@ -287,7 +288,7 @@ export default function NewLoadForm() {
                         <CardContent className="space-y-4">
                             {/* Title */}
                             <div className="space-y-2">
-                                <Label htmlFor="title" className="text-sm font-medium">
+                                <Label htmlFor="title" className="text-base font-semibold">
                                     {t('newLoad.fields.title')} *
                                 </Label>
                                 <Input
@@ -296,7 +297,7 @@ export default function NewLoadForm() {
                                         required: t('newLoad.validation.titleRequired')
                                     })}
                                     placeholder={t('newLoad.placeholders.title')}
-                                    className={errors.title ? 'border-red-500' : ''}
+                                    className={`transition-colors hover:bg-gray-50 ${errors.title ? 'border-red-500' : ''}`}
                                 />
                                 {errors.title && (
                                     <p className="text-sm text-red-600">{errors.title.message}</p>
@@ -305,7 +306,7 @@ export default function NewLoadForm() {
 
                             {/* Goods Type */}
                             <div className="space-y-2">
-                                <Label className="text-sm font-medium">
+                                <Label className="text-base font-semibold">
                                     {t('newLoad.fields.goodsType')} *
                                 </Label>
                                 <GoodsTypeSelect
@@ -318,7 +319,7 @@ export default function NewLoadForm() {
 
                             {/* Weight */}
                             <div className="space-y-2">
-                                <Label htmlFor="netWeight" className="text-sm font-medium">
+                                <Label htmlFor="netWeight" className="text-base font-semibold">
                                     {t('newLoad.fields.weight')} (kg) *
                                 </Label>
                                 <Input
@@ -331,7 +332,7 @@ export default function NewLoadForm() {
                                         min: { value: 0.1, message: t('newLoad.validation.weightMin') }
                                     })}
                                     placeholder={t('newLoad.placeholders.weight')}
-                                    className={errors.netWeight ? 'border-red-500' : ''}
+                                    className={`transition-colors hover:bg-gray-50 ${errors.netWeight ? 'border-red-500' : ''}`}
                                 />
                                 {errors.netWeight && (
                                     <p className="text-sm text-red-600">{errors.netWeight.message}</p>
@@ -340,7 +341,7 @@ export default function NewLoadForm() {
 
                             {/* Transport Type */}
                             <div className="space-y-3">
-                                <Label className="text-sm font-medium">
+                                <Label className="text-base font-semibold">
                                     Taşıma Tipi *
                                 </Label>
                                 <div className="grid grid-cols-2 gap-4">
@@ -391,7 +392,7 @@ export default function NewLoadForm() {
                     </Card>
 
                     {/* Addresses Section */}
-                    <Card>
+                    <Card className="bg-gradient-to-br from-green-50 to-emerald-50">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <MapPin className="h-5 w-5 text-green-600" />
@@ -401,7 +402,7 @@ export default function NewLoadForm() {
                         <CardContent className="space-y-4">
                             {/* Loading Address */}
                             <div className="space-y-2">
-                                <Label htmlFor="loadingAddress" className="text-sm font-medium">
+                                <Label htmlFor="loadingAddress" className="text-base font-semibold">
                                     {t('newLoad.fields.loadingAddress')} *
                                 </Label>
                                 <Textarea
@@ -411,7 +412,7 @@ export default function NewLoadForm() {
                                     })}
                                     placeholder={t('newLoad.placeholders.loadingAddress')}
                                     rows={3}
-                                    className={errors.loadingAddress ? 'border-red-500' : ''}
+                                    className={`transition-colors hover:bg-gray-50 ${errors.loadingAddress ? 'border-red-500' : ''}`}
                                 />
                                 {errors.loadingAddress && (
                                     <p className="text-sm text-red-600">{errors.loadingAddress.message}</p>
@@ -420,7 +421,7 @@ export default function NewLoadForm() {
 
                             {/* Delivery Address */}
                             <div className="space-y-2">
-                                <Label htmlFor="deliveryAddress" className="text-sm font-medium">
+                                <Label htmlFor="deliveryAddress" className="text-base font-semibold">
                                     {t('newLoad.fields.deliveryAddress')} *
                                 </Label>
                                 <Textarea
@@ -430,7 +431,7 @@ export default function NewLoadForm() {
                                     })}
                                     placeholder={t('newLoad.placeholders.deliveryAddress')}
                                     rows={3}
-                                    className={errors.deliveryAddress ? 'border-red-500' : ''}
+                                    className={`transition-colors hover:bg-gray-50 ${errors.deliveryAddress ? 'border-red-500' : ''}`}
                                 />
                                 {errors.deliveryAddress && (
                                     <p className="text-sm text-red-600">{errors.deliveryAddress.message}</p>
@@ -440,7 +441,7 @@ export default function NewLoadForm() {
                     </Card>
 
                     {/* Dates Section */}
-                    <Card>
+                    <Card className="bg-gradient-to-br from-green-50 to-emerald-50">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Calendar className="h-5 w-5 text-green-600" />
@@ -451,24 +452,33 @@ export default function NewLoadForm() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {/* Loading Date */}
                                 <div className="space-y-2">
-                                    <Label htmlFor="loadingDate" className="text-sm font-medium">
+                                    <Label htmlFor="loadingDate" className="text-base font-semibold">
                                         {t('newLoad.fields.loadingDate')} *
                                     </Label>
-                                    <Input
-                                        id="loadingDate"
-                                        type="date"
-                                        {...register('loadingDate', {
-                                            required: t('newLoad.validation.loadingDateRequired'),
-                                            validate: (value) => {
-                                                const today = new Date();
-                                                const selectedDate = new Date(value);
-                                                today.setHours(0, 0, 0, 0);
-                                                return selectedDate >= today || t('newLoad.validation.dateNotPast');
-                                            }
-                                        })}
-                                        min={new Date().toISOString().split('T')[0]}
-                                        className={errors.loadingDate ? 'border-red-500' : ''}
-                                    />
+                                    <div
+                                        className="cursor-pointer"
+                                        onClick={() => {
+                                            const input = document.getElementById('loadingDate') as HTMLInputElement | null;
+                                            input?.showPicker?.();
+                                        }}
+                                    >
+                                        <Input
+                                            id="loadingDate"
+                                            type="date"
+                                            {...register('loadingDate', {
+                                                required: t('newLoad.validation.loadingDateRequired'),
+                                                validate: (value) => {
+                                                    const today = new Date();
+                                                    const selectedDate = new Date(value);
+                                                    today.setHours(0, 0, 0, 0);
+                                                    return selectedDate >= today || t('newLoad.validation.dateNotPast');
+                                                }
+                                            })}
+                                            min={new Date().toISOString().split('T')[0]}
+                                            className={`cursor-pointer transition-colors hover:bg-gray-50 ${errors.loadingDate ? 'border-red-500' : ''}`}
+                                            style={{ direction: 'ltr' }}
+                                        />
+                                    </div>
                                     {errors.loadingDate && (
                                         <p className="text-sm text-red-600">{errors.loadingDate.message}</p>
                                     )}
@@ -476,27 +486,36 @@ export default function NewLoadForm() {
 
                                 {/* Delivery Date */}
                                 <div className="space-y-2">
-                                    <Label htmlFor="deliveryDate" className="text-sm font-medium">
+                                    <Label htmlFor="deliveryDate" className="text-base font-semibold">
                                         {t('newLoad.fields.deliveryDate')} *
                                     </Label>
-                                    <Input
-                                        id="deliveryDate"
-                                        type="date"
-                                        {...register('deliveryDate', {
-                                            required: t('newLoad.validation.deliveryDateRequired'),
-                                            validate: (value) => {
-                                                const loadingDate = watch('loadingDate');
-                                                if (!loadingDate) return true;
+                                    <div
+                                        className="cursor-pointer"
+                                        onClick={() => {
+                                            const input = document.getElementById('deliveryDate') as HTMLInputElement | null;
+                                            input?.showPicker?.();
+                                        }}
+                                    >
+                                        <Input
+                                            id="deliveryDate"
+                                            type="date"
+                                            {...register('deliveryDate', {
+                                                required: t('newLoad.validation.deliveryDateRequired'),
+                                                validate: (value) => {
+                                                    const loadingDate = watch('loadingDate');
+                                                    if (!loadingDate) return true;
 
-                                                const loading = new Date(loadingDate);
-                                                const delivery = new Date(value);
+                                                    const loading = new Date(loadingDate);
+                                                    const delivery = new Date(value);
 
-                                                return delivery > loading || t('newLoad.validation.deliveryAfterLoading');
-                                            }
-                                        })}
-                                        min={watch('loadingDate') || new Date().toISOString().split('T')[0]}
-                                        className={errors.deliveryDate ? 'border-red-500' : ''}
-                                    />
+                                                    return delivery > loading || t('newLoad.validation.deliveryAfterLoading');
+                                                }
+                                            })}
+                                            min={watch('loadingDate') || new Date().toISOString().split('T')[0]}
+                                            className={`cursor-pointer transition-colors hover:bg-gray-50 ${errors.deliveryDate ? 'border-red-500' : ''}`}
+                                            style={{ direction: 'ltr' }}
+                                        />
+                                    </div>
                                     {errors.deliveryDate && (
                                         <p className="text-sm text-red-600">{errors.deliveryDate.message}</p>
                                     )}
@@ -506,7 +525,7 @@ export default function NewLoadForm() {
                     </Card>
 
                     {/* Description Section */}
-                    <Card>
+                    <Card className="bg-gradient-to-br from-green-50 to-emerald-50">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <FileText className="h-5 w-5 text-green-600" />
@@ -520,7 +539,7 @@ export default function NewLoadForm() {
                                     {...register('description')}
                                     placeholder={t('newLoad.placeholders.description')}
                                     rows={4}
-                                    className="resize-none"
+                                    className="resize-none transition-colors hover:bg-gray-50"
                                 />
                                 <p className="text-xs text-gray-500">
                                     {t('newLoad.descriptionHelp')}
@@ -622,6 +641,7 @@ export default function NewLoadForm() {
                         </Button>
                     </div>
                 </form>
+                </div>
             </div>
         </ProtectedRoute>
     );
