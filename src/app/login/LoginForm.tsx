@@ -93,17 +93,17 @@ const LoginForm = ({
         </button>
 
         {/* Divider */}
-        <div className="relative my-6">
+        {/* <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300"></div>
             </div>
             <div className="relative flex justify-center text-sm">
                 <span className="px-4 bg-white text-gray-500">{t("auth.orContinueWith") || "veya devam edin"}</span>
             </div>
-        </div>
+        </div> */}
 
         {/* Social Login Buttonss */}
-        <div className="space-y-3">
+        {/* <div className="space-y-3">
             <button
                 type="button"
                 onClick={() => {
@@ -121,7 +121,7 @@ const LoginForm = ({
                 </svg>
                 <span className="text-gray-700 font-medium">Google ile giriş yap</span>
             </button>
-        </div>
+        </div> */}
     </form>
 )
 
