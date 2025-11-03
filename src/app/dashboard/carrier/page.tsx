@@ -9,6 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui/dialog";
+import {
     Loader2,
     Package,
     TruckIcon,
@@ -49,6 +56,8 @@ export default function CarrierDashboard() {
     const [currentTime, setCurrentTime] = useState(new Date());
     const [statistics, setStatistics] = useState<CarrierStatistics | null>(null);
     const [statsLoading, setStatsLoading] = useState(true);
+    const [showActiveVehiclesModal, setShowActiveVehiclesModal] = useState(false);
+    const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
 
     // Gerçek zamanlı saat güncellemesi
     useEffect(() => {
@@ -375,7 +384,7 @@ export default function CarrierDashboard() {
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
                                         <Award className="h-5 w-5 text-yellow-600" />
-                                        En Karlı Rotalar
+                                        En Karlı Rotalar (KM Başı Kazanç)
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
@@ -391,20 +400,20 @@ export default function CarrierDashboard() {
                                                         <div className="flex items-center gap-4 text-sm text-gray-600">
                                                             <span>{route.count} sefer</span>
                                                             <span className="flex items-center gap-1">
-                                                                <Star className="h-3 w-3 text-yellow-500" />
-                                                                {route.rating}
+                                                                <Route className="h-3 w-3 text-blue-600" />
+                                                                {route.distanceKm} km
                                                             </span>
                                                             <span className="flex items-center gap-1">
-                                                                <Fuel className="h-3 w-3 text-green-600" />
-                                                                {route.efficiency}%
+                                                                <DollarSign className="h-3 w-3 text-green-600" />
+                                                                ${route.pricePerKm.toFixed(2)}/km
                                                             </span>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div className="text-right">
                                                     <p className="font-bold text-purple-600">{carrierService.formatCurrency(route.earnings)}</p>
-                                                    <Badge variant="outline" className="text-xs mt-1">
-                                                        Verimli Rota
+                                                    <Badge variant="outline" className="text-xs mt-1 bg-green-100 text-green-700 border-green-300">
+                                                        En Karlı
                                                     </Badge>
                                                 </div>
                                             </div>
@@ -430,6 +439,7 @@ export default function CarrierDashboard() {
                                                     <Fuel className="h-8 w-8 text-green-600 mx-auto mb-2" />
                                                     <p className="text-sm text-green-800 font-medium">Yakıt Tasarrufu</p>
                                                     <p className="text-2xl font-bold text-green-600">{carrierService.formatCurrency(statistics?.fleetAnalytics?.fuelSavings || 0)}</p>
+                                                    <p className="text-xs text-green-600 mt-1">Ort: {statistics?.fleetAnalytics?.avgFuelEfficiency?.toFixed(1) || 0} L/100km</p>
                                                 </CardContent>
                                             </Card>
 
@@ -438,6 +448,7 @@ export default function CarrierDashboard() {
                                                     <Zap className="h-8 w-8 text-blue-600 mx-auto mb-2" />
                                                     <p className="text-sm text-blue-800 font-medium">Operasyon Verimliliği</p>
                                                     <p className="text-2xl font-bold text-blue-600">{statistics?.fleetAnalytics?.operationEfficiency || 0}%</p>
+                                                    <p className="text-xs text-blue-600 mt-1">Yakıt tasarrufuna göre</p>
                                                 </CardContent>
                                             </Card>
                                         </div>
@@ -449,31 +460,31 @@ export default function CarrierDashboard() {
                                                 Araç Durumu
                                             </h4>
                                             <div className="space-y-3">
-                                                <div className="flex justify-between items-center">
-                                                    <span className="text-sm">Aktif Araçlar</span>
+                                                <div className="flex justify-between items-center cursor-pointer hover:bg-gray-50 p-2 rounded" onClick={() => setShowActiveVehiclesModal(true)}>
+                                                    <span className="text-sm font-medium">Aktif Araçlar</span>
                                                     <div className="flex items-center gap-2">
                                                         <div className="w-20 bg-gray-200 rounded-full h-2">
                                                             <div className="bg-green-600 h-2 rounded-full" style={{width: `${(statistics?.fleetAnalytics?.activeVehicles || 0) / (statistics?.fleetAnalytics?.totalVehicles || 1) * 100}%`}}></div>
                                                         </div>
-                                                        <span className="text-sm font-bold">{statistics?.fleetAnalytics?.activeVehicles || 0}/{statistics?.fleetAnalytics?.totalVehicles || 0}</span>
+                                                        <span className="text-sm font-bold text-green-600">{statistics?.fleetAnalytics?.activeVehicles || 0}/{statistics?.fleetAnalytics?.totalVehicles || 0}</span>
                                                     </div>
                                                 </div>
-                                                <div className="flex justify-between items-center">
-                                                    <span className="text-sm">Bakım Durumu</span>
+                                                <div className="flex justify-between items-center cursor-pointer hover:bg-gray-50 p-2 rounded" onClick={() => setShowMaintenanceModal(true)}>
+                                                    <span className="text-sm font-medium">Bakım Durumu</span>
                                                     <div className="flex items-center gap-2">
                                                         <div className="w-20 bg-gray-200 rounded-full h-2">
                                                             <div className="bg-blue-600 h-2 rounded-full" style={{width: `${statistics?.fleetAnalytics?.maintenancePercentage || 0}%`}}></div>
                                                         </div>
-                                                        <span className="text-sm font-bold">{statistics?.fleetAnalytics?.maintenancePercentage || 0}%</span>
+                                                        <span className="text-sm font-bold text-blue-600">{statistics?.fleetAnalytics?.maintenancePercentage || 0}%</span>
                                                     </div>
                                                 </div>
-                                                <div className="flex justify-between items-center">
-                                                    <span className="text-sm">Güvenlik Skoru</span>
+                                                <div className="flex justify-between items-center p-2">
+                                                    <span className="text-sm font-medium">Güvenlik Skoru</span>
                                                     <div className="flex items-center gap-2">
                                                         <div className="w-20 bg-gray-200 rounded-full h-2">
-                                                            <div className="bg-purple-600 h-2 rounded-full" style={{width: `${statistics?.fleetAnalytics?.safetyScore || 0}%`}}></div>
+                                                            <div className={`h-2 rounded-full ${(statistics?.fleetAnalytics?.safetyScore || 0) < 70 ? 'bg-red-600' : (statistics?.fleetAnalytics?.safetyScore || 0) < 90 ? 'bg-yellow-600' : 'bg-purple-600'}`} style={{width: `${statistics?.fleetAnalytics?.safetyScore || 0}%`}}></div>
                                                         </div>
-                                                        <span className="text-sm font-bold">{statistics?.fleetAnalytics?.safetyScore || 0}%</span>
+                                                        <span className={`text-sm font-bold ${(statistics?.fleetAnalytics?.safetyScore || 0) < 70 ? 'text-red-600' : (statistics?.fleetAnalytics?.safetyScore || 0) < 90 ? 'text-yellow-600' : 'text-purple-600'}`}>{statistics?.fleetAnalytics?.safetyScore || 0}%</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -484,25 +495,13 @@ export default function CarrierDashboard() {
                                             <div className="flex items-center justify-between">
                                                 <div>
                                                     <h4 className="font-semibold text-green-800">Çevresel Performans</h4>
-                                                    <p className="text-sm text-green-600">CO₂ emisyon azaltımı</p>
+                                                    <p className="text-sm text-green-600">Yakıt verimliliğine göre</p>
                                                 </div>
                                                 <div className="text-right">
-                                                    <div className="text-3xl font-bold text-green-600">-{statistics?.fleetAnalytics?.co2ReductionPercentage || 0}%</div>
-                                                    <div className="text-sm text-green-700">Bu yıl</div>
+                                                    <div className="text-3xl font-bold text-green-600">{statistics?.fleetAnalytics?.ecoScore || 0}</div>
+                                                    <div className="text-sm text-green-700">Çevreci Skor</div>
                                                 </div>
                                             </div>
-                                        </div>
-
-                                        {/* Quick Actions */}
-                                        <div className="grid grid-cols-2 gap-2">
-                                            <Button variant="outline" size="sm" className="text-xs">
-                                                <Phone className="h-3 w-3 mr-1" />
-                                                Destek
-                                            </Button>
-                                            <Button variant="outline" size="sm" className="text-xs">
-                                                <Mail className="h-3 w-3 mr-1" />
-                                                Rapor
-                                            </Button>
                                         </div>
                                     </div>
                                 </CardContent>
@@ -585,6 +584,126 @@ export default function CarrierDashboard() {
                         </div>
                     </div>
                 </div>
+
+                {/* Active Vehicles Modal */}
+                <Dialog open={showActiveVehiclesModal} onOpenChange={setShowActiveVehiclesModal}>
+                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
+                                <TruckIcon className="h-5 w-5 text-green-600" />
+                                Aktif Araçlar
+                            </DialogTitle>
+                            <DialogDescription>
+                                Filonuzdaki tüm aktif araçların detaylı listesi
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                            {statistics?.fleetAnalytics?.maintenanceAlerts
+                                ?.filter(vehicle => vehicle.isActive)
+                                .map((vehicle, index) => (
+                                    <Card key={index} className="bg-gradient-to-r from-green-50 to-white border-green-200">
+                                        <CardContent className="p-4">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <div>
+                                                    <h4 className="font-bold text-lg">{vehicle.vehiclePlate}</h4>
+                                                    <p className="text-sm text-gray-600">{vehicle.vehicleType}</p>
+                                                </div>
+                                                <Badge className="bg-green-100 text-green-700 border-green-300">Aktif</Badge>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-3 mt-3">
+                                                <div className="flex items-center gap-2">
+                                                    <Route className="h-4 w-4 text-blue-600" />
+                                                    <span className="text-sm">{vehicle.totalKm?.toLocaleString() || 0} km</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <Fuel className="h-4 w-4 text-orange-600" />
+                                                    <span className="text-sm">{vehicle.fuelConsumption} L/100km</span>
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                        </div>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Maintenance Modal */}
+                <Dialog open={showMaintenanceModal} onOpenChange={setShowMaintenanceModal}>
+                    <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
+                                <Settings className="h-5 w-5 text-blue-600" />
+                                Bakım Durumu
+                            </DialogTitle>
+                            <DialogDescription>
+                                Araçlarınızın bakım tarihleri ve uyarılar
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                            {statistics?.fleetAnalytics?.maintenanceAlerts?.map((vehicle, index) => (
+                                <Card key={index} className={`${vehicle.alerts.length > 0 ? 'border-red-300 bg-red-50' : 'border-green-300 bg-green-50'}`}>
+                                    <CardContent className="p-4">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <div>
+                                                <h4 className="font-bold text-lg flex items-center gap-2">
+                                                    {vehicle.vehiclePlate}
+                                                    {vehicle.alerts.length > 0 && (
+                                                        <AlertTriangle className="h-5 w-5 text-red-600" />
+                                                    )}
+                                                </h4>
+                                                <p className="text-sm text-gray-600">{vehicle.vehicleType}</p>
+                                            </div>
+                                            <div className="flex flex-col items-end gap-1">
+                                                <Badge className={vehicle.isActive ? "bg-green-100 text-green-700 border-green-300" : "bg-gray-100 text-gray-700"}>
+                                                    {vehicle.isActive ? 'Aktif' : 'Pasif'}
+                                                </Badge>
+                                                {vehicle.alerts.length > 0 && (
+                                                    <Badge variant="destructive">{vehicle.alerts.length} Uyarı</Badge>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+                                            <div className="bg-white p-2 rounded border">
+                                                <p className="text-xs text-gray-500">Son Yağ Bakımı</p>
+                                                <p className="text-sm font-semibold">{vehicle.lastOilChange}</p>
+                                            </div>
+                                            <div className="bg-white p-2 rounded border">
+                                                <p className="text-xs text-gray-500">Son Lastik Değişimi</p>
+                                                <p className="text-sm font-semibold">{vehicle.lastTireChange}</p>
+                                            </div>
+                                            <div className="bg-white p-2 rounded border">
+                                                <p className="text-xs text-gray-500">Son Filtre Değişimi</p>
+                                                <p className="text-sm font-semibold">{vehicle.lastFilterChange}</p>
+                                            </div>
+                                            <div className="bg-white p-2 rounded border">
+                                                <p className="text-xs text-gray-500">Araç Muayenesi</p>
+                                                <p className="text-sm font-semibold">{vehicle.inspectionDate}</p>
+                                            </div>
+                                        </div>
+
+                                        {vehicle.alerts.length > 0 && (
+                                            <div className="bg-red-100 border border-red-300 rounded p-3">
+                                                <h5 className="font-semibold text-red-800 mb-2 flex items-center gap-2">
+                                                    <Shield className="h-4 w-4" />
+                                                    Güvenlik Uyarıları
+                                                </h5>
+                                                <ul className="space-y-1">
+                                                    {vehicle.alerts.map((alert, alertIndex) => (
+                                                        <li key={alertIndex} className="text-sm text-red-700 flex items-start gap-2">
+                                                            <span className="text-red-600">•</span>
+                                                            {alert}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    </DialogContent>
+                </Dialog>
             </div>
         </ProtectedRoute>
     );

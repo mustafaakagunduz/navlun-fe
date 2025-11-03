@@ -87,7 +87,7 @@ const offerService = {
         try {
             return await apiService.post<Offer, OfferRequest>('/offers', offerData);
         } catch (error) {
-            console.error('Create offer error:', error);
+            // Error already handled in apiService, just rethrow
             throw error;
         }
     },
@@ -391,6 +391,16 @@ const offerService = {
             return await apiService.get<LoadWithOffers[]>('/offers/my-rejected-offers');
         } catch (error) {
             console.error('Get current carrier rejected offers error:', error);
+            throw error;
+        }
+    },
+
+    // Mevcut kullanıcının (taşıyıcı) bekleyen tekliflerini getirir
+    getCurrentCarrierPendingOffers: async (): Promise<LoadWithOffers[]> => {
+        try {
+            return await apiService.get<LoadWithOffers[]>('/offers/my-pending-offers');
+        } catch (error) {
+            console.error('Get current carrier pending offers error:', error);
             throw error;
         }
     }

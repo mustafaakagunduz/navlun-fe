@@ -8,16 +8,19 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Loader2, Package, MapPin, Calendar, Weight, Upload, Navigation, FileText } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import { fetchActiveDeliveries, setSelectedDelivery, setShowStatusModal, setShowDocumentModal } from '@/store/slices/deliverySlice';
+import { fetchActiveDeliveries, setSelectedDelivery, setShowStatusModal, setShowDocumentModal, setSelectedDocumentType } from '@/store/slices/deliverySlice';
 import { useToast } from '@/hooks/use-toast';
 import DeliveryStatusCard from './DeliveryStatusCard';
 import StatusUpdateModal from './StatusUpdateModal';
 import DocumentUploadModal from './DocumentUploadModal';
 import { DeliveryStep } from '@/services/deliveryService';
 import deliveryService from '@/services/deliveryService';
+import loadService from '@/services/loadService';
+import { useRouter } from 'next/navigation';
 
 export default function DeliveryTrackingContent() {
     const dispatch = useAppDispatch();
+    const router = useRouter();
     const { toast } = useToast();
     const {
         activeDeliveries,
@@ -28,7 +31,31 @@ export default function DeliveryTrackingContent() {
         showDocumentModal
     } = useAppSelector(state => state.delivery);
 
-    const [filterStatus, setFilterStatus] = useState<DeliveryStep | 'ALL'>('ALL');
+    const [filterStatus, setFilterStatus] = useState<DeliveryStep | 'ALL'>(DeliveryStep.ASSIGNED);
+
+    const handleGoToChat = async (loadId: string) => {
+        try {
+            // Load detaylarını getir
+            const loadData = await loadService.getLoadById(loadId);
+
+            if (!loadData.sender?.userId) {
+                toast({
+                    title: "Hata",
+                    description: "Yük sahibine ulaşılamadı.",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            router.push(`/dashboard/messages/load/${loadId}?otherUserId=${loadData.sender.userId}`);
+        } catch (error) {
+            toast({
+                title: "Hata",
+                description: "Yük bilgileri alınamadı.",
+                variant: "destructive",
+            });
+        }
+    };
 
     useEffect(() => {
         dispatch(fetchActiveDeliveries());
@@ -45,15 +72,14 @@ export default function DeliveryTrackingContent() {
     }, [activeDeliveriesError, toast]);
 
     const filteredDeliveries = activeDeliveries.filter(delivery => {
-        if (filterStatus === 'ALL') return true;
         return delivery.currentStatus === filterStatus;
     });
 
     const getStatusCounts = () => {
         return {
-            all: activeDeliveries.length,
-            onTheWay: activeDeliveries.filter(d => d.currentStatus === DeliveryStep.ON_THE_WAY).length,
+            assigned: activeDeliveries.filter(d => d.currentStatus === DeliveryStep.ASSIGNED).length,
             pickedUp: activeDeliveries.filter(d => d.currentStatus === DeliveryStep.PICKED_UP).length,
+            onTheWay: activeDeliveries.filter(d => d.currentStatus === DeliveryStep.ON_THE_WAY).length,
             delivered: activeDeliveries.filter(d => d.currentStatus === DeliveryStep.DELIVERED).length,
         };
     };
@@ -88,17 +114,17 @@ export default function DeliveryTrackingContent() {
 
             <Tabs value={filterStatus} onValueChange={(value) => setFilterStatus(value as DeliveryStep | 'ALL')}>
                 <TabsList className="grid w-full grid-cols-4">
-                    <TabsTrigger value="ALL">
-                        Tümü ({counts.all})
-                    </TabsTrigger>
-                    <TabsTrigger value={DeliveryStep.ON_THE_WAY}>
-                        Yüke Gidiliyor ({counts.onTheWay})
+                    <TabsTrigger value={DeliveryStep.ASSIGNED}>
+                        Kabul Edilen Yükler ({counts.assigned})
                     </TabsTrigger>
                     <TabsTrigger value={DeliveryStep.PICKED_UP}>
-                        Alındı ({counts.pickedUp})
+                        Yüklenenler ({counts.pickedUp})
+                    </TabsTrigger>
+                    <TabsTrigger value={DeliveryStep.ON_THE_WAY}>
+                        Yolda Olanlar ({counts.onTheWay})
                     </TabsTrigger>
                     <TabsTrigger value={DeliveryStep.DELIVERED}>
-                        Teslim Edildi ({counts.delivered})
+                        Teslim Edilen Yükler ({counts.delivered})
                     </TabsTrigger>
                 </TabsList>
 
@@ -107,9 +133,7 @@ export default function DeliveryTrackingContent() {
                         <Card>
                             <CardContent className="flex flex-col items-center justify-center py-12">
                                 <Package className="h-12 w-12 text-muted-foreground mb-4" />
-                                <h3 className="text-lg font-semibold mb-2">
-                                    {filterStatus === 'ALL' ? 'Aktif teslimat bulunmuyor' : 'Bu durumda teslimat bulunmuyor'}
-                                </h3>
+                                <h3 className="text-lg font-semibold mb-2">Bu durumda teslimat bulunmuyor</h3>
                                 <p className="text-muted-foreground text-center">
                                     Yeni teslimatlar atandığında burada görünecektir.
                                 </p>
@@ -127,8 +151,11 @@ export default function DeliveryTrackingContent() {
                                     }}
                                     onUploadDocument={(type) => {
                                         dispatch(setSelectedDelivery(delivery));
+                                        dispatch(setSelectedDocumentType(type));
                                         dispatch(setShowDocumentModal(true));
                                     }}
+                                    onGoToChat={() => handleGoToChat(delivery.actualLoadId)}
+                                    onRefresh={() => dispatch(fetchActiveDeliveries())}
                                 />
                             ))}
                         </div>

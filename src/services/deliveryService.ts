@@ -3,9 +3,13 @@ import apiService from '@/services/apiService';
 
 // Enum tanımlamaları
 export enum DeliveryStep {
+    ASSIGNED = 'ASSIGNED',
     ON_THE_WAY = 'ON_THE_WAY',
     PICKED_UP = 'PICKED_UP',
-    DELIVERED = 'DELIVERED'
+    DELIVERED = 'DELIVERED',
+    PAYMENT_RECEIVED = 'PAYMENT_RECEIVED',
+    PAYMENT_PENDING = 'PAYMENT_PENDING',
+    COMPLETED = 'COMPLETED'
 }
 
 // Tip tanımlamaları
@@ -458,12 +462,20 @@ const deliveryService = {
 // Status display name
     getStatusDisplayName: (step: DeliveryStep): string => {
         switch (step) {
+            case DeliveryStep.ASSIGNED:
+                return 'Atandı';
             case DeliveryStep.ON_THE_WAY:
-                return 'Yüke Gidiliyor';
+                return 'Yola Çıkıldı';
             case DeliveryStep.PICKED_UP:
-                return 'Alındı';
+                return 'Yük Alındı';
             case DeliveryStep.DELIVERED:
                 return 'Teslim Edildi';
+            case DeliveryStep.PAYMENT_RECEIVED:
+                return 'Ödeme Alındı';
+            case DeliveryStep.PAYMENT_PENDING:
+                return 'Ödeme Beklemede';
+            case DeliveryStep.COMPLETED:
+                return 'Tamamlandı';
             default:
                 return String(step).replace(/_/g, ' ');
         }
@@ -472,11 +484,19 @@ const deliveryService = {
 // Status progress hesaplama
     getStatusProgress: (step: DeliveryStep): number => {
         switch (step) {
+            case DeliveryStep.ASSIGNED:
+                return 10;
             case DeliveryStep.ON_THE_WAY:
-                return 25;
+                return 30;
             case DeliveryStep.PICKED_UP:
-                return 50;
+                return 60;
             case DeliveryStep.DELIVERED:
+                return 80;
+            case DeliveryStep.PAYMENT_RECEIVED:
+                return 95;
+            case DeliveryStep.PAYMENT_PENDING:
+                return 85;
+            case DeliveryStep.COMPLETED:
                 return 100;
             default:
                 return 0;
@@ -486,11 +506,19 @@ const deliveryService = {
 // Status color
     getStatusColor: (step: DeliveryStep): string => {
         switch (step) {
+            case DeliveryStep.ASSIGNED:
+                return 'gray';
             case DeliveryStep.ON_THE_WAY:
                 return 'blue';
             case DeliveryStep.PICKED_UP:
                 return 'orange';
             case DeliveryStep.DELIVERED:
+                return 'purple';
+            case DeliveryStep.PAYMENT_RECEIVED:
+                return 'green';
+            case DeliveryStep.PAYMENT_PENDING:
+                return 'yellow';
+            case DeliveryStep.COMPLETED:
                 return 'green';
             default:
                 return 'gray';
@@ -525,6 +553,50 @@ const deliveryService = {
             return tracking.loadId; // Bu aslında delivery status ID olacak
         } catch (error) {
             console.error(`Get delivery status ID by load ID (${loadId}) error:`, error);
+            throw error;
+        }
+    },
+
+    // === YENİ AKIŞ METODları ===
+
+    // Yola çıkma
+    startJourney: async (deliveryStatusId: string): Promise<DeliveryStatus> => {
+        try {
+            return await apiService.post<DeliveryStatus>(
+                `/delivery-status/${deliveryStatusId}/start-journey`,
+                {}
+            );
+        } catch (error) {
+            console.error(`Start journey (${deliveryStatusId}) error:`, error);
+            throw error;
+        }
+    },
+
+    // Boşaltma tamamlama
+    completeUnloading: async (deliveryStatusId: string): Promise<DeliveryStatus> => {
+        try {
+            return await apiService.post<DeliveryStatus>(
+                `/delivery-status/${deliveryStatusId}/complete-unloading`,
+                {}
+            );
+        } catch (error) {
+            console.error(`Complete unloading (${deliveryStatusId}) error:`, error);
+            throw error;
+        }
+    },
+
+    // Ödeme durumu işaretleme
+    markPaymentStatus: async (deliveryStatusId: string, paymentReceived: boolean): Promise<DeliveryStatus> => {
+        try {
+            const params = new URLSearchParams();
+            params.append('paymentReceived', String(paymentReceived));
+
+            return await apiService.post<DeliveryStatus>(
+                `/delivery-status/${deliveryStatusId}/payment-status?${params.toString()}`,
+                {}
+            );
+        } catch (error) {
+            console.error(`Mark payment status (${deliveryStatusId}) error:`, error);
             throw error;
         }
     },

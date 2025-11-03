@@ -128,10 +128,10 @@ export default function AvailableLoadsPage() {
             dispatch(fetchAvailableLoads({ page: 0, size: 50 }));
 
         } catch (error: any) {
-            console.error('Offer submission error:', error); // Debug
+            // unwrap() reject edildiğinde error string olarak gelir
             toast({
-                title: 'Hata',
-                description: error.message || 'Teklif gönderilirken bir hata oluştu.',
+                title: 'Uyarı',
+                description: error || 'Teklif gönderilirken bir hata oluştu.',
                 variant: 'destructive',
             });
         }

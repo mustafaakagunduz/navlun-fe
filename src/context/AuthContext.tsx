@@ -141,11 +141,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             window.location.href = dashboardUrl; // Hard refresh için
 
         } catch (error: any) {
+            const errorMessage = error.response?.data?.message || 'Giriş başarısız oldu.';
+
             setState(prev => ({
                 ...prev,
                 isLoading: false,
-                error: error.response?.data?.message || 'Giriş başarısız oldu.',
+                error: errorMessage,
             }));
+
+            // Toast mesajı göster
+            toast({
+                title: "Giriş Başarısız",
+                description: errorMessage,
+                variant: "destructive"
+            });
         }
     };
 
@@ -209,11 +218,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 return user;
             }
         } catch (error: any) {
+            // Backend'den dönen tam hata detaylarını göster
+            console.error('❌ AuthContext signup error FULL DETAILS:', {
+                status: error.response?.status,
+                statusText: error.response?.statusText,
+                message: error.response?.data?.message,
+                fullData: error.response?.data,
+                errorType: typeof error.response?.data?.message
+            });
+
+            const errorMessage = error.response?.data?.message || 'Kayıt sırasında hata oluştu.';
+
             setState(prev => ({
                 ...prev,
                 isLoading: false,
-                error: error.response?.data?.message || 'Kayıt sırasında hata oluştu.',
+                error: errorMessage,
             }));
+
+            // Toast mesajı göster - detaylı hata analizi ile
+            const errorLowerCase = errorMessage.toLowerCase();
+
+            if (errorLowerCase.includes('e-posta') || errorLowerCase.includes('email') ||
+                errorLowerCase.includes('zaten') || errorLowerCase.includes('already exists') ||
+                errorLowerCase.includes('duplicate') || errorLowerCase.includes('conflict')) {
+                toast({
+                    title: "E-posta Zaten Kullanılıyor",
+                    description: "Bu e-posta adresi ile daha önce kayıt olunmuş. Lütfen farklı bir e-posta deneyin veya giriş yapın.",
+                    variant: "destructive"
+                });
+            } else if (errorLowerCase.includes('telefon') || errorLowerCase.includes('phone')) {
+                toast({
+                    title: "Telefon Numarası Zaten Kullanılıyor",
+                    description: "Bu telefon numarası ile daha önce kayıt olunmuş. Lütfen farklı bir numara deneyin.",
+                    variant: "destructive"
+                });
+            } else {
+                toast({
+                    title: "Kayıt Başarısız",
+                    description: errorMessage,
+                    variant: "destructive"
+                });
+            }
+
             return null;
         }
     };

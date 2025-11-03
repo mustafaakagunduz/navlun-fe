@@ -17,6 +17,8 @@ export interface TopRoute {
     earnings: number;
     rating: number;
     efficiency: number;
+    distanceKm: number;
+    pricePerKm: number;
 }
 
 export interface FleetAnalytics {
@@ -27,6 +29,22 @@ export interface FleetAnalytics {
     fuelSavings: number;
     operationEfficiency: number;
     co2ReductionPercentage: number;
+    maintenanceAlerts: VehicleMaintenance[];
+    avgFuelEfficiency: number;
+    ecoScore: number;
+}
+
+export interface VehicleMaintenance {
+    vehiclePlate: string;
+    vehicleType: string;
+    isActive: boolean;
+    lastOilChange: string;
+    lastTireChange: string;
+    lastFilterChange: string;
+    inspectionDate: string;
+    totalKm: number;
+    fuelConsumption: number;
+    alerts: string[];
 }
 
 export interface CarrierStatistics {

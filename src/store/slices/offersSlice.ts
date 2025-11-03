@@ -26,6 +26,10 @@ interface OffersState {
     rejectedOffers: LoadWithOffers[]
     rejectedOffersLoading: boolean
 
+    // Carrier - Bekleyen teklifler
+    pendingOffers: LoadWithOffers[]
+    pendingOffersLoading: boolean
+
     // UI State
     selectedOffer: OfferWithVehicleInfo | null
     offerSubmitting: boolean
@@ -42,6 +46,8 @@ const initialState: OffersState = {
     acceptedLoadsLoading: false,
     rejectedOffers: [],
     rejectedOffersLoading: false,
+    pendingOffers: [],
+    pendingOffersLoading: false,
     selectedOffer: null,
     offerSubmitting: false,
 }
@@ -125,6 +131,18 @@ export const fetchRejectedOffers = createAsyncThunk(
     }
 )
 
+export const fetchPendingOffers = createAsyncThunk(
+    'offers/fetchPendingOffers',
+    async (_, { rejectWithValue }) => {
+        try {
+            const data = await offerService.getCurrentCarrierPendingOffers()
+            return data
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || 'Bekleyen teklifler yüklenemedi')
+        }
+    }
+)
+
 const offersSlice = createSlice({
     name: 'offers',
     initialState,
@@ -189,6 +207,16 @@ const offersSlice = createSlice({
             .addCase(fetchRejectedOffers.fulfilled, (state, action) => {
                 state.rejectedOffersLoading = false
                 state.rejectedOffers = action.payload
+            })
+
+        // Pending Offers
+        builder
+            .addCase(fetchPendingOffers.pending, (state) => {
+                state.pendingOffersLoading = true
+            })
+            .addCase(fetchPendingOffers.fulfilled, (state, action) => {
+                state.pendingOffersLoading = false
+                state.pendingOffers = action.payload
             })
     },
 })

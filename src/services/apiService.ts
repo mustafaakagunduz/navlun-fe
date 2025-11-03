@@ -34,7 +34,9 @@ const apiService = {
             const response = await axiosInstance.post<ApiResponse<T>>(endpoint, data);
             return response.data.data;
         } catch (error) {
-            console.error(`POST ${endpoint} isteği başarısız:`, error);
+            if (process.env.NODE_ENV === 'development') {
+                console.error(`POST ${endpoint} isteği başarısız:`, error);
+            }
             throw error;
         }
     },

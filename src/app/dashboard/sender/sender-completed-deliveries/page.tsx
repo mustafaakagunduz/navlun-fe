@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import loadService, { Load } from "@/services/loadService";
+import LoadDetailsDialog from "@/app/dashboard/sender/loads/LoadDetailsDialog";
 
 export default function CompletedDeliveriesPage() {
     const { user, isAuthenticated, isLoading: authLoading } = useAuth();
@@ -33,6 +34,8 @@ export default function CompletedDeliveriesPage() {
     const [isDataLoading, setIsDataLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedLoad, setSelectedLoad] = useState<Load | null>(null);
+    const [showDetailsDialog, setShowDetailsDialog] = useState(false);
 
     // Giriş yapmamış veya sender olmayan kullanıcıları yönlendir
     useEffect(() => {
@@ -107,6 +110,16 @@ export default function CompletedDeliveriesPage() {
             month: 'long',
             day: 'numeric'
         });
+    };
+
+    const handleLoadClick = (load: Load) => {
+        setSelectedLoad(load);
+        setShowDetailsDialog(true);
+    };
+
+    const handleCloseDialog = () => {
+        setShowDetailsDialog(false);
+        setSelectedLoad(null);
     };
 
     // Yükleme durumunda gösterilecek içerik
@@ -202,7 +215,7 @@ export default function CompletedDeliveriesPage() {
                                 <Card
                                     key={delivery.id}
                                     className="border-gray-200 shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer bg-white"
-                                    onClick={() => router.push(`/dashboard/sender/loads/${delivery.id}`)}
+                                    onClick={() => handleLoadClick(delivery)}
                                 >
                                     <CardHeader className="border-b border-gray-100 bg-gradient-to-r from-green-50 to-blue-50">
                                         <div className="flex items-start justify-between">
@@ -303,7 +316,7 @@ export default function CompletedDeliveriesPage() {
                                                 className="border-green-600 text-green-600 hover:bg-green-50"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    router.push(`/dashboard/sender/loads/${delivery.id}`);
+                                                    handleLoadClick(delivery);
                                                 }}
                                             >
                                                 Detayları Görüntüle
@@ -348,6 +361,13 @@ export default function CompletedDeliveriesPage() {
                             </CardContent>
                         </Card>
                     )}
+
+                    {/* Load Details Dialog */}
+                    <LoadDetailsDialog
+                        load={selectedLoad}
+                        isOpen={showDetailsDialog}
+                        onClose={handleCloseDialog}
+                    />
                 </div>
             </div>
         </ProtectedRoute>

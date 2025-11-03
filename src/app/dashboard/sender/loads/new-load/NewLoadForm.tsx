@@ -158,10 +158,47 @@ export default function NewLoadForm() {
             setSubmitError('');
             setSubmitSuccess('');
 
-            // ÖNCE: User'ın sender profile'ını al
-            console.log('🔍 Sender profile alınıyor...');
-            const senderProfile = await senderService.getSenderProfileByUserId(user.id);
-            console.log('✅ Sender profile bulundu:', senderProfile);
+            // ÖNCE: User'ın sender profile'ını al veya oluştur
+            console.log('🔍 Sender profile kontrol ediliyor...');
+            let senderProfile;
+
+            try {
+                senderProfile = await senderService.getSenderProfileByUserId(user.id);
+                console.log('✅ Sender profile bulundu:', senderProfile);
+            } catch (profileError: any) {
+                // Eğer profil yoksa (404), otomatik olarak oluştur
+                if (profileError.response?.status === 404 || profileError.message?.includes('404')) {
+                    console.log('⚠️ Sender profile bulunamadı, yeni profil oluşturuluyor...');
+
+                    try {
+                        // Default sender profile oluştur
+                        const defaultProfile = {
+                            userId: user.id,
+                            company: false,
+                            companyName: user.email?.split('@')[0] || 'Gönderici',
+                            productionTypes: [],
+                            certificates: [],
+                            phone: user.phone || '',
+                            email: user.email || ''
+                        };
+
+                        senderProfile = await senderService.createSenderProfile(defaultProfile);
+                        console.log('✅ Yeni sender profile oluşturuldu:', senderProfile);
+
+                        toast({
+                            title: "Profil Oluşturuldu",
+                            description: "Gönderici profiliniz otomatik olarak oluşturuldu.",
+                            variant: "default",
+                        });
+                    } catch (createError: any) {
+                        console.error('❌ Sender profile oluşturma hatası:', createError);
+                        throw new Error('Gönderici profili oluşturulamadı. Lütfen profil ayarlarınızı kontrol edin.');
+                    }
+                } else {
+                    // Başka bir hata varsa, throw et
+                    throw profileError;
+                }
+            }
 
             // Prepare load request - SENDER PROFILE ID kullan
             const loadRequest: LoadRequest = {

@@ -231,36 +231,23 @@ const AuthForms = ({ initialRole }: AuthFormsProps) => {
                 role: signupData.role
             })
 
-            // If signup failed (result is null), check for specific errors
+            // If signup failed (result is null), check for specific errors to highlight fields
             if (!result && error) {
                 const errorMessage = error.toLowerCase()
                 const newErrors: FormErrorsType = {}
 
                 // E-posta zaten kullanılıyor kontrolü
-                if (errorMessage.includes('e-posta') || errorMessage.includes('email') || errorMessage.includes('zaten')) {
+                if (errorMessage.includes('e-posta') ||
+                    errorMessage.includes('email') ||
+                    errorMessage.includes('zaten') ||
+                    errorMessage.includes('already exists') ||
+                    errorMessage.includes('duplicate') ||
+                    errorMessage.includes('conflict')) {
                     newErrors.email = "Bu e-posta adresi zaten kullanılıyor"
-                    toast({
-                        title: "E-posta Zaten Kullanılıyor",
-                        description: "Bu e-posta adresi ile daha önce kayıt olunmuş. Lütfen farklı bir e-posta deneyin veya giriş yapın.",
-                        variant: "destructive"
-                    })
                 }
                 // Telefon numarası zaten kullanılıyor kontrolü
                 else if (errorMessage.includes('telefon') || errorMessage.includes('phone')) {
                     newErrors.phone = "Bu telefon numarası zaten kullanılıyor"
-                    toast({
-                        title: "Telefon Numarası Zaten Kullanılıyor",
-                        description: "Bu telefon numarası ile daha önce kayıt olunmuş. Lütfen farklı bir numara deneyin.",
-                        variant: "destructive"
-                    })
-                }
-                // Genel hata mesajı
-                else {
-                    toast({
-                        title: "Kayıt Başarısız",
-                        description: error,
-                        variant: "destructive"
-                    })
                 }
 
                 if (Object.keys(newErrors).length > 0) {
@@ -269,13 +256,6 @@ const AuthForms = ({ initialRole }: AuthFormsProps) => {
             }
         } catch (error: any) {
             console.error("Signup error:", error)
-            // Ekstra güvenlik: catch bloğunda da toast göster
-            const errorMsg = error?.response?.data?.message || error?.message || "Kayıt sırasında beklenmeyen bir hata oluştu"
-            toast({
-                title: "Hata",
-                description: errorMsg,
-                variant: "destructive"
-            })
         }
     }
 

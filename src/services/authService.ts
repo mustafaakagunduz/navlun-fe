@@ -70,8 +70,15 @@ const authService = {
         try {
             const response = await apiService.post<User>('/auth/signup', userData);
             return response;
-        } catch (error) {
-            console.error('Signup error:', error);
+        } catch (error: any) {
+            // Backend'den dönen tam hata detaylarını göster
+            console.error('❌ Signup error FULL DETAILS:', {
+                status: error.response?.status,
+                statusText: error.response?.statusText,
+                message: error.response?.data?.message,
+                fullData: error.response?.data,
+                fullError: error
+            });
             throw error;
         }
     },
