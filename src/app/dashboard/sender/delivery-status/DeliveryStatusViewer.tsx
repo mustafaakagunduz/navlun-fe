@@ -71,10 +71,33 @@ export default function DeliveryStatusViewer() {
         }
     }, [senderTrackingsError, toast]);
 
-    const filteredTrackings = senderTrackings.filter(tracking => {
-        if (filterStatus === 'ALL') return true;
-        return tracking.currentStatus === filterStatus;
-    });
+    // State'lere göre sıralama önceliği: ON_THE_WAY -> PICKED_UP -> DELIVERED
+    const getStatusPriority = (status: DeliveryStep): number => {
+        switch (status) {
+            case DeliveryStep.ON_THE_WAY:
+                return 1;
+            case DeliveryStep.PICKED_UP:
+                return 2;
+            case DeliveryStep.DELIVERED:
+                return 3;
+            default:
+                return 999;
+        }
+    };
+
+    const filteredTrackings = senderTrackings
+        .filter(tracking => {
+            if (filterStatus === 'ALL') return true;
+            return tracking.currentStatus === filterStatus;
+        })
+        .sort((a, b) => {
+            // "Tümü" sekmesinde state'lere göre sırala
+            if (filterStatus === 'ALL') {
+                return getStatusPriority(a.currentStatus) - getStatusPriority(b.currentStatus);
+            }
+            // Diğer sekmelerde zaman sıralaması
+            return new Date(b.lastUpdate).getTime() - new Date(a.lastUpdate).getTime();
+        });
 
     const getStatusCounts = () => {
         return {
@@ -110,6 +133,20 @@ export default function DeliveryStatusViewer() {
         }
     };
 
+    // Satır için border ve background rengi
+    const getRowBorderClass = (status: DeliveryStep) => {
+        switch (status) {
+            case DeliveryStep.ON_THE_WAY:
+                return 'border-l-4 border-l-blue-500 bg-blue-50/50 hover:bg-blue-50';
+            case DeliveryStep.PICKED_UP:
+                return 'border-l-4 border-l-orange-500 bg-orange-50/50 hover:bg-orange-50';
+            case DeliveryStep.DELIVERED:
+                return 'border-l-4 border-l-green-500 bg-green-50/50 hover:bg-green-50';
+            default:
+                return 'border-l-4 border-l-gray-500 bg-gray-50/50 hover:bg-gray-50';
+        }
+    };
+
     const openDocumentViewer = (documentUrl: string) => {
         // Dosyayı yeni sekmede aç
         window.open(documentUrl, '_blank');
@@ -142,17 +179,29 @@ export default function DeliveryStatusViewer() {
             </div>
 
             <Tabs value={filterStatus} onValueChange={(value) => setFilterStatus(value as DeliveryStep | 'ALL')}>
-                <TabsList className="grid w-full grid-cols-4">
-                    <TabsTrigger value="ALL">
+                <TabsList className="flex flex-col md:grid md:grid-cols-4 w-full gap-2 md:gap-0 h-auto md:h-20 bg-transparent p-0 md:p-1">
+                    <TabsTrigger
+                        value="ALL"
+                        className="text-base md:text-lg font-semibold h-14 md:h-full data-[state=active]:bg-gray-100 data-[state=inactive]:bg-gray-50 hover:bg-gray-100 border-l-4 border-l-gray-500"
+                    >
                         Tümü ({counts.all})
                     </TabsTrigger>
-                    <TabsTrigger value={DeliveryStep.ON_THE_WAY}>
+                    <TabsTrigger
+                        value={DeliveryStep.ON_THE_WAY}
+                        className="text-base md:text-lg font-semibold h-14 md:h-full data-[state=active]:bg-blue-100 data-[state=inactive]:bg-blue-50 hover:bg-blue-100 border-l-4 border-l-blue-500"
+                    >
                         Yüke Gidiliyor ({counts.onTheWay})
                     </TabsTrigger>
-                    <TabsTrigger value={DeliveryStep.PICKED_UP}>
+                    <TabsTrigger
+                        value={DeliveryStep.PICKED_UP}
+                        className="text-base md:text-lg font-semibold h-14 md:h-full data-[state=active]:bg-orange-100 data-[state=inactive]:bg-orange-50 hover:bg-orange-100 border-l-4 border-l-orange-500"
+                    >
                         Alındı ({counts.pickedUp})
                     </TabsTrigger>
-                    <TabsTrigger value={DeliveryStep.DELIVERED}>
+                    <TabsTrigger
+                        value={DeliveryStep.DELIVERED}
+                        className="text-base md:text-lg font-semibold h-14 md:h-full data-[state=active]:bg-green-100 data-[state=inactive]:bg-green-50 hover:bg-green-100 border-l-4 border-l-green-500"
+                    >
                         Teslim Edildi ({counts.delivered})
                     </TabsTrigger>
                 </TabsList>
@@ -206,7 +255,7 @@ export default function DeliveryStatusViewer() {
                                                 return (
                                                     <tr
                                                         key={tracking.loadId}
-                                                        className="hover:bg-gray-50 cursor-pointer transition-colors"
+                                                        className={`cursor-pointer transition-colors ${getRowBorderClass(tracking.currentStatus)}`}
                                                         onClick={() => setSelectedTracking(tracking)}
                                                     >
                                                         <td className="px-6 py-4">

@@ -49,7 +49,7 @@ export default function SenderOffersPage() {
     const [selectedBrokerOffer, setSelectedBrokerOffer] = useState<BrokerOfferResponse | null>(null);
     const [isOfferDetailModalOpen, setIsOfferDetailModalOpen] = useState(false);
     const [isBrokerOfferDetailModalOpen, setIsBrokerOfferDetailModalOpen] = useState(false);
-    const [filter, setFilter] = useState<'all' | 'pending' | 'eco'>('all');
+    const [filter, setFilter] = useState<'pending' | 'accepted' | 'rejected' | 'eco'>('pending');
     const [brokerOffers, setBrokerOffers] = useState<BrokerOfferResponse[]>([]);
     const [brokerOffersLoading, setBrokerOffersLoading] = useState(false);
 
@@ -238,6 +238,12 @@ export default function SenderOffersPage() {
         if (filter === 'pending') {
             return loadWithOffers.offers.some(offer => offer.status === 'PENDING');
         }
+        if (filter === 'accepted') {
+            return loadWithOffers.offers.some(offer => offer.status === 'ACCEPTED');
+        }
+        if (filter === 'rejected') {
+            return loadWithOffers.offers.some(offer => offer.status === 'REJECTED');
+        }
         if (filter === 'eco') {
             return loadWithOffers.offers.some(offer => offer.vehicleEcoCertified || offer.isEcoFriendly);
         }
@@ -272,25 +278,37 @@ export default function SenderOffersPage() {
             </div>
 
             {/* Filtre Butonları */}
-            <div className="flex space-x-2 mb-6">
-                <Button
-                    variant={filter === 'all' ? 'default' : 'outline'}
-                    onClick={() => setFilter('all')}
-                >
-                    Tümü
-                </Button>
+            <div className="flex flex-col md:flex-row gap-3 mb-6">
                 <Button
                     variant={filter === 'pending' ? 'default' : 'outline'}
                     onClick={() => setFilter('pending')}
+                    className={`flex-1 h-14 md:h-16 text-base ${filter === 'pending' ? 'bg-yellow-600 hover:bg-yellow-700' : ''}`}
                 >
-                    Bekleyen Teklifler
+                    <Clock className="h-5 w-5 mr-2" />
+                    Bekleyen
+                </Button>
+                <Button
+                    variant={filter === 'accepted' ? 'default' : 'outline'}
+                    onClick={() => setFilter('accepted')}
+                    className={`flex-1 h-14 md:h-16 text-base ${filter === 'accepted' ? 'bg-green-600 hover:bg-green-700' : ''}`}
+                >
+                    <CheckCircle className="h-5 w-5 mr-2" />
+                    Kabul Edilen
+                </Button>
+                <Button
+                    variant={filter === 'rejected' ? 'default' : 'outline'}
+                    onClick={() => setFilter('rejected')}
+                    className={`flex-1 h-14 md:h-16 text-base ${filter === 'rejected' ? 'bg-red-600 hover:bg-red-700' : ''}`}
+                >
+                    <XCircle className="h-5 w-5 mr-2" />
+                    Reddedilen
                 </Button>
                 <Button
                     variant={filter === 'eco' ? 'default' : 'outline'}
                     onClick={() => setFilter('eco')}
-                    className="text-green-700 border-green-300 hover:bg-green-50"
+                    className={`flex-1 h-14 md:h-16 text-base ${filter === 'eco' ? 'bg-green-600 hover:bg-green-700' : 'text-green-700 border-green-300 hover:bg-green-50'}`}
                 >
-                    <Leaf className="h-4 w-4 mr-2" />
+                    <Leaf className="h-5 w-5 mr-2" />
                     Yeşil Seçim
                 </Button>
             </div>
@@ -300,14 +318,16 @@ export default function SenderOffersPage() {
                     <CardContent className="flex flex-col items-center justify-center py-12">
                         <Package className="h-12 w-12 text-muted-foreground mb-4" />
                         <h3 className="text-lg font-semibold mb-2">
-                            {filter === 'all' ? 'Henüz teklif bulunmuyor' :
-                                filter === 'pending' ? 'Bekleyen teklif bulunmuyor' :
-                                    'Çevreci teklif bulunmuyor'}
+                            {filter === 'pending' ? 'Bekleyen teklif bulunmuyor' :
+                                filter === 'accepted' ? 'Kabul edilmiş teklif bulunmuyor' :
+                                    filter === 'rejected' ? 'Reddedilmiş teklif bulunmuyor' :
+                                        'Çevreci teklif bulunmuyor'}
                         </h3>
                         <p className="text-muted-foreground text-center">
-                            {filter === 'all' ? 'Yükleriniz için henüz teklif gelmemiştir.' :
-                                filter === 'pending' ? 'Şu anda bekleyen teklif bulunmamaktadır.' :
-                                    'Çevre dostu araçlardan teklif bulunmamaktadır.'}
+                            {filter === 'pending' ? 'Şu anda bekleyen teklif bulunmamaktadır.' :
+                                filter === 'accepted' ? 'Henüz kabul edilmiş teklif bulunmamaktadır.' :
+                                    filter === 'rejected' ? 'Henüz reddedilmiş teklif bulunmamaktadır.' :
+                                        'Çevre dostu araçlardan teklif bulunmamaktadır.'}
                         </p>
                     </CardContent>
                 </Card>

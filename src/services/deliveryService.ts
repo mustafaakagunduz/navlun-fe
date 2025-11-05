@@ -465,7 +465,7 @@ const deliveryService = {
             case DeliveryStep.ASSIGNED:
                 return 'Atandı';
             case DeliveryStep.ON_THE_WAY:
-                return 'Yola Çıkıldı';
+                return 'Yüke Gidiliyor';
             case DeliveryStep.PICKED_UP:
                 return 'Yük Alındı';
             case DeliveryStep.DELIVERED:

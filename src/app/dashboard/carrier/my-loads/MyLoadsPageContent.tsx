@@ -59,6 +59,57 @@ export default function MyLoadsPageContent() {
         return new Date(dateString).toLocaleDateString('tr-TR');
     };
 
+    // Yükleme tarihine göre renk teması ve stil belirleme
+    const getLoadingDateStyle = (loadingDate: string) => {
+        const today = new Date();
+        const loadDate = new Date(loadingDate);
+        const diffTime = loadDate.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays <= 2) {
+            return {
+                borderColor: 'border-l-red-500',
+                bgColor: 'bg-red-50',
+                textColor: 'text-red-800',
+                badgeBg: 'bg-red-100',
+                badgeText: 'text-red-800',
+                label: 'Acil',
+            };
+        } else if (diffDays <= 7) {
+            return {
+                borderColor: 'border-l-yellow-500',
+                bgColor: 'bg-yellow-50',
+                textColor: 'text-yellow-800',
+                badgeBg: 'bg-yellow-100',
+                badgeText: 'text-yellow-800',
+                label: 'Yaklaşan',
+            };
+        } else {
+            return {
+                borderColor: 'border-l-green-500',
+                bgColor: 'bg-green-50',
+                textColor: 'text-green-800',
+                badgeBg: 'bg-green-100',
+                badgeText: 'text-green-800',
+                label: 'Normal',
+            };
+        }
+    };
+
+    // Yükleme tarihine göre sıralama fonksiyonu
+    const sortByLoadingDate = (loads: any[]) => {
+        return [...loads].sort((a, b) => {
+            const dateA = new Date(a.load.loadingDate).getTime();
+            const dateB = new Date(b.load.loadingDate).getTime();
+            return dateA - dateB; // En yakın tarih en üstte
+        });
+    };
+
+    // Sıralanmış yük listeleri
+    const sortedAcceptedLoads = sortByLoadingDate(acceptedLoads);
+    const sortedPendingOffers = sortByLoadingDate(pendingOffers);
+    const sortedRejectedOffers = sortByLoadingDate(rejectedOffers);
+
     const loading = acceptedLoadsLoading || rejectedOffersLoading || pendingOffersLoading;
 
     if (loading) {
@@ -96,7 +147,7 @@ export default function MyLoadsPageContent() {
                 </TabsList>
 
                 <TabsContent value="accepted">
-                    {acceptedLoads.length === 0 ? (
+                    {sortedAcceptedLoads.length === 0 ? (
                         <Card>
                             <CardContent className="flex flex-col items-center justify-center py-12">
                                 <Package className="h-12 w-12 text-muted-foreground mb-4" />
@@ -108,14 +159,21 @@ export default function MyLoadsPageContent() {
                         </Card>
                     ) : (
                         <div className="grid gap-6">
-                            {acceptedLoads.map((loadWithOffers) => (
-                                <Card key={loadWithOffers.load.id} className="border-l-4 border-l-green-500">
+                            {sortedAcceptedLoads.map((loadWithOffers) => {
+                                const dateStyle = getLoadingDateStyle(loadWithOffers.load.loadingDate);
+                                return (
+                                <Card key={loadWithOffers.load.id} className={`border-l-4 ${dateStyle.borderColor}`}>
                                     <CardHeader>
                                         <CardTitle className="flex items-center justify-between">
                                             <span>{loadWithOffers.load.title}</span>
-                                            <Badge className="bg-green-100 text-green-800">
-                                                Kabul Edildi
-                                            </Badge>
+                                            <div className="flex gap-2">
+                                                <Badge className={`${dateStyle.badgeBg} ${dateStyle.badgeText}`}>
+                                                    {dateStyle.label}
+                                                </Badge>
+                                                <Badge className="bg-green-100 text-green-800">
+                                                    Kabul Edildi
+                                                </Badge>
+                                            </div>
                                         </CardTitle>
                                     </CardHeader>
 
@@ -212,13 +270,14 @@ export default function MyLoadsPageContent() {
                                         </div>
                                     </CardContent>
                                 </Card>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
                 </TabsContent>
 
                 <TabsContent value="pending">
-                    {pendingOffers.length === 0 ? (
+                    {sortedPendingOffers.length === 0 ? (
                         <Card>
                             <CardContent className="flex flex-col items-center justify-center py-12">
                                 <Clock className="h-12 w-12 text-muted-foreground mb-4" />
@@ -230,14 +289,21 @@ export default function MyLoadsPageContent() {
                         </Card>
                     ) : (
                         <div className="grid gap-6">
-                            {pendingOffers.map((loadWithOffers) => (
-                                <Card key={loadWithOffers.load.id} className="border-l-4 border-l-yellow-500">
+                            {sortedPendingOffers.map((loadWithOffers) => {
+                                const dateStyle = getLoadingDateStyle(loadWithOffers.load.loadingDate);
+                                return (
+                                <Card key={loadWithOffers.load.id} className={`border-l-4 ${dateStyle.borderColor}`}>
                                     <CardHeader>
                                         <CardTitle className="flex items-center justify-between">
                                             <span>{loadWithOffers.load.title}</span>
-                                            <Badge className="bg-yellow-100 text-yellow-800">
-                                                Bekliyor
-                                            </Badge>
+                                            <div className="flex gap-2">
+                                                <Badge className={`${dateStyle.badgeBg} ${dateStyle.badgeText}`}>
+                                                    {dateStyle.label}
+                                                </Badge>
+                                                <Badge className="bg-yellow-100 text-yellow-800">
+                                                    Bekliyor
+                                                </Badge>
+                                            </div>
                                         </CardTitle>
                                     </CardHeader>
 
@@ -322,13 +388,14 @@ export default function MyLoadsPageContent() {
                                         </div>
                                     </CardContent>
                                 </Card>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
                 </TabsContent>
 
                 <TabsContent value="rejected">
-                    {rejectedOffers.length === 0 ? (
+                    {sortedRejectedOffers.length === 0 ? (
                         <Card>
                             <CardContent className="flex flex-col items-center justify-center py-12">
                                 <XCircle className="h-12 w-12 text-muted-foreground mb-4" />
@@ -340,21 +407,29 @@ export default function MyLoadsPageContent() {
                         </Card>
                     ) : (
                         <div className="grid gap-6">
-                            {rejectedOffers.map((loadWithOffers) => (
-                                <Card key={loadWithOffers.load.id} className="border-l-4 border-l-red-500">
+                            {sortedRejectedOffers.map((loadWithOffers) => {
+                                const dateStyle = getLoadingDateStyle(loadWithOffers.load.loadingDate);
+                                return (
+                                <Card key={loadWithOffers.load.id} className={`border-l-4 ${dateStyle.borderColor}`}>
                                     <CardHeader>
                                         <CardTitle className="flex items-center justify-between">
                                             <span>{loadWithOffers.load.title}</span>
-                                            <Badge variant="destructive">
-                                                Reddedildi
-                                            </Badge>
+                                            <div className="flex gap-2">
+                                                <Badge className={`${dateStyle.badgeBg} ${dateStyle.badgeText}`}>
+                                                    {dateStyle.label}
+                                                </Badge>
+                                                <Badge variant="destructive">
+                                                    Reddedildi
+                                                </Badge>
+                                            </div>
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent>
                                         {/* Yük detayları */}
                                     </CardContent>
                                 </Card>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
                 </TabsContent>
