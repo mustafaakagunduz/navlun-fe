@@ -166,32 +166,52 @@ export default function SenderDashboard() {
         <ProtectedRoute allowedRoles={['SENDER']}>
             <div className="flex h-[calc(100vh-4rem)]">
                 {/* Main Content */}
-                <div className="flex-1 overflow-auto bg-gradient-to-br from-gray-50 to-blue-50 p-8">
+                <div className="flex-1 overflow-auto bg-gradient-to-br from-gray-50 to-blue-50 p-4 md:p-8">
                     <div className="max-w-7xl mx-auto">
                         {/* Header with Real-time Info */}
-                        <div className="flex justify-between items-center mb-8">
-                            <div>
-                                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
-                                    Gönderici Yönetim Paneli
-                                </h1>
-                                <p className="text-gray-600 mt-2 text-lg">Akıllı lojistik çözümleriyle işinizi büyütün</p>
+                        <div className="mb-6 md:mb-8">
+                            {/* Desktop Header */}
+                            <div className="hidden md:flex justify-between items-center">
+                                <div>
+                                    <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
+                                        Gönderici Yönetim Paneli
+                                    </h1>
+                                    <p className="text-gray-600 mt-2 text-lg">Akıllı lojistik çözümleriyle işinizi büyütün</p>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                    <div className="hidden lg:block text-right">
+                                        <div className="text-2xl font-bold text-gray-900">
+                                            {currentTime.toLocaleTimeString('tr-TR')}
+                                        </div>
+                                        <div className="text-gray-600">
+                                            {currentTime.toLocaleDateString('tr-TR', {
+                                                weekday: 'long',
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric'
+                                            })}
+                                        </div>
+                                    </div>
+                                    <Button
+                                        className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white shadow-lg"
+                                        onClick={() => router.push('/dashboard/sender/loads/new-load')}
+                                    >
+                                        <PlusCircle className="h-4 w-4 mr-2" />
+                                        {t("senderPage.createNewLoad")}
+                                    </Button>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-4">
-                                <div className="text-right">
-                                    <div className="text-2xl font-bold text-gray-900">
-                                        {currentTime.toLocaleTimeString('tr-TR')}
-                                    </div>
-                                    <div className="text-gray-600">
-                                        {currentTime.toLocaleDateString('tr-TR', {
-                                            weekday: 'long',
-                                            year: 'numeric',
-                                            month: 'long',
-                                            day: 'numeric'
-                                        })}
-                                    </div>
+
+                            {/* Mobile Header */}
+                            <div className="md:hidden flex flex-col gap-4">
+                                <div>
+                                    <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
+                                        Gönderici Yönetim Paneli
+                                    </h1>
+                                    <p className="text-gray-600 mt-1 text-sm">Akıllı lojistik çözümleriyle işinizi büyütün</p>
                                 </div>
                                 <Button
-                                    className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white shadow-lg"
+                                    className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white shadow-lg h-12"
                                     onClick={() => router.push('/dashboard/sender/loads/new-load')}
                                 >
                                     <PlusCircle className="h-4 w-4 mr-2" />
@@ -201,7 +221,7 @@ export default function SenderDashboard() {
                         </div>
 
                         {/* Key Performance Indicators */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
                             <Card
                                 className="shadow-lg border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-white cursor-pointer hover:shadow-xl transition-shadow"
                                 onClick={() => router.push('/dashboard/sender/loads')}
@@ -296,7 +316,7 @@ export default function SenderDashboard() {
                         </div>
 
                         {/* Average Weight Info Card */}
-                        <div className="mb-8">
+                        <div className="mb-6 md:mb-8">
                             <Card className="shadow-lg border-l-4 border-l-emerald-500 bg-gradient-to-r from-emerald-50 to-white">
                                 <CardContent className="p-3">
                                     <div className="flex items-center justify-between">
@@ -311,7 +331,7 @@ export default function SenderDashboard() {
                         </div>
 
                         {/* Performance Dashboard */}
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
                             {/* Shipping Performance Metrics */}
                             <Card className="lg:col-span-2 shadow-lg">
                                 <CardHeader>

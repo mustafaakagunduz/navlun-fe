@@ -138,9 +138,9 @@ export default function AvailableLoadsPage() {
     };
 
     const handleMessageSender = (load: Load) => {
-        // Backend'den gelen Load objesinde sender.id'yi kullan
-        if (load.sender?.id) {
-            router.push(`/dashboard/messages/load/${load.id}?otherUserId=${load.sender.id}`);
+        // Backend'den gelen Load objesinde sender.userId'yi kullan (User ID, profile ID değil)
+        if (load.sender?.userId) {
+            router.push(`/dashboard/messages/load/${load.id}?otherUserId=${load.sender.userId}`);
         } else {
             toast({
                 title: 'Hata',
@@ -324,8 +324,8 @@ export default function AvailableLoadsPage() {
                                         Teklif Ver
                                     </Button>
 
-                                    {/* Mesajlaş Butonu */}
-                                    <Button
+                                    {/* Mesajlaş Butonu - Geçici olarak kaldırıldı */}
+                                    {/* <Button
                                         variant="outline"
                                         size="sm"
                                         onClick={() => handleMessageSender(load)}
@@ -333,7 +333,7 @@ export default function AvailableLoadsPage() {
                                     >
                                         <MessageSquare className="h-4 w-4 mr-2" />
                                         Mesajlaş
-                                    </Button>
+                                    </Button> */}
                                 </div>
                             </CardContent>
                         </Card>

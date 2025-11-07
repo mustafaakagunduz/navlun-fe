@@ -29,6 +29,7 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import loadService from "@/services/loadService";
 import messageService, { MessageType, MessagePriority, MessageCategory, MessageResponse } from "@/services/messageService";
+import { formatDateTime, formatRelativeTime, parseDate } from '@/utils/dateUtils';
 
 interface LoadMessagingContentProps {
     loadId: string;
@@ -125,6 +126,12 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
                         // "null" string'ini "admin-support" olarak değiştir
                         const apiLoadId = loadId === 'null' ? 'admin-support' : loadId;
                         const newMessages = await messageService.getLoadConversation(apiLoadId, user.id, finalOtherUserId);
+
+                        // Null check - eğer newMessages undefined veya null ise boş array kullan
+                        if (!newMessages || !Array.isArray(newMessages)) {
+                            console.warn('Geçersiz mesaj response, boş array kullanılıyor');
+                            return;
+                        }
 
                         // TAMAMEN YENİ YAKLAŞIM: Tüm mesaj listesini karşılaştır
                         setMessages(prevMessages => {
@@ -406,16 +413,20 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
         }
     };
 
-// Mesajın editlenebilir olup olmadığını kontrol et
+    // Mesajın editlenebilir olup olmadığını kontrol et
     const canEditMessage = (message: MessageResponse) => {
+        // Sadece kendi mesajlarını düzenleyebilir
         if (message.senderUserId !== user?.id) return false;
-        return true;
 
-        const messageTime = new Date(message.createdAt);
+        // Mesaj tarihini parse et
+        const messageTime = parseDate(message.createdAt);
+        if (!messageTime) return false;
+
         const now = new Date();
         const diffInMinutes = (now.getTime() - messageTime.getTime()) / (1000 * 60);
 
-        return diffInMinutes <= 15; // 15 dakika içinde editlenebilir
+        // 15 dakika içinde editlenebilir
+        return diffInMinutes <= 15;
     };
 
     const handleSendMessage = async () => {
@@ -476,16 +487,7 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
         }
     };
 
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleString('tr-TR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
+    // formatDate artık dateUtils'den geliyor, yerel fonksiyona gerek yok
 
     const getRoleBadgeColor = (role: string) => {
         switch (role) {
@@ -750,12 +752,20 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
                                                         <div className="flex items-center gap-1 flex-shrink-0">
                                                             <Calendar className="h-3 w-3" />
                                                             <span className="truncate">
-                    {formatDate(message.createdAt)}
+                    {formatDateTime(message.createdAt)}
                 </span>
-                                                            {message.updatedAt && message.updatedAt !== message.createdAt &&
-                                                                new Date(message.updatedAt).getTime() !== new Date(message.createdAt).getTime() && (
-                                                                    <span className="ml-1 italic">(düzenlendi)</span>
-                                                                )}
+                                                            {(() => {
+                                                                if (!message.updatedAt || !message.createdAt) return null;
+                                                                const updated = parseDate(message.updatedAt);
+                                                                const created = parseDate(message.createdAt);
+                                                                if (!updated || !created) return null;
+                                                                // Eğer updatedAt, createdAt'tan 1 saniyeden fazla sonraysa düzenlenmiştir
+                                                                const diffInSeconds = Math.abs(updated.getTime() - created.getTime()) / 1000;
+                                                                if (diffInSeconds > 1) {
+                                                                    return <span className="ml-1 italic text-xs">(düzenlendi)</span>;
+                                                                }
+                                                                return null;
+                                                            })()}
                                                         </div>
                                                         {isMyMessage && (
                                                             <span className="ml-1 flex-shrink-0">

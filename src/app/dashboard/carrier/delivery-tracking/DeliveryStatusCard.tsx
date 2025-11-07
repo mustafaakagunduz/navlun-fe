@@ -23,6 +23,7 @@ import { DeliveryTrackingData, DeliveryStep } from '@/services/deliveryService';
 import deliveryService from '@/services/deliveryService';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
+import { formatDateTime } from '@/utils/dateUtils';
 
 interface DeliveryStatusCardProps {
     delivery: DeliveryTrackingData;
@@ -42,14 +43,9 @@ export default function DeliveryStatusCard({
     const { toast } = useToast();
     const [loading, setLoading] = useState(false);
 
+    // formatDate artık dateUtils'den geliyor
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('tr-TR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+        return formatDateTime(dateString);
     };
 
     const getStatusBadgeColor = (status: DeliveryStep) => {

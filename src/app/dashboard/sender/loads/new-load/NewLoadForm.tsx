@@ -277,10 +277,10 @@ export default function NewLoadForm() {
 
     return (
         <ProtectedRoute allowedRoles={['SENDER']}>
-            <div className="min-h-screen bg-gradient-to-br from-green-100 to-emerald-100">
+            <div className="min-h-screen bg-gradient-to-br from-green-100 to-emerald-100 pb-8">
                 <div className="p-4 lg:p-8 max-w-6xl mx-auto">
                 {/* Header */}
-                <div className="flex items-center gap-4 mb-8">
+                <div className="flex items-center gap-4 mb-6 md:mb-8">
                     <Button
                         variant="ghost"
                         size="sm"
@@ -313,7 +313,7 @@ export default function NewLoadForm() {
                 )}
 
                 {/* Form */}
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-6">
                     {/* Basic Information */}
                     <Card className="bg-gradient-to-br from-green-50 to-emerald-50">
                         <CardHeader>
@@ -648,12 +648,12 @@ export default function NewLoadForm() {
                     )}
 
                     {/* Form Actions */}
-                    <div className="flex flex-col sm:flex-row gap-4 pt-6">
+                    <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 pt-4 sm:pt-6 pb-4">
                         <Button
                             type="button"
                             variant="outline"
                             onClick={handleBack}
-                            className="flex-1 sm:flex-none"
+                            className="w-full sm:w-auto sm:flex-1 h-12 sm:h-10"
                         >
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             {t('common.cancel')}
@@ -662,7 +662,7 @@ export default function NewLoadForm() {
                         <Button
                             type="submit"
                             disabled={isSubmitting}
-                            className="flex-1 bg-green-600 hover:bg-green-700"
+                            className="w-full sm:w-auto sm:flex-1 h-12 sm:h-10 bg-green-600 hover:bg-green-700"
                         >
                             {isSubmitting ? (
                                 <>

@@ -192,7 +192,10 @@ export default function CarrierDashboard() {
 
                         {/* Key Performance Indicators */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                            <Card className="shadow-lg border-l-4 border-l-purple-500 bg-gradient-to-r from-purple-50 to-white">
+                            <Card
+                                className="shadow-lg border-l-4 border-l-purple-500 bg-gradient-to-r from-purple-50 to-white cursor-pointer hover:shadow-xl transition-shadow"
+                                onClick={() => router.push('/dashboard/carrier/earnings')}
+                            >
                                 <CardContent className="p-6">
                                     <div className="flex items-center justify-between">
                                         <div>
@@ -212,7 +215,10 @@ export default function CarrierDashboard() {
                                 </CardContent>
                             </Card>
 
-                            <Card className="shadow-lg border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-white">
+                            <Card
+                                className="shadow-lg border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-white cursor-pointer hover:shadow-xl transition-shadow"
+                                onClick={() => router.push('/dashboard/carrier/delivery-tracking')}
+                            >
                                 <CardContent className="p-6">
                                     <div className="flex items-center justify-between">
                                         <div>
@@ -221,7 +227,7 @@ export default function CarrierDashboard() {
                                             <div className="flex items-center mt-2">
                                                 <Activity className="h-4 w-4 text-blue-600 mr-1" />
                                                 <span className="text-sm text-blue-600 font-medium">
-                                                    12 yeni teklif
+                                                    Devam eden işler
                                                 </span>
                                             </div>
                                         </div>
@@ -230,7 +236,10 @@ export default function CarrierDashboard() {
                                 </CardContent>
                             </Card>
 
-                            <Card className="shadow-lg border-l-4 border-l-green-500 bg-gradient-to-r from-green-50 to-white">
+                            <Card
+                                className="shadow-lg border-l-4 border-l-green-500 bg-gradient-to-r from-green-50 to-white cursor-pointer hover:shadow-xl transition-shadow"
+                                onClick={() => router.push('/dashboard/carrier/completed-deliveries')}
+                            >
                                 <CardContent className="p-6">
                                     <div className="flex items-center justify-between">
                                         <div>
@@ -248,7 +257,10 @@ export default function CarrierDashboard() {
                                 </CardContent>
                             </Card>
 
-                            <Card className="shadow-lg border-l-4 border-l-emerald-500 bg-gradient-to-r from-emerald-50 to-white">
+                            <Card
+                                className="shadow-lg border-l-4 border-l-emerald-500 bg-gradient-to-r from-emerald-50 to-white cursor-pointer hover:shadow-xl transition-shadow"
+                                onClick={() => router.push('/dashboard/carrier/eco-score')}
+                            >
                                 <CardContent className="p-6">
                                     <div className="flex items-center justify-between">
                                         <div>

@@ -27,6 +27,7 @@ import { useToast } from '@/hooks/use-toast';
 import { DeliveryStep, DeliveryTrackingData } from '@/services/deliveryService';
 import deliveryService from '@/services/deliveryService';
 import senderService from '@/services/senderService';
+import { formatDate as formatDateUtil, formatDateTime } from '@/utils/dateUtils';
 
 export default function DeliveryStatusViewer() {
     const dispatch = useAppDispatch();
@@ -110,14 +111,9 @@ export default function DeliveryStatusViewer() {
 
     const counts = getStatusCounts();
 
+    // formatDate artık dateUtils'den geliyor
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('tr-TR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+        return formatDateTime(dateString);
     };
 
     const getStatusBadgeColor = (status: DeliveryStep) => {
@@ -179,28 +175,28 @@ export default function DeliveryStatusViewer() {
             </div>
 
             <Tabs value={filterStatus} onValueChange={(value) => setFilterStatus(value as DeliveryStep | 'ALL')}>
-                <TabsList className="flex flex-col md:grid md:grid-cols-4 w-full gap-2 md:gap-0 h-auto md:h-20 bg-transparent p-0 md:p-1">
+                <TabsList className="grid grid-cols-4 w-full gap-1 md:gap-2 h-auto bg-transparent p-0">
                     <TabsTrigger
                         value="ALL"
-                        className="text-base md:text-lg font-semibold h-14 md:h-full data-[state=active]:bg-gray-100 data-[state=inactive]:bg-gray-50 hover:bg-gray-100 border-l-4 border-l-gray-500"
+                        className="text-xs md:text-lg font-semibold h-14 md:h-20 data-[state=active]:bg-gray-100 data-[state=inactive]:bg-gray-50 hover:bg-gray-100 border-l-4 border-l-gray-500 px-1 md:px-4"
                     >
                         Tümü ({counts.all})
                     </TabsTrigger>
                     <TabsTrigger
                         value={DeliveryStep.ON_THE_WAY}
-                        className="text-base md:text-lg font-semibold h-14 md:h-full data-[state=active]:bg-blue-100 data-[state=inactive]:bg-blue-50 hover:bg-blue-100 border-l-4 border-l-blue-500"
+                        className="text-xs md:text-lg font-semibold h-14 md:h-20 data-[state=active]:bg-blue-100 data-[state=inactive]:bg-blue-50 hover:bg-blue-100 border-l-4 border-l-blue-500 px-1 md:px-4"
                     >
                         Yüke Gidiliyor ({counts.onTheWay})
                     </TabsTrigger>
                     <TabsTrigger
                         value={DeliveryStep.PICKED_UP}
-                        className="text-base md:text-lg font-semibold h-14 md:h-full data-[state=active]:bg-orange-100 data-[state=inactive]:bg-orange-50 hover:bg-orange-100 border-l-4 border-l-orange-500"
+                        className="text-xs md:text-lg font-semibold h-14 md:h-20 data-[state=active]:bg-orange-100 data-[state=inactive]:bg-orange-50 hover:bg-orange-100 border-l-4 border-l-orange-500 px-1 md:px-4"
                     >
                         Alındı ({counts.pickedUp})
                     </TabsTrigger>
                     <TabsTrigger
                         value={DeliveryStep.DELIVERED}
-                        className="text-base md:text-lg font-semibold h-14 md:h-full data-[state=active]:bg-green-100 data-[state=inactive]:bg-green-50 hover:bg-green-100 border-l-4 border-l-green-500"
+                        className="text-xs md:text-lg font-semibold h-14 md:h-20 data-[state=active]:bg-green-100 data-[state=inactive]:bg-green-50 hover:bg-green-100 border-l-4 border-l-green-500 px-1 md:px-4"
                     >
                         Teslim Edildi ({counts.delivered})
                     </TabsTrigger>

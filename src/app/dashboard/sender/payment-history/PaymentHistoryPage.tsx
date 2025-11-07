@@ -46,6 +46,10 @@ export default function PaymentHistoryPage() {
                 paymentService.getCurrentUserPaymentStatistics()
             ]);
 
+            console.log('📊 Payment History - Payments Data:', paymentsData);
+            console.log('📊 Payment History - Payments Count:', paymentsData?.length);
+            console.log('📊 Payment History - Statistics:', statsData);
+
             setPayments(paymentsData);
             setStatistics(statsData);
         } catch (error: any) {

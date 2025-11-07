@@ -24,6 +24,7 @@ import {
 import { useLanguage } from "@/context/LanguageContext";
 import loadService, { Load } from "@/services/loadService";
 import LoadDetailsDialog from "@/app/dashboard/sender/loads/LoadDetailsDialog";
+import { formatDate as formatDateUtil, formatDateTime } from '@/utils/dateUtils';
 
 export default function CompletedDeliveriesPage() {
     const { user, isAuthenticated, isLoading: authLoading } = useAuth();
@@ -104,12 +105,9 @@ export default function CompletedDeliveriesPage() {
         }
     };
 
+    // formatDate artık dateUtils'den geliyor
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('tr-TR', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
+        return formatDateUtil(dateString);
     };
 
     const handleLoadClick = (load: Load) => {
