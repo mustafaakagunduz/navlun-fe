@@ -34,6 +34,7 @@ import vehicleService from '@/services/vehicleService';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { fetchAvailableLoads, removeLoadFromAvailable } from '@/store/slices/loadsSlice';
 import { createOffer } from '@/store/slices/offersSlice';
+import { formatDate } from '@/utils/dateUtils';
 
 export default function AvailableLoadsPage() {
     const router = useRouter();
@@ -150,9 +151,6 @@ export default function AvailableLoadsPage() {
         }
     };
 
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('tr-TR');
-    };
 
     const getStatusBadgeColor = (status: LoadStatus) => {
         switch (status) {

@@ -32,6 +32,7 @@ import { Search, Trash2, Edit, Loader2, ChevronLeft, ChevronRight, Package } fro
 import adminService, { LoadManagement } from "@/services/adminService";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/LanguageContext";
+import { formatDate, formatDateTime, formatTime } from '@/utils/dateUtils';
 
 export default function LoadManagementTab() {
     const { toast } = useToast();
@@ -216,7 +217,7 @@ export default function LoadManagementTab() {
                                                 <Badge variant="outline">{load.offersCount} offers</Badge>
                                             </TableCell>
                                             <TableCell>
-                                                {new Date(load.createdAt).toLocaleDateString()}
+                                                {formatDate(load.createdAt)}
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex gap-2">

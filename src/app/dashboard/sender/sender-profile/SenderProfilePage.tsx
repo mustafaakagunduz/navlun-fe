@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from "@/context/AuthContext";
+import { formatDate, formatDateTime, formatTime } from '@/utils/dateUtils';
 
 // Local User type with phone property
 type UserWithPhone = {
@@ -152,7 +153,7 @@ export default function SenderProfilePage() {
                         url: file.viewUrl,
                         viewUrl: file.viewUrl, // EKLENEN
                         downloadUrl: file.downloadUrl,
-                        uploadDate: new Date(file.createdAt).toLocaleString('tr-TR'),
+                        uploadDate: formatDateTime(file.createdAt),
                         isPermanent: true
                     }));
                     setUploadedFiles(formattedFiles);
@@ -258,7 +259,7 @@ export default function SenderProfilePage() {
             size: formatFileSize(file.size),
             type: file.type,
             url: URL.createObjectURL(file), // Önizleme için
-            uploadDate: new Date().toLocaleString('tr-TR'),
+            uploadDate: formatDateTime(new Date().toISOString()),
             isPermanent: false
         }));
 
@@ -386,7 +387,7 @@ export default function SenderProfilePage() {
                             url: file.viewUrl,
                             viewUrl: file.viewUrl, // EKLENEN
                             downloadUrl: file.downloadUrl,
-                            uploadDate: new Date(file.createdAt).toLocaleString('tr-TR'),
+                            uploadDate: formatDateTime(file.createdAt),
                             isPermanent: true
                         }));
                         setUploadedFiles(formattedFiles);

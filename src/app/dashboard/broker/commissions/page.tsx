@@ -20,6 +20,7 @@ import {
     Leaf
 } from "lucide-react";
 import brokerService, { BrokerProfile, BrokerOfferResponse, OfferStatus } from "@/services/brokerService";
+import { formatDate, formatDateTime, formatTime } from '@/utils/dateUtils';
 
 interface CommissionStats {
     totalCommission: number;
@@ -119,14 +120,6 @@ export default function BrokerCommissionsPage() {
             const dateB = new Date(b.acceptedAt || b.createdAt).getTime();
             return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
         });
-
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('tr-TR', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
-    };
 
     const formatCurrency = (amount: number) => {
         return `₺${amount.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;

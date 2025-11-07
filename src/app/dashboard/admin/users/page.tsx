@@ -58,6 +58,7 @@ import {
 import adminService, { UserManagement } from "@/services/adminService";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/LanguageContext";
+import { formatDate, formatDateTime, formatTime } from '@/utils/dateUtils';
 
 export default function AdminUsersPage() {
     const { user, isAuthenticated, isLoading: authLoading } = useAuth();
@@ -419,7 +420,7 @@ export default function AdminUsersPage() {
                                                     <TableCell>
                                                         <div className="flex items-center gap-2 text-sm text-gray-600">
                                                             <Calendar className="h-3 w-3" />
-                                                            {new Date(user.createdAt).toLocaleDateString()}
+                                                            {formatDate(user.createdAt)}
                                                         </div>
                                                     </TableCell>
                                                     <TableCell className="text-right">

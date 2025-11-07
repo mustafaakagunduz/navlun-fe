@@ -11,6 +11,7 @@ import { fetchAcceptedLoads, fetchRejectedOffers, fetchPendingOffers } from '@/s
 import {updateLoadCount} from "@/store/slices/notificationsSlice";
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import { formatDate, formatDateTime, formatTime } from '@/utils/dateUtils';
 
 
 export default function MyLoadsPageContent() {
@@ -53,11 +54,6 @@ export default function MyLoadsPageContent() {
             dispatch(updateLoadCount(totalLoads));
         });
     }, [dispatch]);
-
-
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('tr-TR');
-    };
 
     // Yükleme tarihine göre renk teması ve stil belirleme
     const getLoadingDateStyle = (loadingDate: string) => {

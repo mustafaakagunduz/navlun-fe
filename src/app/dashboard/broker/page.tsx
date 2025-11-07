@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { formatDate, formatDateTime, formatTime } from '@/utils/dateUtils';
 import {
     Loader2,
     Package,
@@ -192,15 +193,10 @@ export default function BrokerDashboard() {
                             </div>
                             <div className="text-right">
                                 <div className="text-2xl font-bold text-gray-900">
-                                    {currentTime.toLocaleTimeString('tr-TR')}
+                                    {formatTime(currentTime.toISOString())}
                                 </div>
                                 <div className="text-gray-600">
-                                    {currentTime.toLocaleDateString('tr-TR', {
-                                        weekday: 'long',
-                                        year: 'numeric',
-                                        month: 'long',
-                                        day: 'numeric'
-                                    })}
+                                    {formatDate(currentTime.toISOString())}
                                 </div>
                             </div>
                         </div>

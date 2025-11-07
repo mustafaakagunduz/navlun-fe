@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { Load, LoadStatus } from "@/services/loadService";
+import { formatDate, formatDateTime, formatTime } from '@/utils/dateUtils';
 
 interface LoadDetailsDialogProps {
     load: Load | null;
@@ -34,24 +35,6 @@ export default function LoadDetailsDialog({ load, isOpen, onClose }: LoadDetails
     const { t } = useLanguage();
 
     if (!load) return null;
-
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('tr-TR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
-    };
-
-    const formatDateTime = (dateString: string) => {
-        return new Date(dateString).toLocaleString('tr-TR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
 
     const formatWeight = (weight: number) => {
         if (weight >= 1000) {

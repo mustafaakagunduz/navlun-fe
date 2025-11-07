@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { formatDate, formatDateTime, formatTime } from '@/utils/dateUtils';
 import {
     Loader2,
     Ship,
@@ -396,7 +397,7 @@ export default function ShipPortfolio() {
                                             <div className="flex items-center gap-2 text-sm">
                                                 <Calendar className="h-4 w-4 text-orange-600" />
                                                 <span className="text-gray-600">
-                                                    Müsait: {new Date(ship.nextAvailableDate).toLocaleDateString('tr-TR')}
+                                                    Müsait: {formatDate(ship.nextAvailableDate)}
                                                 </span>
                                             </div>
                                         )}

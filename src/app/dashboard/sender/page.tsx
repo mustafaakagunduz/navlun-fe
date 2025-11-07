@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { formatDate, formatDateTime, formatTime } from '@/utils/dateUtils';
 import {
     Loader2,
     Package,
@@ -181,15 +182,10 @@ export default function SenderDashboard() {
                                 <div className="flex items-center gap-4">
                                     <div className="hidden lg:block text-right">
                                         <div className="text-2xl font-bold text-gray-900">
-                                            {currentTime.toLocaleTimeString('tr-TR')}
+                                            {formatTime(currentTime.toISOString())}
                                         </div>
                                         <div className="text-gray-600">
-                                            {currentTime.toLocaleDateString('tr-TR', {
-                                                weekday: 'long',
-                                                year: 'numeric',
-                                                month: 'long',
-                                                day: 'numeric'
-                                            })}
+                                            {formatDate(currentTime.toISOString())}
                                         </div>
                                     </div>
                                     <Button
@@ -420,7 +416,7 @@ export default function SenderDashboard() {
                                                         </Badge>
                                                     </div>
                                                     <p className="text-xs text-gray-500 mt-1">
-                                                        {new Date(load.createdAt).toLocaleDateString('tr-TR')}
+                                                        {formatDate(load.createdAt)}
                                                     </p>
                                                 </div>
                                             </div>

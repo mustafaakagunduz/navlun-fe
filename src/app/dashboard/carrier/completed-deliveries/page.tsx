@@ -21,7 +21,7 @@ import {
     Star
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import deliveryService, { DeliveryTrackingData } from "@/services/deliveryService";
+import deliveryService, { DeliveryStatus, DeliveryStep } from "@/services/deliveryService";
 import { formatDateTime, formatDate } from '@/utils/dateUtils';
 
 export default function CarrierCompletedDeliveriesPage() {
@@ -29,7 +29,7 @@ export default function CarrierCompletedDeliveriesPage() {
     const router = useRouter();
     const { toast } = useToast();
     const [loading, setLoading] = useState(true);
-    const [deliveries, setDeliveries] = useState<DeliveryTrackingData[]>([]);
+    const [deliveries, setDeliveries] = useState<DeliveryStatus[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
@@ -44,9 +44,15 @@ export default function CarrierCompletedDeliveriesPage() {
 
             try {
                 setLoading(true);
-                const trackings = await deliveryService.getCarrierTrackings();
+                // Tüm teslimatları getir
+                const allDeliveries = await deliveryService.getCurrentCarrierDeliveryStatuses();
                 // Sadece teslim edilmiş olanları filtrele
-                const completed = trackings.filter(t => t.currentStep === 'DELIVERED' || t.currentStep === 'COMPLETED');
+                const completed = allDeliveries.filter(d =>
+                    d.status === DeliveryStep.DELIVERED ||
+                    d.status === DeliveryStep.COMPLETED ||
+                    d.status === DeliveryStep.PAYMENT_RECEIVED ||
+                    d.status === DeliveryStep.PAYMENT_PENDING
+                );
                 setDeliveries(completed);
             } catch (error: any) {
                 console.error('Error loading completed deliveries:', error);
@@ -64,9 +70,8 @@ export default function CarrierCompletedDeliveriesPage() {
     }, [isAuthenticated, user]);
 
     const filteredDeliveries = deliveries.filter(delivery =>
-        delivery.loadTitle?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        delivery.pickupLocation?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        delivery.deliveryLocation?.toLowerCase().includes(searchQuery.toLowerCase())
+        delivery.offerId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        delivery.locationUpdates?.some(loc => loc.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
     if (isLoading || loading) {
@@ -81,7 +86,7 @@ export default function CarrierCompletedDeliveriesPage() {
     }
 
     const totalDeliveries = deliveries.length;
-    const completionRate = totalDeliveries > 0 ? Math.round((deliveries.filter(d => d.currentStep === 'COMPLETED').length / totalDeliveries) * 100) : 0;
+    const completionRate = totalDeliveries > 0 ? Math.round((deliveries.filter(d => d.status === DeliveryStep.COMPLETED).length / totalDeliveries) * 100) : 0;
 
     return (
         <ProtectedRoute allowedRoles={['CARRIER']}>
@@ -155,7 +160,7 @@ export default function CarrierCompletedDeliveriesPage() {
                             <div className="relative">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                                 <Input
-                                    placeholder="Teslimat ara (yük, nereden, nereye)..."
+                                    placeholder="Teslimat ara (ID, konum)..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     className="pl-10"
@@ -186,27 +191,31 @@ export default function CarrierCompletedDeliveriesPage() {
                                                         <CheckCircle className="h-6 w-6 text-white" />
                                                     </div>
                                                     <div>
-                                                        <h3 className="text-lg font-bold text-gray-900">{delivery.loadTitle}</h3>
+                                                        <h3 className="text-lg font-bold text-gray-900">Teslimat #{delivery.id.substring(0, 8)}</h3>
                                                         <Badge className="bg-green-100 text-green-700 border-green-300">
-                                                            Tamamlandı
+                                                            {deliveryService.getStatusDisplayName(delivery.status)}
                                                         </Badge>
                                                     </div>
                                                 </div>
 
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                     <div className="flex items-start gap-2">
-                                                        <MapPin className="h-4 w-4 text-blue-600 mt-1 flex-shrink-0" />
+                                                        <Package className="h-4 w-4 text-blue-600 mt-1 flex-shrink-0" />
                                                         <div>
-                                                            <p className="text-xs text-gray-500">Nereden</p>
-                                                            <p className="text-sm font-medium text-gray-900">{delivery.pickupLocation}</p>
+                                                            <p className="text-xs text-gray-500">Teklif ID</p>
+                                                            <p className="text-sm font-medium text-gray-900">#{delivery.offerId.substring(0, 8)}</p>
                                                         </div>
                                                     </div>
 
                                                     <div className="flex items-start gap-2">
                                                         <MapPin className="h-4 w-4 text-green-600 mt-1 flex-shrink-0" />
                                                         <div>
-                                                            <p className="text-xs text-gray-500">Nereye</p>
-                                                            <p className="text-sm font-medium text-gray-900">{delivery.deliveryLocation}</p>
+                                                            <p className="text-xs text-gray-500">Son Konum</p>
+                                                            <p className="text-sm font-medium text-gray-900">
+                                                                {delivery.locationUpdates && delivery.locationUpdates.length > 0
+                                                                    ? delivery.locationUpdates[delivery.locationUpdates.length - 1]
+                                                                    : 'Belirtilmemiş'}
+                                                            </p>
                                                         </div>
                                                     </div>
 
@@ -215,7 +224,7 @@ export default function CarrierCompletedDeliveriesPage() {
                                                         <div>
                                                             <p className="text-xs text-gray-500">Alım Tarihi</p>
                                                             <p className="text-sm font-medium text-gray-900">
-                                                                {delivery.pickupDate ? formatDate(delivery.pickupDate) : 'Belirtilmemiş'}
+                                                                {delivery.pickupTime ? formatDateTime(delivery.pickupTime) : 'Belirtilmemiş'}
                                                             </p>
                                                         </div>
                                                     </div>
@@ -225,7 +234,7 @@ export default function CarrierCompletedDeliveriesPage() {
                                                         <div>
                                                             <p className="text-xs text-gray-500">Teslim Tarihi</p>
                                                             <p className="text-sm font-medium text-gray-900">
-                                                                {delivery.deliveryDate ? formatDate(delivery.deliveryDate) : 'Belirtilmemiş'}
+                                                                {delivery.deliveryTime ? formatDateTime(delivery.deliveryTime) : 'Belirtilmemiş'}
                                                             </p>
                                                         </div>
                                                     </div>

@@ -38,6 +38,7 @@ import adminService, { DeliveryManagement } from "@/services/adminService";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/LanguageContext";
 import { useRouter } from 'next/navigation';
+import { formatDate, formatDateTime, formatTime } from '@/utils/dateUtils';
 
 export default function DeliveryManagementTab() {
     const { toast } = useToast();
@@ -492,13 +493,13 @@ export default function DeliveryManagementTab() {
                                 {selectedDelivery.pickupTime && (
                                     <div>
                                         <p className="text-sm text-gray-600">Alım Zamanı</p>
-                                        <p className="text-sm">{new Date(selectedDelivery.pickupTime).toLocaleString('tr-TR')}</p>
+                                        <p className="text-sm">{formatDateTime(selectedDelivery.pickupTime)}</p>
                                     </div>
                                 )}
                                 {selectedDelivery.deliveryTime && (
                                     <div>
                                         <p className="text-sm text-gray-600">Teslimat Zamanı</p>
-                                        <p className="text-sm">{new Date(selectedDelivery.deliveryTime).toLocaleString('tr-TR')}</p>
+                                        <p className="text-sm">{formatDateTime(selectedDelivery.deliveryTime)}</p>
                                     </div>
                                 )}
                             </div>

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, MapPin, Weight, Shield, Leaf, Package } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { Load, LoadStatus } from "@/services/loadService";
+import { formatDate, formatDateTime, formatTime } from '@/utils/dateUtils';
 
 interface LoadCardProps {
     load: Load;
@@ -16,14 +17,6 @@ interface LoadCardProps {
 
 export default function LoadCard({ load, onClick, getStatusColor, getStatusText }: LoadCardProps) {
     const { t } = useLanguage();
-
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('tr-TR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
-    };
 
     const formatWeight = (weight: number) => {
         if (weight >= 1000) {

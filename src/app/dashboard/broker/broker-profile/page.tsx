@@ -29,6 +29,7 @@ import {
     DollarSign
 } from "lucide-react";
 import brokerService, { BrokerProfile } from "@/services/brokerService";
+import { formatDate, formatDateTime, formatTime } from '@/utils/dateUtils';
 
 export default function BrokerProfilePage() {
     const { user, isAuthenticated, isLoading } = useAuth();

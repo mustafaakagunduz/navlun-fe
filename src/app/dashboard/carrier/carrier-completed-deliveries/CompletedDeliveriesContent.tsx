@@ -23,6 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { fetchCompletedDeliveries } from '@/store/slices/loadsSlice';
 import { LoadStatus } from '@/services/loadService';
+import { formatDate, formatDateTime, formatTime } from '@/utils/dateUtils';
 
 export default function CompletedDeliveriesContent() {
     const dispatch = useAppDispatch();
@@ -38,12 +39,8 @@ export default function CompletedDeliveriesContent() {
         dispatch(fetchCompletedDeliveries());
     }, [dispatch]);
 
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('tr-TR', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric'
-        });
+    const formatDateLocal = (dateString: string) => {
+        return formatDate(dateString);
     };
 
     const getStatusBadge = (status: LoadStatus) => {
@@ -194,14 +191,14 @@ export default function CompletedDeliveriesContent() {
                                             <Calendar className="h-3 w-3" />
                                             Yükleme
                                         </p>
-                                        <p className="text-sm font-medium">{formatDate(load.loadingDate)}</p>
+                                        <p className="text-sm font-medium">{formatDateLocal(load.loadingDate)}</p>
                                     </div>
                                     <div className="space-y-1">
                                         <p className="text-xs text-gray-500 flex items-center gap-1">
                                             <Calendar className="h-3 w-3" />
                                             Teslimat
                                         </p>
-                                        <p className="text-sm font-medium">{formatDate(load.deliveryDate)}</p>
+                                        <p className="text-sm font-medium">{formatDateLocal(load.deliveryDate)}</p>
                                     </div>
                                     {load.estimatedPrice && (
                                         <div className="space-y-1">
@@ -220,7 +217,7 @@ export default function CompletedDeliveriesContent() {
                                             Tamamlanma
                                         </p>
                                         <p className="text-sm font-medium">
-                                            {load.updatedAt ? formatDate(load.updatedAt) : '-'}
+                                            {load.updatedAt ? formatDateLocal(load.updatedAt) : '-'}
                                         </p>
                                     </div>
                                 </div>

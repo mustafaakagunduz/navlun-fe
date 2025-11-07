@@ -32,6 +32,7 @@ import { Search, Trash2, Edit, Loader2, ChevronLeft, ChevronRight } from "lucide
 import adminService, { UserManagement } from "@/services/adminService";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/LanguageContext";
+import { formatDate, formatDateTime, formatTime } from '@/utils/dateUtils';
 
 export default function UserManagementTab() {
     const { toast } = useToast();
@@ -202,7 +203,7 @@ export default function UserManagementTab() {
                                         <TableCell>{user.totalLoads}</TableCell>
                                         <TableCell>{user.totalOffers}</TableCell>
                                         <TableCell>
-                                            {new Date(user.createdAt).toLocaleDateString()}
+                                            {formatDate(user.createdAt)}
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex gap-2">

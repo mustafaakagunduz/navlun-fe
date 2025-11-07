@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { formatDate, formatDateTime, formatTime } from '@/utils/dateUtils';
 import {
     Loader2,
     Ship,
@@ -212,7 +213,7 @@ export default function ShipDetail() {
                                     <p className="text-sm text-gray-600 mb-1">Müsaitlik Tarihi</p>
                                     <p className="font-medium flex items-center gap-2">
                                         <Calendar className="h-4 w-4 text-orange-600" />
-                                        {new Date(ship.nextAvailableDate).toLocaleDateString('tr-TR')}
+                                        {formatDate(ship.nextAvailableDate)}
                                     </p>
                                 </div>
                             )}
@@ -345,7 +346,7 @@ export default function ShipDetail() {
                             <div>
                                 <p className="text-sm text-gray-600">Kayıt Tarihi</p>
                                 <p className="font-medium">
-                                    {new Date(ship.createdAt).toLocaleDateString('tr-TR')}
+                                    {formatDate(ship.createdAt)}
                                 </p>
                             </div>
                         </div>

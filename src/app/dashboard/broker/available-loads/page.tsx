@@ -40,6 +40,7 @@ import {
 import { useLanguage } from "@/context/LanguageContext";
 import { Load, LoadStatus, TransportType } from "@/services/loadService";
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
+import { formatDate } from '@/utils/dateUtils';
 import {
     fetchAvailableLoadsForBroker,
     setSearchQuery,
@@ -206,9 +207,6 @@ export default function BrokerAvailableLoads() {
         dispatch(resetFilters());
     };
 
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('tr-TR');
-    };
 
     const getStatusBadgeColor = (status: LoadStatus) => {
         switch (status) {

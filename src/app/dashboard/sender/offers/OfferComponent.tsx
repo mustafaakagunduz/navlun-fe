@@ -34,6 +34,7 @@ import brokerService, { BrokerOfferResponse } from '@/services/brokerService';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
 import { fetchLoadsWithOffers, acceptOffer, rejectOffer, setSelectedOffer } from '@/store/slices/offersSlice'
 import {decrementOfferCount, updateOfferCount} from "@/store/slices/notificationsSlice";
+import { formatDate, formatDateTime, formatTime } from '@/utils/dateUtils';
 
 export default function SenderOffersPage() {
 
@@ -215,16 +216,12 @@ export default function SenderOffersPage() {
         }
     };
 
-    const formatDate = (dateString: string | number[]) => {
+    const formatDateHelper = (dateString: string | number[]) => {
         if (Array.isArray(dateString)) {
             const [year, month, day] = dateString;
-            return new Date(year, month - 1, day).toLocaleDateString('tr-TR');
+            return formatDate(new Date(year, month - 1, day).toISOString());
         }
-        return new Date(dateString).toLocaleDateString('tr-TR');
-    };
-
-    const formatDateTime = (dateString: string) => {
-        return new Date(dateString).toLocaleString('tr-TR');
+        return formatDate(dateString);
     };
 
     const formatCurrency = (amount: number) => {
@@ -352,7 +349,7 @@ export default function SenderOffersPage() {
                                                 </div>
                                                 <div className="flex items-center">
                                                     <Calendar className="h-3 w-3 md:h-4 md:w-4 mr-1" />
-                                                    {formatDate(loadWithOffers.load.loadingDate)}
+                                                    {formatDateHelper(loadWithOffers.load.loadingDate)}
                                                 </div>
                                             </div>
                                         </div>
@@ -782,11 +779,11 @@ export default function SenderOffersPage() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <span className="text-muted-foreground">Tahmini Yükleme:</span>
-                                    <span className="ml-2">{formatDate(selectedBrokerOffer.estimatedLoadingDate)}</span>
+                                    <span className="ml-2">{formatDateHelper(selectedBrokerOffer.estimatedLoadingDate)}</span>
                                 </div>
                                 <div>
                                     <span className="text-muted-foreground">Tahmini Teslimat:</span>
-                                    <span className="ml-2">{formatDate(selectedBrokerOffer.estimatedDeliveryDate)}</span>
+                                    <span className="ml-2">{formatDateHelper(selectedBrokerOffer.estimatedDeliveryDate)}</span>
                                 </div>
                             </div>
 

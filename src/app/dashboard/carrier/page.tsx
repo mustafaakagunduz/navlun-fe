@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { formatDate, formatDateTime, formatTime } from '@/utils/dateUtils';
 import {
     Dialog,
     DialogContent,
@@ -176,15 +177,10 @@ export default function CarrierDashboard() {
                             <div className="flex items-center gap-4">
                                 <div className="text-right">
                                     <div className="text-2xl font-bold text-gray-900">
-                                        {currentTime.toLocaleTimeString('tr-TR')}
+                                        {formatTime(currentTime.toISOString())}
                                     </div>
                                     <div className="text-gray-600">
-                                        {currentTime.toLocaleDateString('tr-TR', {
-                                            weekday: 'long',
-                                            year: 'numeric',
-                                            month: 'long',
-                                            day: 'numeric'
-                                        })}
+                                        {formatDate(currentTime.toISOString())}
                                     </div>
                                 </div>
                             </div>
@@ -238,7 +234,7 @@ export default function CarrierDashboard() {
 
                             <Card
                                 className="shadow-lg border-l-4 border-l-green-500 bg-gradient-to-r from-green-50 to-white cursor-pointer hover:shadow-xl transition-shadow"
-                                onClick={() => router.push('/dashboard/carrier/completed-deliveries')}
+                                onClick={() => router.push('/dashboard/carrier/carrier-completed-deliveries')}
                             >
                                 <CardContent className="p-6">
                                     <div className="flex items-center justify-between">

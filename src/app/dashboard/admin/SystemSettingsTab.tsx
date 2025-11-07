@@ -7,6 +7,7 @@ import { Loader2, Server, Database, Activity, Clock } from "lucide-react";
 import adminService, { SystemHealth } from "@/services/adminService";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/LanguageContext";
+import { formatDate, formatDateTime, formatTime } from '@/utils/dateUtils';
 
 export default function SystemSettingsTab() {
     const { toast } = useToast();
@@ -158,7 +159,7 @@ export default function SystemSettingsTab() {
                         </div>
                         <div className="flex justify-between items-center py-2 border-b">
                             <span className="text-sm text-gray-600">Last Updated</span>
-                            <span className="font-medium">{new Date().toLocaleString()}</span>
+                            <span className="font-medium">{formatDateTime(new Date().toISOString())}</span>
                         </div>
                     </div>
                 </CardContent>
@@ -201,7 +202,7 @@ export default function SystemSettingsTab() {
                             <div className="flex-1">
                                 <div className="font-medium">System Health Check</div>
                                 <div className="text-sm text-gray-600">All systems operational</div>
-                                <div className="text-xs text-gray-400 mt-1">{new Date().toLocaleString()}</div>
+                                <div className="text-xs text-gray-400 mt-1">{formatDateTime(new Date().toISOString())}</div>
                             </div>
                         </div>
                         <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
@@ -210,7 +211,7 @@ export default function SystemSettingsTab() {
                                 <div className="font-medium">Database Backup</div>
                                 <div className="text-sm text-gray-600">Scheduled backup completed successfully</div>
                                 <div className="text-xs text-gray-400 mt-1">
-                                    {new Date(Date.now() - 3600000).toLocaleString()}
+                                    {formatDateTime(new Date(Date.now() - 3600000).toISOString())}
                                 </div>
                             </div>
                         </div>
@@ -220,7 +221,7 @@ export default function SystemSettingsTab() {
                                 <div className="font-medium">System Update</div>
                                 <div className="text-sm text-gray-600">Platform updated to version 1.0.0</div>
                                 <div className="text-xs text-gray-400 mt-1">
-                                    {new Date(Date.now() - 86400000).toLocaleString()}
+                                    {formatDateTime(new Date(Date.now() - 86400000).toISOString())}
                                 </div>
                             </div>
                         </div>

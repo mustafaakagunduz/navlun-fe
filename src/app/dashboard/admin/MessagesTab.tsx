@@ -19,6 +19,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from 'next/navigation';
 import { useToast } from "@/hooks/use-toast";
 import messageService, { ConversationResponse } from '@/services/messageService';
+import { formatDate } from '@/utils/dateUtils';
 
 export default function MessagesTab() {
     const { user } = useAuth();
@@ -86,7 +87,7 @@ export default function MessagesTab() {
         loadUnreadCount();
     };
 
-    const formatDate = (dateString: string) => {
+    const getRelativeTime = (dateString: string) => {
         const date = new Date(dateString);
         const now = new Date();
         const diffInMs = now.getTime() - date.getTime();
@@ -100,7 +101,7 @@ export default function MessagesTab() {
         } else if (diffInDays < 7) {
             return `${Math.floor(diffInDays)} gün önce`;
         } else {
-            return date.toLocaleDateString('tr-TR');
+            return formatDate(dateString);
         }
     };
 
@@ -236,7 +237,7 @@ export default function MessagesTab() {
                                         <div className="flex items-center justify-between text-xs text-gray-500">
                                             <div className="flex items-center gap-1">
                                                 <Clock className="h-3 w-3" />
-                                                {formatDate(conversation.lastMessageAt)}
+                                                {getRelativeTime(conversation.lastMessageAt)}
                                             </div>
                                             <div className="flex items-center gap-1">
                                                 <MessageSquare className="h-3 w-3" />

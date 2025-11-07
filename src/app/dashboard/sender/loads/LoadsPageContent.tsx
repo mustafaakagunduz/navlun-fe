@@ -17,6 +17,7 @@ import senderService from "@/services/senderService";
 import authService from "@/services/authService";
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
 import { fetchMyLoads, setStatusFilter, setSearchQuery } from '@/store/slices/loadsSlice'
+import { formatDate, formatDateTime, formatTime } from '@/utils/dateUtils';
 
 
 
@@ -109,14 +110,6 @@ export default function LoadsPageContent() {
 
     const getStatusText = (status: LoadStatus) => {
         return t(`loads.status.${status.toLowerCase()}`);
-    };
-
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('tr-TR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
     };
 
     const formatWeight = (weight: number) => {

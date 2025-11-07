@@ -54,6 +54,7 @@ import {
     clearCreateOfferSuccess,
     BrokerOfferRequest
 } from '@/store/slices/brokerOffersSlice';
+import { formatDate, formatDateTime, formatTime } from '@/utils/dateUtils';
 
 
 
@@ -298,14 +299,6 @@ function BrokerOfferCreate() {
             style: 'currency',
             currency: 'TRY'
         }).format(price);
-    };
-
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('tr-TR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
     };
 
     if (isLoading || loading || availableShipsLoading) {
