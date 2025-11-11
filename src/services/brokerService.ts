@@ -573,11 +573,18 @@ const brokerService = {
     // Mevcut sender'ın yüklerine gelen broker tekliflerini getir
     getCurrentSenderReceivedBrokerOffers: async (loadId?: string, status?: OfferStatus): Promise<BrokerOfferResponse[]> => {
         try {
+            console.log('=== BROKER SERVICE: GET SENDER OFFERS ===');
+            console.log('LoadId:', loadId);
+            console.log('Status:', status);
+
             const params: Record<string, any> = {};
             if (loadId) params.loadId = loadId;
             if (status) params.status = status;
 
-            return await apiService.get<BrokerOfferResponse[]>('/broker-offers/my-received-broker-offers', params);
+            const result = await apiService.get<BrokerOfferResponse[]>('/broker-offers/my-received-broker-offers', params);
+            console.log('=== BROKER SERVICE: API RESPONSE ===');
+            console.log('Result:', result);
+            return result;
         } catch (error) {
             console.error('Get current sender received broker offers error:', error);
             throw error;

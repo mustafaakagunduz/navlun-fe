@@ -43,6 +43,7 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import senderService from '@/services/senderService';
+import AccountTypeChangeSection from '@/components/AccountTypeChangeSection';
 
 export default function SenderProfilePage() {
     const { user } = useAuth();
@@ -830,6 +831,11 @@ export default function SenderProfilePage() {
                         </div>
                     </CardContent>
                 </Card>
+
+                {/* Hesap Türü Değiştirme Bölümü */}
+                <div className="mt-8">
+                    <AccountTypeChangeSection />
+                </div>
             </div>
         </div>
     );

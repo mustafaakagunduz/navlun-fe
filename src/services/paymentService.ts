@@ -88,6 +88,22 @@ class PaymentService {
     }
 
     /**
+     * Create payment for a completed load
+     */
+    async createPaymentForLoad(loadId: string, paymentData: {
+        loadId: string;
+        senderId: string;
+        offerId?: string;
+        carrierId?: string;
+        amount: number;
+        paymentMethod: PaymentMethod;
+        description?: string;
+    }): Promise<Payment> {
+        const response = await apiService.post<Payment>(`${this.baseUrl}/load/${loadId}`, paymentData);
+        return response;
+    }
+
+    /**
      * Get status color class
      */
     getStatusColor(status: PaymentStatus): string {

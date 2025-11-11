@@ -19,17 +19,38 @@ import {
     Search,
     TruckIcon,
     FileText,
-    Download
+    Download,
+    DollarSign
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import loadService, { Load } from "@/services/loadService";
 import LoadDetailsDialog from "@/app/dashboard/sender/loads/LoadDetailsDialog";
 import { formatDate as formatDateUtil, formatDateTime } from '@/utils/dateUtils';
+import paymentService, { PaymentMethod } from "@/services/paymentService";
+import { useToast } from "@/hooks/use-toast";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function CompletedDeliveriesPage() {
     const { user, isAuthenticated, isLoading: authLoading } = useAuth();
     const router = useRouter();
     const { t } = useLanguage();
+    const { toast } = useToast();
     const [completedDeliveries, setCompletedDeliveries] = useState<Load[]>([]);
     const [filteredDeliveries, setFilteredDeliveries] = useState<Load[]>([]);
     const [isDataLoading, setIsDataLoading] = useState(true);
@@ -37,6 +58,11 @@ export default function CompletedDeliveriesPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedLoad, setSelectedLoad] = useState<Load | null>(null);
     const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+    const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+    const [paymentAmount, setPaymentAmount] = useState('');
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.BANK_TRANSFER);
+    const [paymentDescription, setPaymentDescription] = useState('');
+    const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
 
     // Giriş yapmamış veya sender olmayan kullanıcıları yönlendir
     useEffect(() => {
@@ -118,6 +144,71 @@ export default function CompletedDeliveriesPage() {
     const handleCloseDialog = () => {
         setShowDetailsDialog(false);
         setSelectedLoad(null);
+    };
+
+    const handleOpenPaymentDialog = (load: Load) => {
+        setSelectedLoad(load);
+        setPaymentAmount('');
+        setPaymentMethod(PaymentMethod.BANK_TRANSFER);
+        setPaymentDescription(`${load.title} teslim ödemes i`);
+        setShowPaymentDialog(true);
+    };
+
+    const handleClosePaymentDialog = () => {
+        setShowPaymentDialog(false);
+        setSelectedLoad(null);
+        setPaymentAmount('');
+        setPaymentDescription('');
+    };
+
+    const handleSubmitPayment = async () => {
+        if (!selectedLoad) return;
+
+        const amount = parseFloat(paymentAmount);
+        if (!amount || amount <= 0) {
+            toast({
+                title: "Hata",
+                description: "Geçerli bir ödeme tutarı girin",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        if (!selectedLoad.senderId) {
+            toast({
+                title: "Hata",
+                description: "Gönderici bilgisi bulunamadı",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        setIsSubmittingPayment(true);
+        try {
+            await paymentService.createPaymentForLoad(selectedLoad.id, {
+                amount,
+                paymentMethod,
+                description: paymentDescription,
+                loadId: selectedLoad.id,
+                senderId: selectedLoad.senderId,
+            });
+
+            toast({
+                title: "Başarılı",
+                description: "Ödeme başarıyla kaydedildi",
+            });
+
+            handleClosePaymentDialog();
+        } catch (error: any) {
+            console.error('Payment creation error:', error);
+            toast({
+                title: "Hata",
+                description: error.response?.data?.message || "Ödeme kaydedilirken hata oluştu",
+                variant: "destructive",
+            });
+        } finally {
+            setIsSubmittingPayment(false);
+        }
     };
 
     // Yükleme durumunda gösterilecek içerik
@@ -303,22 +394,35 @@ export default function CompletedDeliveriesPage() {
                                             </div>
                                         )}
 
-                                        {/* Footer with Action Button */}
+                                        {/* Footer with Action Buttons */}
                                         <div className="mt-6 pt-6 border-t border-gray-100 flex items-center justify-between">
                                             <div className="flex items-center gap-2 text-sm text-gray-500">
                                                 <Calendar className="h-4 w-4" />
                                                 <span>Oluşturulma: {formatDate(delivery.createdAt)}</span>
                                             </div>
-                                            <Button
-                                                variant="outline"
-                                                className="border-green-600 text-green-600 hover:bg-green-50"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleLoadClick(delivery);
-                                                }}
-                                            >
-                                                Detayları Görüntüle
-                                            </Button>
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    variant="outline"
+                                                    className="border-blue-600 text-blue-600 hover:bg-blue-50"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleOpenPaymentDialog(delivery);
+                                                    }}
+                                                >
+                                                    <DollarSign className="h-4 w-4 mr-2" />
+                                                    Ödeme Yap
+                                                </Button>
+                                                <Button
+                                                    variant="outline"
+                                                    className="border-green-600 text-green-600 hover:bg-green-50"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleLoadClick(delivery);
+                                                    }}
+                                                >
+                                                    Detayları Görüntüle
+                                                </Button>
+                                            </div>
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -366,6 +470,92 @@ export default function CompletedDeliveriesPage() {
                         isOpen={showDetailsDialog}
                         onClose={handleCloseDialog}
                     />
+
+                    {/* Payment Dialog */}
+                    <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+                        <DialogContent className="sm:max-w-[500px]">
+                            <DialogHeader>
+                                <DialogTitle>Ödeme Kaydı Oluştur</DialogTitle>
+                                <DialogDescription>
+                                    {selectedLoad && (
+                                        <>Teslimat: <span className="font-semibold">{selectedLoad.title}</span></>
+                                    )}
+                                </DialogDescription>
+                            </DialogHeader>
+
+                            <div className="grid gap-4 py-4">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="amount">Ödeme Tutarı (TL) *</Label>
+                                    <Input
+                                        id="amount"
+                                        type="number"
+                                        placeholder="Örn: 15000"
+                                        value={paymentAmount}
+                                        onChange={(e) => setPaymentAmount(e.target.value)}
+                                        min="0"
+                                        step="0.01"
+                                    />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="paymentMethod">Ödeme Yöntemi *</Label>
+                                    <Select
+                                        value={paymentMethod}
+                                        onValueChange={(value) => setPaymentMethod(value as PaymentMethod)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Ödeme yöntemi seçin" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value={PaymentMethod.BANK_TRANSFER}>Banka Havalesi</SelectItem>
+                                            <SelectItem value={PaymentMethod.CREDIT_CARD}>Kredi Kartı</SelectItem>
+                                            <SelectItem value={PaymentMethod.DEBIT_CARD}>Banka Kartı</SelectItem>
+                                            <SelectItem value={PaymentMethod.CASH}>Nakit</SelectItem>
+                                            <SelectItem value={PaymentMethod.OTHER}>Diğer</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="description">Açıklama</Label>
+                                    <Textarea
+                                        id="description"
+                                        placeholder="Ödeme ile ilgili not ekleyin..."
+                                        value={paymentDescription}
+                                        onChange={(e) => setPaymentDescription(e.target.value)}
+                                        rows={3}
+                                    />
+                                </div>
+                            </div>
+
+                            <DialogFooter>
+                                <Button
+                                    variant="outline"
+                                    onClick={handleClosePaymentDialog}
+                                    disabled={isSubmittingPayment}
+                                >
+                                    İptal
+                                </Button>
+                                <Button
+                                    onClick={handleSubmitPayment}
+                                    disabled={isSubmittingPayment || !paymentAmount}
+                                    className="bg-blue-600 hover:bg-blue-700"
+                                >
+                                    {isSubmittingPayment ? (
+                                        <>
+                                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                            Kaydediliyor...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <DollarSign className="h-4 w-4 mr-2" />
+                                            Ödemeyi Kaydet
+                                        </>
+                                    )}
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
                 </div>
             </div>
         </ProtectedRoute>

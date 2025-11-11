@@ -50,6 +50,7 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import carrierService from '@/services/carrierService';
+import AccountTypeChangeSection from '@/components/AccountTypeChangeSection';
 
 // Local types for carrier profile
 interface CarrierProfile {
@@ -1100,6 +1101,11 @@ export default function CarrierProfilePage() {
                         </DialogContent>
                     </Dialog>
                 </div>
+            </div>
+
+            {/* Hesap Türü Değiştirme Bölümü */}
+            <div className="mt-8">
+                <AccountTypeChangeSection />
             </div>
         </div>
     );

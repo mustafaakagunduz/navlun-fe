@@ -57,16 +57,28 @@ export type DeliveryTrackingData = {
     pickupDocuments: string[];
     deliveryDocuments: string[];
     cancellationDocuments: string[];
-    carrier: {
+    carrier?: {
+        id?: string;
         name: string;
         phone?: string;
         isEcoFriendly: boolean;
     };
-    vehicle: {
+    vehicle?: {
         plateNumber: string;
         type: string;
         ecoCertified: boolean;
     };
+    carrierUserId?: string; // Mesajlaşma için carrier'ın user ID'si
+    broker?: {
+        id?: string;
+        name: string;
+        phone?: string;
+        userId?: string; // Broker'ın user ID'si
+    };
+    // Eğer broker varsa ve carrier yoksa, broker ile iletişim kurulabilir
+    contactUserId?: string; // İletişim kurulacak kişinin user ID'si (carrier veya broker)
+    contactName?: string; // İletişim kurulacak kişinin adı
+    contactRole?: 'CARRIER' | 'BROKER'; // İletişim kurulacak kişinin rolü
 };
 
 export type StatusHistoryItem = {
@@ -597,6 +609,28 @@ const deliveryService = {
             );
         } catch (error) {
             console.error(`Mark payment status (${deliveryStatusId}) error:`, error);
+            throw error;
+        }
+    },
+
+    // === BROKER METODLARI ===
+
+    // Broker'ın aktif teslimatları
+    getCurrentBrokerActiveDeliveries: async (): Promise<DeliveryTrackingData[]> => {
+        try {
+            return await apiService.get<DeliveryTrackingData[]>('/delivery-status/broker/active-deliveries');
+        } catch (error) {
+            console.error('Get current broker active deliveries error:', error);
+            throw error;
+        }
+    },
+
+    // Broker'ın tamamlanmış teslimatları
+    getCurrentBrokerCompletedDeliveries: async (): Promise<DeliveryTrackingData[]> => {
+        try {
+            return await apiService.get<DeliveryTrackingData[]>('/delivery-status/broker/completed-deliveries');
+        } catch (error) {
+            console.error('Get current broker completed deliveries error:', error);
             throw error;
         }
     },

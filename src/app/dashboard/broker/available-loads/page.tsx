@@ -34,7 +34,7 @@ import {
     Building2,
     Route,
     AlertCircle,
-    MessageSquare,
+    // MessageSquare, // Şimdilik kullanılmıyor
     Loader2, CheckCircle
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
@@ -250,18 +250,19 @@ export default function BrokerAvailableLoads() {
 
 
 
-    const handleMessageSender = (load: Load) => {
-        if (load.sender?.id) {
-            router.push(`/dashboard/messages/load/${load.id}?otherUserId=${load.sender.id}`);
-        } else {
-            console.log('Debug - Load object:', load);
-            toast({
-                title: 'Hata',
-                description: 'Gönderici bilgisi bulunamadı.',
-                variant: 'destructive',
-            });
-        }
-    };
+    // Mesajlaşma fonksiyonu - şimdilik devre dışı
+    // const handleMessageSender = (load: Load) => {
+    //     if (load.sender?.id) {
+    //         router.push(`/dashboard/messages/load/${load.id}?otherUserId=${load.sender.id}`);
+    //     } else {
+    //         console.log('Debug - Load object:', load);
+    //         toast({
+    //             title: 'Hata',
+    //             description: 'Gönderici bilgisi bulunamadı.',
+    //             variant: 'destructive',
+    //         });
+    //     }
+    // };
 
     if (isLoading || availableLoadsLoading) {
         return (
@@ -535,7 +536,8 @@ export default function BrokerAvailableLoads() {
                                             <Eye className="h-4 w-4 mr-1" />
                                             Detay
                                         </Button>
-                                        <Button
+                                        {/* Mesajlaşma butonu - şimdilik devre dışı */}
+                                        {/* <Button
                                             variant="outline"
                                             size="sm"
                                             className="flex-1"
@@ -543,7 +545,7 @@ export default function BrokerAvailableLoads() {
                                         >
                                             <MessageSquare className="h-4 w-4 mr-1" />
                                             Mesajlaş
-                                        </Button>
+                                        </Button> */}
 
                                         {/* Teklif Ver butonu yerine ekle */}
                                         {offeredLoads.includes(load.id) ? (
@@ -762,7 +764,8 @@ export default function BrokerAvailableLoads() {
 
                                     {/* Action Buttons */}
                                     <div className="flex gap-3 pt-4 border-t">
-                                        <Button
+                                        {/* Mesajlaşma butonu - şimdilik devre dışı */}
+                                        {/* <Button
                                             variant="outline"
                                             className="flex-1"
                                             onClick={() => {
@@ -772,7 +775,7 @@ export default function BrokerAvailableLoads() {
                                         >
                                             <MessageSquare className="h-4 w-4 mr-2" />
                                             Mesajlaş
-                                        </Button>
+                                        </Button> */}
                                         {!offeredLoads.includes(selectedLoad.id) && (
                                             <Button
                                                 className="flex-1"

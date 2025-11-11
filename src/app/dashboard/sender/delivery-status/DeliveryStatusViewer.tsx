@@ -18,7 +18,8 @@ import {
     Phone,
     Leaf,
     Eye,
-    Download
+    Download,
+    MessageSquare
 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { fetchSenderTrackings } from '@/store/slices/deliverySlice';
@@ -27,7 +28,11 @@ import { useToast } from '@/hooks/use-toast';
 import { DeliveryStep, DeliveryTrackingData } from '@/services/deliveryService';
 import deliveryService from '@/services/deliveryService';
 import senderService from '@/services/senderService';
+import messageService, { MessageType, MessagePriority, MessageCategory } from '@/services/messageService';
 import { formatDate as formatDateUtil, formatDateTime } from '@/utils/dateUtils';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export default function DeliveryStatusViewer() {
     const dispatch = useAppDispatch();
@@ -41,6 +46,8 @@ export default function DeliveryStatusViewer() {
 
     const [filterStatus, setFilterStatus] = useState<DeliveryStep | 'ALL'>('ALL');
     const [selectedTracking, setSelectedTracking] = useState<DeliveryTrackingData | null>(null);
+    const [messageModalOpen, setMessageModalOpen] = useState(false);
+    const [selectedTrackingForMessage, setSelectedTrackingForMessage] = useState<DeliveryTrackingData | null>(null);
 
     useEffect(() => {
         const loadSenderTrackings = async () => {
@@ -48,8 +55,30 @@ export default function DeliveryStatusViewer() {
                 try {
                     // Sender profile'ı al ve onun üzerinden trackings'i çek
                     const senderProfile = await senderService.getSenderProfileByUserId(user.id);
-                    dispatch(fetchSenderTrackings(senderProfile.id));
+                    const result = await dispatch(fetchSenderTrackings(senderProfile.id));
+
+                    // Debug: Backend'den gelen veriyi konsola yazdır
+                    if (result.payload) {
+                        console.log('=== SENDER TRACKINGS DATA ===');
+                        console.log('Full data:', JSON.stringify(result.payload, null, 2));
+                        (result.payload as DeliveryTrackingData[]).forEach((tracking, index) => {
+                            console.log(`\n========== Tracking ${index + 1} ==========`);
+                            console.log('loadTitle:', tracking.loadTitle);
+                            console.log('currentStatus:', tracking.currentStatus);
+                            console.log('carrier:', JSON.stringify(tracking.carrier, null, 2));
+                            console.log('broker:', JSON.stringify(tracking.broker, null, 2));
+                            console.log('carrierUserId:', tracking.carrierUserId);
+                            console.log('contactUserId:', tracking.contactUserId);
+                            console.log('contactName:', tracking.contactName);
+                            console.log('contactRole:', tracking.contactRole);
+                            console.log('vehicle:', JSON.stringify(tracking.vehicle, null, 2));
+                            console.log('ALL KEYS:', Object.keys(tracking));
+                            console.log('FULL OBJECT:', JSON.stringify(tracking, null, 2));
+                        });
+                        console.log('=== END TRACKING DATA ===');
+                    }
                 } catch (error) {
+                    console.error('Load sender trackings error:', error);
                     toast({
                         title: "Hata",
                         description: "Teslimat takipleri yüklenirken hata oluştu",
@@ -146,6 +175,27 @@ export default function DeliveryStatusViewer() {
     const openDocumentViewer = (documentUrl: string) => {
         // Dosyayı yeni sekmede aç
         window.open(documentUrl, '_blank');
+    };
+
+    const handleOpenMessageModal = (tracking: DeliveryTrackingData) => {
+        // contactUserId öncelikli, yoksa carrierUserId, yoksa broker userId
+        const recipientUserId = tracking.contactUserId || tracking.carrierUserId || tracking.broker?.userId;
+
+        if (!recipientUserId) {
+            toast({
+                title: "Uyarı",
+                description: "Bu teslimat için iletişim bilgisi bulunmuyor. Mesaj gönderilemez.",
+                variant: "destructive",
+            });
+            return;
+        }
+        setSelectedTrackingForMessage(tracking);
+        setMessageModalOpen(true);
+    };
+
+    const handleCloseMessageModal = () => {
+        setMessageModalOpen(false);
+        setSelectedTrackingForMessage(null);
     };
 
     if (senderTrackingsLoading) {
@@ -269,36 +319,57 @@ export default function DeliveryStatusViewer() {
                                                             </div>
                                                         </td>
                                                         <td className="px-6 py-4">
-                                                            <div className="flex items-center gap-2">
-                                                                <div>
-                                                                    <div className="text-gray-900">{tracking.carrier.name}</div>
-                                                                    {tracking.carrier.phone && (
-                                                                        <div className="text-xs text-gray-500 flex items-center gap-1 mt-1">
-                                                                            <Phone className="h-3 w-3" />
-                                                                            {tracking.carrier.phone}
+                                                            {tracking.carrier ? (
+                                                                <div className="flex items-center gap-2">
+                                                                    <div>
+                                                                        <div className="text-gray-900 font-medium">{tracking.carrier.name}</div>
+                                                                        {tracking.carrier.phone && (
+                                                                            <div className="text-xs text-gray-500 flex items-center gap-1 mt-1">
+                                                                                <Phone className="h-3 w-3" />
+                                                                                {tracking.carrier.phone}
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                    {tracking.carrier.isEcoFriendly && (
+                                                                        <div title="Çevreci Taşıyıcı">
+                                                                            <Leaf className="h-4 w-4 text-green-600 flex-shrink-0" />
                                                                         </div>
                                                                     )}
                                                                 </div>
-                                                                {tracking.carrier.isEcoFriendly && (
-                                                                    <div title="Çevreci Taşıyıcı">
-                                                                        <Leaf className="h-4 w-4 text-green-600 flex-shrink-0" />
+                                                            ) : tracking.broker ? (
+                                                                <div className="flex items-center gap-2">
+                                                                    <div>
+                                                                        <div className="text-gray-900 font-medium">{tracking.broker.name}</div>
+                                                                        <div className="text-xs text-blue-600 font-medium mt-1">Broker</div>
+                                                                        {tracking.broker.phone && (
+                                                                            <div className="text-xs text-gray-500 flex items-center gap-1 mt-1">
+                                                                                <Phone className="h-3 w-3" />
+                                                                                {tracking.broker.phone}
+                                                                            </div>
+                                                                        )}
                                                                     </div>
-                                                                )}
-                                                            </div>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="text-sm text-gray-400 italic">Taşıyıcı bilgisi bekleniyor</div>
+                                                            )}
                                                         </td>
                                                         <td className="px-6 py-4">
-                                                            <div className="flex items-center gap-2 text-gray-700">
-                                                                <Truck className="h-4 w-4 text-gray-400" />
-                                                                <div>
-                                                                    <div className="font-medium">{tracking.vehicle.plateNumber}</div>
-                                                                    <div className="text-xs text-gray-500">{tracking.vehicle.type}</div>
-                                                                </div>
-                                                                {tracking.vehicle.ecoCertified && (
-                                                                    <div title="Çevreci Araç">
-                                                                        <Leaf className="h-3 w-3 text-green-600" />
+                                                            {tracking.vehicle ? (
+                                                                <div className="flex items-center gap-2 text-gray-700">
+                                                                    <Truck className="h-4 w-4 text-gray-400" />
+                                                                    <div>
+                                                                        <div className="font-medium">{tracking.vehicle.plateNumber}</div>
+                                                                        <div className="text-xs text-gray-500">{tracking.vehicle.type}</div>
                                                                     </div>
-                                                                )}
-                                                            </div>
+                                                                    {tracking.vehicle.ecoCertified && (
+                                                                        <div title="Çevreci Araç">
+                                                                            <Leaf className="h-3 w-3 text-green-600" />
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            ) : (
+                                                                <div className="text-sm text-gray-400 italic">Araç bilgisi bekleniyor</div>
+                                                            )}
                                                         </td>
                                                         <td className="px-6 py-4">
                                                             <Badge className={getStatusBadgeColor(tracking.currentStatus)}>
@@ -317,18 +388,38 @@ export default function DeliveryStatusViewer() {
                                                                 <span className="text-sm">{formatDate(tracking.lastUpdate)}</span>
                                                             </div>
                                                         </td>
-                                                        <td className="px-6 py-4 text-center">
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    setSelectedTracking(tracking);
-                                                                }}
-                                                                className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                                                            >
-                                                                <Eye className="h-4 w-4" />
-                                                            </Button>
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex items-center justify-center gap-2">
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setSelectedTracking(tracking);
+                                                                    }}
+                                                                    className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                                                    title="Detayları Görüntüle"
+                                                                >
+                                                                    <Eye className="h-4 w-4" />
+                                                                </Button>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleOpenMessageModal(tracking);
+                                                                    }}
+                                                                    className={`${(tracking.contactUserId || tracking.carrierUserId || tracking.broker?.userId) ? 'text-blue-600 hover:text-blue-700 hover:bg-blue-50' : 'text-gray-400 cursor-not-allowed'}`}
+                                                                    disabled={!(tracking.contactUserId || tracking.carrierUserId || tracking.broker?.userId)}
+                                                                    title={
+                                                                        tracking.contactUserId || tracking.carrierUserId || tracking.broker?.userId
+                                                                            ? `${tracking.contactName || tracking.carrier?.name || tracking.broker?.name || 'Taşıyıcı'}'ya Mesaj Gönder`
+                                                                            : "İletişim bilgisi bekleniyor"
+                                                                    }
+                                                                >
+                                                                    <MessageSquare className="h-4 w-4" />
+                                                                </Button>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 );
@@ -349,6 +440,15 @@ export default function DeliveryStatusViewer() {
                     onClose={() => setSelectedTracking(null)}
                     onViewDocument={openDocumentViewer}
                     formatDate={formatDate}
+                />
+            )}
+
+            {/* Mesaj Modal */}
+            {messageModalOpen && selectedTrackingForMessage && user && (
+                <MessageModal
+                    tracking={selectedTrackingForMessage}
+                    senderUserId={user.id}
+                    onClose={handleCloseMessageModal}
                 />
             )}
         </div>
@@ -381,7 +481,7 @@ function TrackingCard({
                         <CardTitle className="flex items-center gap-2">
                             <Package className="h-5 w-5" />
                             {tracking.loadTitle}
-                            {tracking.vehicle.ecoCertified && (
+                            {tracking.vehicle?.ecoCertified && (
                                 <div title="Çevreci Araç">
                                     <Leaf className="h-4 w-4 text-green-600" />
                                 </div>
@@ -390,7 +490,7 @@ function TrackingCard({
                         <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                             <span className="flex items-center gap-1">
                                 <Truck className="h-4 w-4" />
-                                {tracking.vehicle.plateNumber} - {tracking.vehicle.type}
+                                {tracking.vehicle?.plateNumber || 'Araç bilgisi yok'} - {tracking.vehicle?.type || '-'}
                             </span>
                             <span className="flex items-center gap-1">
                                 <Clock className="h-4 w-4" />
@@ -418,15 +518,15 @@ function TrackingCard({
                 <div className="bg-muted p-3 rounded-md">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="font-medium">{tracking.carrier.name}</p>
-                            {tracking.carrier.phone && (
+                            <p className="font-medium">{tracking.carrier?.name || 'Taşıyıcı bilgisi yok'}</p>
+                            {tracking.carrier?.phone && (
                                 <p className="text-sm text-muted-foreground flex items-center gap-1">
                                     <Phone className="h-3 w-3" />
                                     {tracking.carrier.phone}
                                 </p>
                             )}
                         </div>
-                        {tracking.carrier.isEcoFriendly && (
+                        {tracking.carrier?.isEcoFriendly && (
                             <Badge variant="outline" className="text-green-600 border-green-200">
                                 Çevreci Taşıyıcı
                             </Badge>
@@ -571,6 +671,178 @@ function TrackingDetailModal({ tracking, onClose, onViewDocument, formatDate }: 
                                     </div>
                                 )}
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// Message Modal Component
+interface MessageModalProps {
+    tracking: DeliveryTrackingData;
+    senderUserId: string;
+    onClose: () => void;
+}
+
+function MessageModal({ tracking, senderUserId, onClose }: MessageModalProps) {
+    const { toast } = useToast();
+    const [subject, setSubject] = useState(`${tracking.loadTitle} - Teslimat Hakkında`);
+    const [content, setContent] = useState('');
+    const [sending, setSending] = useState(false);
+
+    // İletişim kurulacak kişiyi belirle
+    const recipientUserId = tracking.contactUserId || tracking.carrierUserId || tracking.broker?.userId;
+    const recipientName = tracking.contactName || tracking.carrier?.name || tracking.broker?.name;
+    const recipientRole = tracking.contactRole || (tracking.carrier ? 'CARRIER' : 'BROKER');
+
+    const handleSendMessage = async () => {
+        if (!content.trim()) {
+            toast({
+                title: "Uyarı",
+                description: "Lütfen mesaj içeriği girin",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        if (!recipientUserId) {
+            toast({
+                title: "Hata",
+                description: "Alıcı bilgisi bulunamadı",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        setSending(true);
+        try {
+            await messageService.sendMessage({
+                loadId: tracking.actualLoadId,
+                senderUserId: senderUserId,
+                receiverUserId: recipientUserId,
+                subject: subject,
+                content: content,
+                messageType: MessageType.DELIVERY_UPDATE,
+                priority: MessagePriority.NORMAL,
+                category: MessageCategory.DELIVERY,
+            });
+
+            toast({
+                title: "Başarılı",
+                description: `Mesajınız ${recipientName || (recipientRole === 'BROKER' ? 'broker' : 'taşıyıcı')}'ya gönderildi`,
+                variant: "default",
+            });
+
+            onClose();
+        } catch (error) {
+            console.error('Send message error:', error);
+            toast({
+                title: "Hata",
+                description: "Mesaj gönderilirken bir hata oluştu",
+                variant: "destructive",
+            });
+        } finally {
+            setSending(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg max-w-lg w-full">
+                <div className="p-6">
+                    <div className="flex justify-between items-center mb-4">
+                        <div>
+                            <h2 className="text-xl font-bold flex items-center gap-2">
+                                <MessageSquare className="h-5 w-5 text-blue-600" />
+                                {recipientRole === 'BROKER' ? 'Broker\'a' : 'Taşıyıcıya'} Mesaj Gönder
+                            </h2>
+                            <p className="text-sm text-gray-500 mt-1">
+                                {recipientName || (recipientRole === 'BROKER' ? 'Broker' : 'Taşıyıcı')} ile iletişim kurun
+                            </p>
+                        </div>
+                        <Button
+                            variant="ghost"
+                            size="lg"
+                            onClick={onClose}
+                            className="text-2xl hover:bg-gray-100"
+                            disabled={sending}
+                        >
+                            ✕
+                        </Button>
+                    </div>
+
+                    <div className="space-y-4">
+                        {/* Load Info */}
+                        <div className="bg-blue-50 p-3 rounded-md border border-blue-200">
+                            <div className="flex items-center gap-2">
+                                <Package className="h-4 w-4 text-blue-600" />
+                                <span className="text-sm font-medium text-blue-900">
+                                    Yük: {tracking.loadTitle}
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2 mt-1">
+                                <Truck className="h-4 w-4 text-blue-600" />
+                                <span className="text-sm text-blue-700">
+                                    Durum: {deliveryService.getStatusDisplayName(tracking.currentStatus)}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Subject */}
+                        <div className="space-y-2">
+                            <Label htmlFor="subject">Konu</Label>
+                            <Input
+                                id="subject"
+                                value={subject}
+                                onChange={(e) => setSubject(e.target.value)}
+                                placeholder="Mesaj konusu"
+                                disabled={sending}
+                            />
+                        </div>
+
+                        {/* Content */}
+                        <div className="space-y-2">
+                            <Label htmlFor="content">Mesaj</Label>
+                            <Textarea
+                                id="content"
+                                value={content}
+                                onChange={(e) => setContent(e.target.value)}
+                                placeholder="Taşıyıcıya göndermek istediğiniz mesajı yazın..."
+                                rows={6}
+                                disabled={sending}
+                                className="resize-none"
+                            />
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex gap-3 pt-4">
+                            <Button
+                                onClick={onClose}
+                                variant="outline"
+                                className="flex-1"
+                                disabled={sending}
+                            >
+                                İptal
+                            </Button>
+                            <Button
+                                onClick={handleSendMessage}
+                                className="flex-1 bg-blue-600 hover:bg-blue-700"
+                                disabled={sending}
+                            >
+                                {sending ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                        Gönderiliyor...
+                                    </>
+                                ) : (
+                                    <>
+                                        <MessageSquare className="h-4 w-4 mr-2" />
+                                        Gönder
+                                    </>
+                                )}
+                            </Button>
                         </div>
                     </div>
                 </div>

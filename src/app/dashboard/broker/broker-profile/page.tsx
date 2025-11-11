@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import brokerService, { BrokerProfile } from "@/services/brokerService";
 import { formatDate, formatDateTime, formatTime } from '@/utils/dateUtils';
+import AccountTypeChangeSection from '@/components/AccountTypeChangeSection';
 
 export default function BrokerProfilePage() {
     const { user, isAuthenticated, isLoading } = useAuth();
@@ -475,6 +476,11 @@ export default function BrokerProfilePage() {
                                 )}
                             </CardContent>
                         </Card>
+                    </div>
+
+                    {/* Hesap Türü Değiştirme Bölümü */}
+                    <div className="mt-8">
+                        <AccountTypeChangeSection />
                     </div>
                 </div>
             </div>

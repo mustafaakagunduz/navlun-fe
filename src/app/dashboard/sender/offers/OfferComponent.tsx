@@ -71,9 +71,13 @@ export default function SenderOffersPage() {
     }, [dispatch]);
 
     const fetchBrokerOffers = async () => {
+        console.log('=== FETCHING BROKER OFFERS STARTED ===');
         setBrokerOffersLoading(true);
         try {
             const offers = await brokerService.getCurrentSenderReceivedBrokerOffers();
+            console.log('=== BROKER OFFERS RECEIVED ===');
+            console.log('Offers count:', offers.length);
+            console.log('Offers:', offers);
             setBrokerOffers(offers);
         } catch (error) {
             console.error('Broker teklifleri yüklenirken hata:', error);
@@ -231,23 +235,7 @@ export default function SenderOffersPage() {
         }).format(amount);
     };
 
-    const filteredLoads = loadsWithOffers.filter(loadWithOffers => {
-        if (filter === 'pending') {
-            return loadWithOffers.offers.some(offer => offer.status === 'PENDING');
-        }
-        if (filter === 'accepted') {
-            return loadWithOffers.offers.some(offer => offer.status === 'ACCEPTED');
-        }
-        if (filter === 'rejected') {
-            return loadWithOffers.offers.some(offer => offer.status === 'REJECTED');
-        }
-        if (filter === 'eco') {
-            return loadWithOffers.offers.some(offer => offer.vehicleEcoCertified || offer.isEcoFriendly);
-        }
-        return true;
-    });
-
-    // Broker tekliflerini yüklere göre grupla
+    // Broker tekliflerini yüklere göre grupla (filtrelemeden önce)
     const brokerOffersByLoad = brokerOffers.reduce((acc, offer) => {
         if (!acc[offer.loadId]) {
             acc[offer.loadId] = [];
@@ -255,6 +243,70 @@ export default function SenderOffersPage() {
         acc[offer.loadId].push(offer);
         return acc;
     }, {} as Record<string, BrokerOfferResponse[]>);
+
+    // Broker teklifi olan ama carrier teklifi olmayan yükleri de ekle
+    const allLoadIds = new Set([
+        ...loadsWithOffers.map(l => l.load.id),
+        ...Object.keys(brokerOffersByLoad)
+    ]);
+
+    // Tüm yükleri birleştir
+    const allLoadsMap = new Map<string, LoadWithOffers>();
+    loadsWithOffers.forEach(load => {
+        allLoadsMap.set(load.load.id, load);
+    });
+
+    // Broker teklifi olan ama carrier teklifi olmayan yükleri ekle
+    brokerOffers.forEach(brokerOffer => {
+        if (!allLoadsMap.has(brokerOffer.loadId)) {
+            // Broker teklifinden load bilgisini çıkar
+            allLoadsMap.set(brokerOffer.loadId, {
+                load: {
+                    id: brokerOffer.loadId,
+                    title: brokerOffer.loadTitle || 'Yük',
+                    goodsType: '',
+                    netWeight: 0,
+                    loadingAddress: '',
+                    deliveryAddress: '',
+                    loadingDate: '',
+                    deliveryDate: '',
+                    description: '',
+                    insuranceRequested: false,
+                    ecoTransportRequested: false,
+                    status: 'PENDING',
+                    transportType: 'SEA',
+                    active: true
+                } as any,
+                offers: [],
+                pendingOffersCount: 0
+            });
+        }
+    });
+
+    const allLoadsWithOffers = Array.from(allLoadsMap.values());
+
+    const filteredLoads = allLoadsWithOffers.filter(loadWithOffers => {
+        const carrierOffers = loadWithOffers.offers;
+        const brokerOffersForLoad = brokerOffersByLoad[loadWithOffers.load.id] || [];
+
+        if (filter === 'pending') {
+            return carrierOffers.some(offer => offer.status === 'PENDING') ||
+                   brokerOffersForLoad.some(offer => offer.status === 'PENDING');
+        }
+        if (filter === 'accepted') {
+            return carrierOffers.some(offer => offer.status === 'ACCEPTED') ||
+                   brokerOffersForLoad.some(offer => offer.status === 'ACCEPTED');
+        }
+        if (filter === 'rejected') {
+            return carrierOffers.some(offer => offer.status === 'REJECTED') ||
+                   brokerOffersForLoad.some(offer => offer.status === 'REJECTED');
+        }
+        if (filter === 'eco') {
+            return carrierOffers.some(offer => offer.vehicleEcoCertified || offer.isEcoFriendly) ||
+                   brokerOffersForLoad.some(offer => offer.ecoFriendly);
+        }
+        return true;
+    });
 
     if (loadsWithOffersLoading || brokerOffersLoading) {
         return (

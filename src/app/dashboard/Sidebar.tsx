@@ -21,7 +21,8 @@ import {
     Ship,
     Menu,
     X,
-    CreditCard
+    CreditCard,
+    UserCog
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
@@ -125,6 +126,8 @@ export default function Sidebar() {
             icon: MessageSquare,
             badge: notificationCounts.messages || 0
         },
+        { href: "/dashboard/broker/delivery-tracking", label: "Teslimat Takibi", icon: MapPin },
+        { href: "/dashboard/broker/completed-deliveries", label: t("dashboard.sidebar.completed"), icon: CheckCheck },
         { href: "/dashboard/broker/ship-portfolio", label: t("dashboard.sidebar.shipPortfolio"), icon: Truck },
         { href: "/dashboard/broker/commissions", label: t("dashboard.sidebar.commissions"), icon: DollarSign },
         { href: "/dashboard/broker/broker-profile", label: t("dashboard.sidebar.profile"), icon: Users },
@@ -133,6 +136,7 @@ export default function Sidebar() {
     const adminMenuItems = [
         { href: "/dashboard", label: t("dashboard.sidebar.home"), icon: Home },
         { href: "/dashboard/admin/users", label: t("dashboard.sidebar.users"), icon: Users },
+        { href: "/dashboard/admin/account-requests", label: "Hesap Değişiklik Talepleri", icon: UserCog },
         { href: "/dashboard/admin/analytics", label: t("dashboard.sidebar.analytics"), icon: BarChart3 },
         { href: "/dashboard/admin/settings", label: t("dashboard.sidebar.settings"), icon: Settings },
     ];
