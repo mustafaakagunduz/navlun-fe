@@ -321,9 +321,7 @@ function MyOffersPageContent() {
             {/* Teklifler Listesi */}
             <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="grid w-full grid-cols-4">
-                    <TabsTrigger value="all">
-                        Tümü ({offers.length})
-                    </TabsTrigger>
+
                     <TabsTrigger value="pending">
                         Beklemede ({pendingOffers.length})
                     </TabsTrigger>
@@ -332,6 +330,9 @@ function MyOffersPageContent() {
                     </TabsTrigger>
                     <TabsTrigger value="rejected">
                         Reddedildi ({rejectedOffers.length})
+                    </TabsTrigger>
+                    <TabsTrigger value="all">
+                        Tümü ({offers.length})
                     </TabsTrigger>
                 </TabsList>
 
