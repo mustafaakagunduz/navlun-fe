@@ -302,50 +302,21 @@ function MyOffersPageContent() {
                 </Card>
             </div>
 
-            {/* Filtreler */}
+
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
                 <div className="flex-1">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <div className="relative bg-white text-black rounded-lg shadow-sm">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
                         <Input
-                            placeholder="Yük başlığı, tipi veya gemi adı ile ara..."
+                            placeholder="Yük başlığı, tipi veya gemi adı ile ara.."
                             value={filters.searchQuery}
                             onChange={(e) => handleSearch(e.target.value)}
-                            className="pl-10"
+                            className="pl-10 bg-white text-black placeholder-gray-500 border border-gray-300"
                         />
                     </div>
                 </div>
-                <div className="flex gap-2">
-                    <Button
-                        variant={filters.status === 'ALL' ? 'default' : 'outline'}
-                        onClick={() => handleStatusFilter('ALL')}
-                        size="sm"
-                    >
-                        Tümü
-                    </Button>
-                    <Button
-                        variant={filters.status === 'PENDING' ? 'default' : 'outline'}
-                        onClick={() => handleStatusFilter(OfferStatus.PENDING)}
-                        size="sm"
-                    >
-                        Beklemede
-                    </Button>
-                    <Button
-                        variant={filters.status === 'ACCEPTED' ? 'default' : 'outline'}
-                        onClick={() => handleStatusFilter(OfferStatus.ACCEPTED)}
-                        size="sm"
-                    >
-                        Kabul Edildi
-                    </Button>
-                    <Button
-                        variant={filters.status === 'REJECTED' ? 'default' : 'outline'}
-                        onClick={() => handleStatusFilter(OfferStatus.REJECTED)}
-                        size="sm"
-                    >
-                        Reddedildi
-                    </Button>
-                </div>
             </div>
+
 
             {/* Teklifler Listesi */}
             <Tabs value={activeTab} onValueChange={setActiveTab}>

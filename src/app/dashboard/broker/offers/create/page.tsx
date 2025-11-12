@@ -549,7 +549,7 @@ function BrokerOfferCreate() {
                                 <CardContent className="space-y-4">
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <div>
-                                            <Label htmlFor="freightRate">Navlun Ücreti (₺) *</Label>
+                                            <Label htmlFor="freightRate">Teklif Edilen Navlun Ücreti (₺) *</Label>
                                             <Input
                                                 id="freightRate"
                                                 type="number"
@@ -569,7 +569,7 @@ function BrokerOfferCreate() {
                                         </div>
 
                                         <div>
-                                            <Label htmlFor="demurrageRate">Demuraj Ücreti (₺)</Label>
+                                            <Label htmlFor="demurrageRate">Günlük Demuraj Ücreti (₺)</Label>
                                             <Input
                                                 id="demurrageRate"
                                                 type="number"
@@ -585,7 +585,7 @@ function BrokerOfferCreate() {
                                         </div>
 
                                         <div>
-                                            <Label htmlFor="despatchRate">Dispeç Ücreti (₺)</Label>
+                                            <Label htmlFor="despatchRate">Günlük Dispeç Ücreti (₺)</Label>
                                             <Input
                                                 id="despatchRate"
                                                 type="number"
@@ -668,7 +668,7 @@ function BrokerOfferCreate() {
                                 <CardContent className="space-y-4">
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <div>
-                                            <Label htmlFor="estimatedLoadingDate">Tahmini Yükleme Tarihi *</Label>
+                                            <Label htmlFor="estimatedLoadingDate">Laytime Tarihi *</Label>
                                             <Input
                                                 id="estimatedLoadingDate"
                                                 type="date"
