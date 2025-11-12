@@ -264,6 +264,13 @@ export default function BrokerAvailableLoads() {
     //     }
     // };
 
+    const formatWeight = (weight: number) => {
+        if (weight >= 1000) {
+            return `${(weight / 1000).toFixed(1)} ton`;
+        }
+        return `${weight} kg`;
+    };
+
     if (isLoading || availableLoadsLoading) {
         return (
             <div className="flex items-center justify-center h-screen">
@@ -277,19 +284,16 @@ export default function BrokerAvailableLoads() {
 
     return (
         <ProtectedRoute allowedRoles={['BROKER']}>
-            <div className="container mx-auto p-6 space-y-6">
+            <div className="p-4 md:p-8 space-y-4 md:space-y-6">
                 {/* Header */}
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 md:gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900">Açık Deniz Yükü Talepleri</h1>
-                        <p className="text-gray-600 mt-1">
+                        <h1 className="text-2xl md:text-3xl font-bold">Açık Deniz Yükü Talepleri</h1>
+                        <p className="text-sm md:text-base text-gray-600 mt-1">
                             Teklif verebileceğiniz açık deniz yüklerini görüntüleyin ve değerlendirin
                         </p>
-                        <p className="text-sm text-blue-600 mt-1">
-                            Toplam: {availableLoads.length} yük | Deniz: {sortedLoads.length} yük | Filtrelenen: {availableLoads.length - sortedLoads.length} yük
-                        </p>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                         <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
                             <Package className="h-4 w-4 mr-1" />
                             {sortedLoads.length} deniz yükü
@@ -299,8 +303,7 @@ export default function BrokerAvailableLoads() {
                             size="sm"
                             onClick={() => dispatch(fetchAvailableLoadsForBroker({ page: 0, size: pageSize }))}
                         >
-                            <RefreshCcw className="h-4 w-4 mr-2" />
-                            Yenile
+                            <RefreshCcw className="h-4 w-4" />
                         </Button>
                     </div>
                 </div>
@@ -308,7 +311,7 @@ export default function BrokerAvailableLoads() {
 
                 {/* Search and Filters */}
                 <Card>
-                    <CardContent className="p-4">
+                    <CardContent className="p-4 md:p-6">
                         <div className="flex flex-col lg:flex-row gap-4">
                             <div className="flex-1 relative">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -439,10 +442,10 @@ export default function BrokerAvailableLoads() {
                     )}
                 </div>
 
-                {/* Loads Grid */}
+                {/* Loads List */}
                 {sortedLoads.length === 0 ? (
                     <Card>
-                        <CardContent className="p-8 text-center">
+                        <CardContent className="p-12 text-center">
                             <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                             <h3 className="text-lg font-medium text-gray-900 mb-2">
                                 Henüz açık yük bulunamadı
@@ -453,121 +456,265 @@ export default function BrokerAvailableLoads() {
                         </CardContent>
                     </Card>
                 ) : (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                        {sortedLoads.map((load) => (
-                            <Card key={load.id} className="hover:shadow-lg transition-shadow border-l-4 border-l-amber-500">
-                                <CardHeader className="pb-3">
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex-1">
-                                            <CardTitle className="text-lg font-semibold text-gray-900 mb-1">
-                                                {load.title}
-                                            </CardTitle>
-                                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                <Building2 className="h-4 w-4" />
-                                                {load.sender?.companyName || 'Şirket bilgisi yok'}
+                    <>
+                        {/* Desktop Table View */}
+                        <Card className="hidden md:block">
+                            <CardContent className="p-0">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full">
+                                        <thead className="bg-gray-50 border-b">
+                                            <tr>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                    Yük Adı
+                                                </th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                    Şirket
+                                                </th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                    Mal Türü
+                                                </th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                    Ağırlık
+                                                </th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                    Yükleme
+                                                </th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                    Teslimat
+                                                </th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                    Tarih
+                                                </th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                    Durum
+                                                </th>
+                                                <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                    İşlemler
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="bg-white divide-y divide-gray-200">
+                                            {sortedLoads.map((load) => (
+                                                <tr
+                                                    key={load.id}
+                                                    className="hover:bg-gray-50 cursor-pointer transition-colors"
+                                                    onClick={() => handleViewDetails(load)}
+                                                >
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <Package className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                                                            <span className="font-medium text-gray-900">{load.title}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-2 text-gray-700">
+                                                            <Building2 className="h-4 w-4 text-gray-400" />
+                                                            <span className="truncate max-w-xs">{load.sender?.companyName || 'Şirket bilgisi yok'}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <span className="text-gray-700">{load.goodsType}</span>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-2 text-gray-700">
+                                                            <Weight className="h-4 w-4 text-gray-400" />
+                                                            <span>{formatWeight(load.netWeight)}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-2 text-gray-700">
+                                                            <MapPin className="h-4 w-4 text-green-600 flex-shrink-0" />
+                                                            <span className="truncate max-w-xs">{load.loadingAddress}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-2 text-gray-700">
+                                                            <MapPin className="h-4 w-4 text-red-600 flex-shrink-0" />
+                                                            <span className="truncate max-w-xs">{load.deliveryAddress}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-2 text-gray-700">
+                                                            <Calendar className="h-4 w-4 text-gray-400" />
+                                                            <span>{formatDate(load.loadingDate)}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <Badge className={`${getStatusBadgeColor(load.status)} border-0`}>
+                                                            {getStatusText(load.status)}
+                                                        </Badge>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center justify-center gap-2">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleViewDetails(load);
+                                                                }}
+                                                                className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                                            >
+                                                                <Eye className="h-4 w-4" />
+                                                            </Button>
+                                                            {offeredLoads.includes(load.id) ? (
+                                                                <Badge className="bg-green-100 text-green-800 text-xs px-2">
+                                                                    <CheckCircle className="h-3 w-3" />
+                                                                </Badge>
+                                                            ) : (
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleOfferClick(load);
+                                                                    }}
+                                                                    disabled={load.status !== 'PENDING' && load.status !== 'ACTIVE'}
+                                                                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                                >
+                                                                    <HandshakeIcon className="h-4 w-4" />
+                                                                </Button>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Mobile Card View */}
+                        <div className="md:hidden space-y-4">
+                            {sortedLoads.map((load) => (
+                                <Card
+                                    key={load.id}
+                                    className="cursor-pointer hover:shadow-md transition-shadow"
+                                    onClick={() => handleViewDetails(load)}
+                                >
+                                    <CardContent className="p-4">
+                                        <div className="space-y-3">
+                                            {/* Header */}
+                                            <div className="flex items-start justify-between gap-2">
+                                                <div className="flex items-start gap-2 min-w-0 flex-1">
+                                                    <Package className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                                                    <span className="font-medium text-gray-900 text-sm">{load.title}</span>
+                                                </div>
+                                                <Badge className={`${getStatusBadgeColor(load.status)} border-0 text-xs flex-shrink-0`}>
+                                                    {getStatusText(load.status)}
+                                                </Badge>
+                                            </div>
+
+                                            {/* Company Info */}
+                                            <div className="flex items-center gap-1 text-xs text-gray-600">
+                                                <Building2 className="h-3 w-3 text-gray-400" />
+                                                <span>{load.sender?.companyName || 'Şirket bilgisi yok'}</span>
+                                            </div>
+
+                                            {/* Goods Type and Weight */}
+                                            <div className="flex items-center gap-4 text-xs text-gray-600">
+                                                <div className="flex items-center gap-1">
+                                                    <Package className="h-3 w-3 text-gray-400" />
+                                                    <span>{load.goodsType}</span>
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <Weight className="h-3 w-3 text-gray-400" />
+                                                    <span>{formatWeight(load.netWeight)}</span>
+                                                </div>
+                                            </div>
+
+                                            {/* Date */}
+                                            <div className="flex items-center gap-1 text-xs text-gray-600">
+                                                <Calendar className="h-3 w-3 text-gray-400" />
+                                                <span>{formatDate(load.loadingDate)}</span>
+                                            </div>
+
+                                            {/* Addresses */}
+                                            <div className="space-y-2">
+                                                <div className="flex items-start gap-2">
+                                                    <MapPin className="h-3 w-3 text-green-600 flex-shrink-0 mt-0.5" />
+                                                    <div className="min-w-0 flex-1">
+                                                        <div className="text-xs text-gray-500 uppercase">Yükleme</div>
+                                                        <div className="text-xs text-gray-900 break-words">{load.loadingAddress}</div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-start gap-2">
+                                                    <MapPin className="h-3 w-3 text-red-600 flex-shrink-0 mt-0.5" />
+                                                    <div className="min-w-0 flex-1">
+                                                        <div className="text-xs text-gray-500 uppercase">Teslimat</div>
+                                                        <div className="text-xs text-gray-900 break-words">{load.deliveryAddress}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Price */}
+                                            {load.estimatedPrice && (
+                                                <div className="flex items-center gap-1 text-sm font-semibold text-amber-600">
+                                                    <DollarSign className="h-4 w-4" />
+                                                    <span>₺{load.estimatedPrice.toLocaleString()}</span>
+                                                </div>
+                                            )}
+
+                                            {/* Badges */}
+                                            {(load.insuranceRequested || load.ecoTransportRequested) && (
+                                                <div className="flex flex-wrap gap-2">
+                                                    {load.insuranceRequested && (
+                                                        <Badge variant="secondary" className="text-xs">
+                                                            <Shield className="h-3 w-3 mr-1" />
+                                                            Sigortalı
+                                                        </Badge>
+                                                    )}
+                                                    {load.ecoTransportRequested && (
+                                                        <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">
+                                                            <Leaf className="h-3 w-3 mr-1" />
+                                                            Çevreci
+                                                        </Badge>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {/* Action Buttons */}
+                                            <div className="pt-2 border-t flex gap-2">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleViewDetails(load);
+                                                    }}
+                                                    className="flex-1 text-green-600 hover:text-green-700 hover:bg-green-50"
+                                                >
+                                                    <Eye className="h-4 w-4 mr-2" />
+                                                    Detaylar
+                                                </Button>
+                                                {offeredLoads.includes(load.id) ? (
+                                                    <Badge className="bg-green-100 text-green-800 flex-1 justify-center items-center">
+                                                        <CheckCircle className="h-3 w-3 mr-1" />
+                                                        Teklif Verildi
+                                                    </Badge>
+                                                ) : (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleOfferClick(load);
+                                                        }}
+                                                        disabled={load.status !== 'PENDING' && load.status !== 'ACTIVE'}
+                                                        className="flex-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                    >
+                                                        <HandshakeIcon className="h-4 w-4 mr-2" />
+                                                        Teklif Ver
+                                                    </Button>
+                                                )}
                                             </div>
                                         </div>
-                                        <Badge className={`${getStatusBadgeColor(load.status)} border`}>
-                                            {getStatusText(load.status)}
-                                        </Badge>
-                                    </div>
-                                </CardHeader>
-
-                                <CardContent className="space-y-4">
-                                    {/* Route */}
-                                    <div className="flex items-start gap-3">
-                                        <Route className="h-4 w-4 text-gray-400 mt-0.5" />
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2 text-sm">
-                                                <span className="font-medium text-green-600">Yükleme:</span>
-                                                <span className="truncate text-gray-600">{load.loadingAddress}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2 text-sm mt-1">
-                                                <span className="font-medium text-red-600">Teslimat:</span>
-                                                <span className="truncate text-gray-600">{load.deliveryAddress}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Load Details */}
-                                    <div className="grid grid-cols-2 gap-3 text-sm">
-                                        <div className="flex items-center gap-2">
-                                            <Weight className="h-4 w-4 text-gray-400" />
-                                            <span>{load.netWeight} kg</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <Calendar className="h-4 w-4 text-gray-400" />
-                                            <span>{formatDate(load.loadingDate)}</span>
-                                        </div>
-                                    </div>
-
-                                    {/* Price */}
-                                    {load.estimatedPrice && (
-                                        <div className="flex items-center gap-2 text-lg font-semibold text-amber-600">
-                                            <DollarSign className="h-5 w-5" />
-                                            ₺{load.estimatedPrice.toLocaleString()}
-                                        </div>
-                                    )}
-
-                                    {/* Badges */}
-                                    <div className="flex flex-wrap gap-2">
-                                        {load.insuranceRequested && (
-                                            <Badge variant="secondary" className="text-xs">
-                                                <Shield className="h-3 w-3 mr-1" />
-                                                Sigortalı
-                                            </Badge>
-                                        )}
-                                        {load.ecoTransportRequested && (
-                                            <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">
-                                                <Leaf className="h-3 w-3 mr-1" />
-                                                Çevreci
-                                            </Badge>
-                                        )}
-                                    </div>
-
-                                    {/* Actions */}
-                                    <div className="flex gap-2 pt-4 border-t">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            className="flex-1"
-                                            onClick={() => handleViewDetails(load)}
-                                        >
-                                            <Eye className="h-4 w-4 mr-1" />
-                                            Detay
-                                        </Button>
-                                        {/* Mesajlaşma butonu - şimdilik devre dışı */}
-                                        {/* <Button
-                                            variant="outline"
-                                            size="sm"
-                                            className="flex-1"
-                                            onClick={() => handleMessageSender(load)}
-                                        >
-                                            <MessageSquare className="h-4 w-4 mr-1" />
-                                            Mesajlaş
-                                        </Button> */}
-
-                                        {/* Teklif Ver butonu yerine ekle */}
-                                        {offeredLoads.includes(load.id) ? (
-                                            <Badge className="bg-green-100 text-green-800 flex-1 justify-center">
-                                                <CheckCircle className="h-3 w-3 mr-1" />
-                                                Teklif Verildi
-                                            </Badge>
-                                        ) : (
-                                            <Button
-                                                onClick={() => handleOfferClick(load)}
-                                                className="flex-1"
-                                                disabled={load.status !== 'PENDING' && load.status !== 'ACTIVE'}
-                                            >
-                                                <HandshakeIcon className="h-4 w-4 mr-1" />
-                                                Teklif Ver
-                                            </Button>
-                                        )}
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    </>
                 )}
 
                 {/* Pagination */}
