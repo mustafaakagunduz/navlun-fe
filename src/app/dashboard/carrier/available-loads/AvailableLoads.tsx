@@ -196,147 +196,287 @@ export default function AvailableLoadsPage() {
         );
     }
 
+    const formatWeight = (weight: number) => {
+        if (weight >= 1000) {
+            return `${(weight / 1000).toFixed(1)} ton`;
+        }
+        return `${weight} kg`;
+    };
+
     return (
-        <div className="space-y-6">
+        <div className="p-4 md:p-8 space-y-4 md:space-y-6">
             {/* Header */}
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 md:gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Müsait Yükler</h1>
-                    <p className="text-gray-600 mt-1">
+                    <h1 className="text-2xl md:text-3xl font-bold">Müsait Yükler</h1>
+                    <p className="text-sm md:text-base text-gray-600 mt-1">
                         Teklif verebileceğiniz müsait kara yüklerini görüntüleyin ve teklif gönderin
                     </p>
                 </div>
-                <div className="flex items-center gap-3">
-                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                        <Package className="h-4 w-4 mr-1" />
-                        {filteredLoads.length} müsait yük
-                    </Badge>
-                </div>
+                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 w-fit">
+                    <Package className="h-4 w-4 mr-1" />
+                    {filteredLoads.length} müsait yük
+                </Badge>
             </div>
 
             {filteredLoads.length === 0 ? (
                 <Card>
-                    <CardContent className="flex flex-col items-center justify-center py-12">
-                        <Package className="h-12 w-12 text-muted-foreground mb-4" />
-                        <h3 className="text-lg font-semibold mb-2">Henüz müsait yük bulunmuyor</h3>
-                        <p className="text-muted-foreground text-center">
+                    <CardContent className="p-12 text-center">
+                        <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">
+                            Henüz müsait yük bulunmuyor
+                        </h3>
+                        <p className="text-gray-600">
                             Şu anda teklif verebileceğiniz yük bulunmamaktadır. Lütfen daha sonra tekrar kontrol edin.
                         </p>
                     </CardContent>
                 </Card>
             ) : (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {filteredLoads.map((load) => (
-                        <Card key={load.id} className="hover:shadow-lg transition-shadow">
-                            <CardHeader>
-                                <CardTitle className="flex items-center justify-between">
-                                    <span className="truncate">{load.title}</span>
-                                    <Badge className={`${getStatusBadgeColor(load.status)} border`}>
-                                        {getStatusText(load.status)}
-                                    </Badge>
-                                </CardTitle>
-                                {load.sender && (
-                                    <div className="flex items-center text-sm text-gray-600">
-                                        <Building2 className="h-4 w-4 mr-1" />
-                                        {load.sender.companyName}
-                                    </div>
-                                )}
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="space-y-2">
-                                    <div className="flex items-center text-sm text-muted-foreground">
-                                        <Package className="h-4 w-4 mr-2" />
-                                        {load.goodsType}
-                                    </div>
+                <>
+                    {/* Desktop Table View */}
+                    <Card className="hidden md:block">
+                        <CardContent className="p-0">
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead className="bg-gray-50 border-b">
+                                        <tr>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                Yük Adı
+                                            </th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                Mal Türü
+                                            </th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                Ağırlık
+                                            </th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                Yükleme
+                                            </th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                Teslimat
+                                            </th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                Tarih
+                                            </th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                Durum
+                                            </th>
+                                            <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                İşlemler
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                        {filteredLoads.map((load) => (
+                                            <tr
+                                                key={load.id}
+                                                className="hover:bg-gray-50 cursor-pointer transition-colors"
+                                                onClick={() => {
+                                                    setSelectedLoad(load);
+                                                    setIsDetailsModalOpen(true);
+                                                }}
+                                            >
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-2">
+                                                        <Package className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                                                        <span className="font-medium text-gray-900">{load.title}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span className="text-gray-700">{load.goodsType}</span>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-2 text-gray-700">
+                                                        <Weight className="h-4 w-4 text-gray-400" />
+                                                        <span>{formatWeight(load.netWeight)}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-2 text-gray-700">
+                                                        <MapPin className="h-4 w-4 text-green-600 flex-shrink-0" />
+                                                        <span className="truncate max-w-xs">{load.loadingAddress}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-2 text-gray-700">
+                                                        <MapPin className="h-4 w-4 text-red-600 flex-shrink-0" />
+                                                        <span className="truncate max-w-xs">{load.deliveryAddress}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-2 text-gray-700">
+                                                        <Calendar className="h-4 w-4 text-gray-400" />
+                                                        <span>{formatDate(load.loadingDate)}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <Badge className={`${getStatusBadgeColor(load.status)} border-0`}>
+                                                        {getStatusText(load.status)}
+                                                    </Badge>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center justify-center gap-2">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setSelectedLoad(load);
+                                                                setIsDetailsModalOpen(true);
+                                                            }}
+                                                            className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                                        >
+                                                            <Eye className="h-4 w-4" />
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setSelectedLoad(load);
+                                                                setIsOfferModalOpen(true);
+                                                            }}
+                                                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                        >
+                                                            <TruckIcon className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </CardContent>
+                    </Card>
 
-                                    <div className="flex items-center text-sm text-muted-foreground">
-                                        <Weight className="h-4 w-4 mr-2" />
-                                        {load.netWeight} kg
-                                    </div>
+                    {/* Mobile Card View */}
+                    <div className="md:hidden space-y-4">
+                        {filteredLoads.map((load) => (
+                            <Card
+                                key={load.id}
+                                className="cursor-pointer hover:shadow-md transition-shadow"
+                                onClick={() => {
+                                    setSelectedLoad(load);
+                                    setIsDetailsModalOpen(true);
+                                }}
+                            >
+                                <CardContent className="p-4">
+                                    <div className="space-y-3">
+                                        {/* Header */}
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div className="flex items-start gap-2 min-w-0 flex-1">
+                                                <Package className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                                                <span className="font-medium text-gray-900 text-sm">{load.title}</span>
+                                            </div>
+                                            <Badge className={`${getStatusBadgeColor(load.status)} border-0 text-xs flex-shrink-0`}>
+                                                {getStatusText(load.status)}
+                                            </Badge>
+                                        </div>
 
-                                    <div className="flex items-center text-sm text-muted-foreground">
-                                        <MapPin className="h-4 w-4 mr-2" />
-                                        <div className="truncate">
-                                            {load.loadingAddress} → {load.deliveryAddress}
+                                        {/* Sender Info */}
+                                        {load.sender && (
+                                            <div className="flex items-center gap-1 text-xs text-gray-600">
+                                                <Building2 className="h-3 w-3 text-gray-400" />
+                                                <span>{load.sender.companyName}</span>
+                                            </div>
+                                        )}
+
+                                        {/* Goods Type and Weight */}
+                                        <div className="flex items-center gap-4 text-xs text-gray-600">
+                                            <div className="flex items-center gap-1">
+                                                <Package className="h-3 w-3 text-gray-400" />
+                                                <span>{load.goodsType}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <Weight className="h-3 w-3 text-gray-400" />
+                                                <span>{formatWeight(load.netWeight)}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Dates */}
+                                        <div className="flex items-center gap-4 text-xs text-gray-600">
+                                            <div className="flex items-center gap-1">
+                                                <Calendar className="h-3 w-3 text-gray-400" />
+                                                <span>{formatDate(load.loadingDate)}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <Clock className="h-3 w-3 text-gray-400" />
+                                                <span>{formatDate(load.deliveryDate)}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Addresses */}
+                                        <div className="space-y-2">
+                                            <div className="flex items-start gap-2">
+                                                <MapPin className="h-3 w-3 text-green-600 flex-shrink-0 mt-0.5" />
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="text-xs text-gray-500 uppercase">Yükleme</div>
+                                                    <div className="text-xs text-gray-900 break-words">{load.loadingAddress}</div>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-start gap-2">
+                                                <MapPin className="h-3 w-3 text-red-600 flex-shrink-0 mt-0.5" />
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="text-xs text-gray-500 uppercase">Teslimat</div>
+                                                    <div className="text-xs text-gray-900 break-words">{load.deliveryAddress}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Badges */}
+                                        {(load.insuranceRequested || load.ecoTransportRequested) && (
+                                            <div className="flex flex-wrap gap-2">
+                                                {load.insuranceRequested && (
+                                                    <Badge variant="secondary" className="text-xs">
+                                                        <Shield className="h-3 w-3 mr-1" />
+                                                        Sigortalı
+                                                    </Badge>
+                                                )}
+                                                {load.ecoTransportRequested && (
+                                                    <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">
+                                                        <Leaf className="h-3 w-3 mr-1" />
+                                                        Çevreci
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Action Buttons */}
+                                        <div className="pt-2 border-t flex gap-2">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedLoad(load);
+                                                    setIsDetailsModalOpen(true);
+                                                }}
+                                                className="flex-1 text-green-600 hover:text-green-700 hover:bg-green-50"
+                                            >
+                                                <Eye className="h-4 w-4 mr-2" />
+                                                Detaylar
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedLoad(load);
+                                                    setIsOfferModalOpen(true);
+                                                }}
+                                                className="flex-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                            >
+                                                <TruckIcon className="h-4 w-4 mr-2" />
+                                                Teklif Ver
+                                            </Button>
                                         </div>
                                     </div>
-
-                                    <div className="flex items-center text-sm text-muted-foreground">
-                                        <Calendar className="h-4 w-4 mr-2" />
-                                        Yükleme: {formatDate(load.loadingDate)}
-                                    </div>
-
-                                    <div className="flex items-center text-sm text-muted-foreground">
-                                        <Clock className="h-4 w-4 mr-2" />
-                                        Teslimat: {formatDate(load.deliveryDate)}
-                                    </div>
-
-                                    {load.estimatedPrice && (
-                                        <div className="flex items-center text-sm font-medium text-green-600">
-                                            <DollarSign className="h-4 w-4 mr-2" />
-                                            Tahmini: ₺{load.estimatedPrice.toLocaleString()}
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Badges */}
-                                <div className="flex flex-wrap gap-2">
-                                    {load.insuranceRequested && (
-                                        <Badge variant="secondary" className="text-xs">
-                                            <Shield className="h-3 w-3 mr-1" />
-                                            Sigortalı
-                                        </Badge>
-                                    )}
-                                    {load.ecoTransportRequested && (
-                                        <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">
-                                            <Leaf className="h-3 w-3 mr-1" />
-                                            Çevreci
-                                        </Badge>
-                                    )}
-                                </div>
-
-                                {/* Action Buttons */}
-                                <div className="flex gap-2 mt-4">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => {
-                                            setSelectedLoad(load);
-                                            setIsDetailsModalOpen(true);
-                                        }}
-                                        className="flex-1"
-                                    >
-                                        <Eye className="h-4 w-4 mr-2" />
-                                        Detaylar
-                                    </Button>
-
-                                    <Button
-                                        onClick={() => {
-                                            setSelectedLoad(load);
-                                            setIsOfferModalOpen(true);
-                                        }}
-                                        size="sm"
-                                        className="flex-1"
-                                    >
-                                        <TruckIcon className="h-4 w-4 mr-2" />
-                                        Teklif Ver
-                                    </Button>
-
-                                    {/* Mesajlaş Butonu - Geçici olarak kaldırıldı */}
-                                    {/* <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleMessageSender(load)}
-                                        className="flex-1 border-blue-200 text-blue-600 hover:bg-blue-50"
-                                    >
-                                        <MessageSquare className="h-4 w-4 mr-2" />
-                                        Mesajlaş
-                                    </Button> */}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                </>
             )}
 
             {/* Load Details Modal */}

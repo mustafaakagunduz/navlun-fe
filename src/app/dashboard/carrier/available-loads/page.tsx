@@ -2,9 +2,5 @@ import AvailableLoadsPage from "@/app/dashboard/carrier/available-loads/Availabl
 
 
 export default function AvailableLoads() {
-    return (
-        <div className="p-8">
-            <AvailableLoadsPage />
-        </div>
-    );
+    return <AvailableLoadsPage />;
 }
