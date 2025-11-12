@@ -318,7 +318,7 @@ function MyOffersPageContent() {
             </div>
 
 
-            {/* Teklifler Listesi */}
+            {/* Teklifler Listesdi */}
             <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="grid w-full grid-cols-4">
 
