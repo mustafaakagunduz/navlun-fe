@@ -311,9 +311,10 @@ export default function LoadsPageContent() {
                                                                 e.stopPropagation();
                                                                 handleLoadClick(load);
                                                             }}
-                                                            className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                                            className="text-green-600 hover:text-green-700 hover:bg-green-50 border border-green-200"
                                                         >
-                                                            <Eye className="h-4 w-4" />
+                                                            <Eye className="h-4 w-4 mr-2" />
+                                                            Detaylar
                                                         </Button>
                                                     </td>
                                                 </tr>
@@ -384,7 +385,7 @@ export default function LoadsPageContent() {
                                                         e.stopPropagation();
                                                         handleLoadClick(load);
                                                     }}
-                                                    className="w-full text-green-600 hover:text-green-700 hover:bg-green-50"
+                                                    className="w-full text-green-600 hover:text-green-700 hover:bg-green-50 border border-green-200"
                                                 >
                                                     <Eye className="h-4 w-4 mr-2" />
                                                     {t('loads.clickForDetails')}

@@ -553,13 +553,15 @@ export default function BrokerAvailableLoads() {
                                                                     e.stopPropagation();
                                                                     handleViewDetails(load);
                                                                 }}
-                                                                className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                                                className="text-green-600 hover:text-green-700 hover:bg-green-50 border border-green-200"
                                                             >
-                                                                <Eye className="h-4 w-4" />
+                                                                <Eye className="h-4 w-4 mr-2" />
+                                                                Detaylar
                                                             </Button>
                                                             {offeredLoads.includes(load.id) ? (
-                                                                <Badge className="bg-green-100 text-green-800 text-xs px-2">
-                                                                    <CheckCircle className="h-3 w-3" />
+                                                                <Badge className="bg-green-100 text-green-800 text-xs px-2 border border-green-200">
+                                                                    <CheckCircle className="h-3 w-3 mr-1" />
+                                                                    Teklif Verildi
                                                                 </Badge>
                                                             ) : (
                                                                 <Button
@@ -570,9 +572,10 @@ export default function BrokerAvailableLoads() {
                                                                         handleOfferClick(load);
                                                                     }}
                                                                     disabled={load.status !== 'PENDING' && load.status !== 'ACTIVE'}
-                                                                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border border-blue-200"
                                                                 >
-                                                                    <HandshakeIcon className="h-4 w-4" />
+                                                                    <HandshakeIcon className="h-4 w-4 mr-2" />
+                                                                    Teklif Ver
                                                                 </Button>
                                                             )}
                                                         </div>
@@ -683,13 +686,13 @@ export default function BrokerAvailableLoads() {
                                                         e.stopPropagation();
                                                         handleViewDetails(load);
                                                     }}
-                                                    className="flex-1 text-green-600 hover:text-green-700 hover:bg-green-50"
+                                                    className="flex-1 text-green-600 hover:text-green-700 hover:bg-green-50 border border-green-200"
                                                 >
                                                     <Eye className="h-4 w-4 mr-2" />
                                                     Detaylar
                                                 </Button>
                                                 {offeredLoads.includes(load.id) ? (
-                                                    <Badge className="bg-green-100 text-green-800 flex-1 justify-center items-center">
+                                                    <Badge className="bg-green-100 text-green-800 flex-1 justify-center items-center border border-green-200">
                                                         <CheckCircle className="h-3 w-3 mr-1" />
                                                         Teklif Verildi
                                                     </Badge>
@@ -702,7 +705,7 @@ export default function BrokerAvailableLoads() {
                                                             handleOfferClick(load);
                                                         }}
                                                         disabled={load.status !== 'PENDING' && load.status !== 'ACTIVE'}
-                                                        className="flex-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                        className="flex-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 border border-blue-200"
                                                     >
                                                         <HandshakeIcon className="h-4 w-4 mr-2" />
                                                         Teklif Ver

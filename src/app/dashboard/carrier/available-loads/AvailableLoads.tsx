@@ -324,9 +324,10 @@ export default function AvailableLoadsPage() {
                                                                 setSelectedLoad(load);
                                                                 setIsDetailsModalOpen(true);
                                                             }}
-                                                            className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                                            className="text-green-600 hover:text-green-700 hover:bg-green-50 border border-green-200"
                                                         >
-                                                            <Eye className="h-4 w-4" />
+                                                            <Eye className="h-4 w-4 mr-2" />
+                                                            Detaylar
                                                         </Button>
                                                         <Button
                                                             variant="ghost"
@@ -336,9 +337,10 @@ export default function AvailableLoadsPage() {
                                                                 setSelectedLoad(load);
                                                                 setIsOfferModalOpen(true);
                                                             }}
-                                                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border border-blue-200"
                                                         >
-                                                            <TruckIcon className="h-4 w-4" />
+                                                            <TruckIcon className="h-4 w-4 mr-2" />
+                                                            Teklif Ver
                                                         </Button>
                                                     </div>
                                                 </td>
@@ -452,7 +454,7 @@ export default function AvailableLoadsPage() {
                                                     setSelectedLoad(load);
                                                     setIsDetailsModalOpen(true);
                                                 }}
-                                                className="flex-1 text-green-600 hover:text-green-700 hover:bg-green-50"
+                                                className="flex-1 text-green-600 hover:text-green-700 hover:bg-green-50 border border-green-200"
                                             >
                                                 <Eye className="h-4 w-4 mr-2" />
                                                 Detaylar
@@ -465,7 +467,7 @@ export default function AvailableLoadsPage() {
                                                     setSelectedLoad(load);
                                                     setIsOfferModalOpen(true);
                                                 }}
-                                                className="flex-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                className="flex-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 border border-blue-200"
                                             >
                                                 <TruckIcon className="h-4 w-4 mr-2" />
                                                 Teklif Ver
