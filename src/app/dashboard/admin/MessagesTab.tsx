@@ -31,6 +31,7 @@ export default function MessagesTab() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [unreadCount, setUnreadCount] = useState(0);
+    const [hoveredConversation, setHoveredConversation] = useState<string | null>(null);
 
     useEffect(() => {
         if (user?.id) {
@@ -197,57 +198,153 @@ export default function MessagesTab() {
                     </div>
                 ) : (
                     <div className="space-y-3">
-                        {filteredConversations.map((conversation) => (
-                            <div
-                                key={`${conversation.loadId}-${conversation.otherUserId}`}
-                                className="p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
-                                onClick={() => handleConversationClick(conversation.loadId, conversation.otherUserId)}
-                            >
-                                <div className="flex items-start justify-between">
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <Package className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                                            <h3 className="font-semibold text-gray-900 truncate">
-                                                {conversation.loadTitle}
-                                            </h3>
-                                            {conversation.unreadCount > 0 && (
-                                                <Badge variant="destructive" className="bg-red-500 text-xs">
-                                                    {conversation.unreadCount}
-                                                </Badge>
-                                            )}
-                                        </div>
+                        {filteredConversations.map((conversation) => {
+                            const conversationKey = `${conversation.loadId}-${conversation.otherUserId}`;
+                            const isHovered = hoveredConversation === conversationKey;
+                            const hasUnread = conversation.unreadCount > 0;
 
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <User className="h-3 w-3 text-gray-400" />
-                                            <span className="text-sm text-gray-600">
-                                                {conversation.otherUserName}
-                                            </span>
-                                            <Badge
-                                                variant="outline"
-                                                className={`text-xs ${getRoleBadgeColor(conversation.otherUserRole)}`}
-                                            >
-                                                {getRoleText(conversation.otherUserRole)}
-                                            </Badge>
-                                        </div>
+                            return (
+                                <div
+                                    key={conversationKey}
+                                    className={`
+                                        group relative p-5 rounded-xl border-2 transition-all duration-300 cursor-pointer
+                                        ${hasUnread
+                                            ? 'border-blue-200 bg-blue-50/50 hover:bg-blue-100/70 hover:border-blue-400 hover:shadow-lg'
+                                            : 'border-gray-200 bg-white hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 hover:border-blue-300 hover:shadow-md'
+                                        }
+                                        ${isHovered ? 'scale-[1.02] shadow-xl' : 'scale-100'}
+                                    `}
+                                    onClick={() => handleConversationClick(conversation.loadId, conversation.otherUserId)}
+                                    onMouseEnter={() => setHoveredConversation(conversationKey)}
+                                    onMouseLeave={() => setHoveredConversation(null)}
+                                >
+                                    {/* Okunmamış gösterge çizgisi */}
+                                    {hasUnread && (
+                                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 to-purple-500 rounded-l-xl" />
+                                    )}
 
-                                        <p className="text-sm text-gray-600 line-clamp-2 mb-2">
-                                            {conversation.lastMessageContent}
-                                        </p>
-
-                                        <div className="flex items-center justify-between text-xs text-gray-500">
-                                            <div className="flex items-center gap-1">
-                                                <Clock className="h-3 w-3" />
-                                                {getRelativeTime(conversation.lastMessageAt)}
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex-1 min-w-0">
+                                            {/* Başlık ve Okunmamış Badge */}
+                                            <div className="flex items-center gap-3 mb-3">
+                                                <div className={`
+                                                    p-2 rounded-lg transition-colors duration-300
+                                                    ${isHovered
+                                                        ? 'bg-blue-500 text-white'
+                                                        : hasUnread ? 'bg-blue-400 text-white' : 'bg-blue-100 text-blue-600'
+                                                    }
+                                                `}>
+                                                    <Package className="h-4 w-4 flex-shrink-0" />
+                                                </div>
+                                                <h3 className={`
+                                                    font-semibold truncate transition-colors duration-300
+                                                    ${isHovered ? 'text-blue-700' : hasUnread ? 'text-gray-900' : 'text-gray-800'}
+                                                `}>
+                                                    {conversation.loadTitle}
+                                                </h3>
+                                                {hasUnread && (
+                                                    <Badge
+                                                        variant="destructive"
+                                                        className="bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-semibold shadow-md animate-pulse"
+                                                    >
+                                                        {conversation.unreadCount}
+                                                    </Badge>
+                                                )}
                                             </div>
-                                            <div className="flex items-center gap-1">
-                                                <MessageSquare className="h-3 w-3" />
-                                                {conversation.messageCount} mesaj
+
+                                            {/* Kullanıcı Bilgisi */}
+                                            <div className="flex items-center gap-2 mb-3 ml-1">
+                                                <div className={`
+                                                    p-1.5 rounded-md transition-colors duration-300
+                                                    ${isHovered ? 'bg-purple-100' : 'bg-gray-100'}
+                                                `}>
+                                                    <User className={`
+                                                        h-3 w-3 transition-colors duration-300
+                                                        ${isHovered ? 'text-purple-600' : 'text-gray-500'}
+                                                    `} />
+                                                </div>
+                                                <span className={`
+                                                    text-sm font-medium transition-colors duration-300
+                                                    ${isHovered ? 'text-gray-900' : 'text-gray-600'}
+                                                `}>
+                                                    {conversation.otherUserName}
+                                                </span>
+                                                <Badge
+                                                    variant="outline"
+                                                    className={`
+                                                        text-xs font-medium transition-all duration-300
+                                                        ${isHovered
+                                                            ? 'border-2 shadow-sm'
+                                                            : 'border'
+                                                        }
+                                                        ${getRoleBadgeColor(conversation.otherUserRole)}
+                                                    `}
+                                                >
+                                                    {getRoleText(conversation.otherUserRole)}
+                                                </Badge>
+                                            </div>
+
+                                            {/* Son Mesaj */}
+                                            <div className={`
+                                                p-3 rounded-lg mb-3 transition-all duration-300
+                                                ${isHovered
+                                                    ? 'bg-white/80 shadow-sm border border-blue-100'
+                                                    : hasUnread ? 'bg-white/70' : 'bg-gray-50/80'
+                                                }
+                                            `}>
+                                                <p className={`
+                                                    text-sm line-clamp-2 transition-colors duration-300
+                                                    ${isHovered ? 'text-gray-800' : 'text-gray-600'}
+                                                    ${hasUnread ? 'font-medium' : ''}
+                                                `}>
+                                                    {conversation.lastMessageContent}
+                                                </p>
+                                            </div>
+
+                                            {/* Alt Bilgiler */}
+                                            <div className="flex items-center justify-between">
+                                                <div className={`
+                                                    flex items-center gap-1.5 px-2.5 py-1.5 rounded-md transition-all duration-300
+                                                    ${isHovered
+                                                        ? 'bg-blue-100 text-blue-700'
+                                                        : 'bg-gray-100 text-gray-600'
+                                                    }
+                                                `}>
+                                                    <Clock className="h-3.5 w-3.5" />
+                                                    <span className="text-xs font-medium">
+                                                        {getRelativeTime(conversation.lastMessageAt)}
+                                                    </span>
+                                                </div>
+                                                <div className={`
+                                                    flex items-center gap-1.5 px-2.5 py-1.5 rounded-md transition-all duration-300
+                                                    ${isHovered
+                                                        ? 'bg-purple-100 text-purple-700'
+                                                        : 'bg-gray-100 text-gray-600'
+                                                    }
+                                                `}>
+                                                    <MessageSquare className="h-3.5 w-3.5" />
+                                                    <span className="text-xs font-medium">
+                                                        {conversation.messageCount} mesaj
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+
+                                    {/* Hover ok ikonu */}
+                                    <div className={`
+                                        absolute right-4 top-1/2 -translate-y-1/2 transition-all duration-300
+                                        ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-2'}
+                                    `}>
+                                        <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white p-2 rounded-full shadow-lg">
+                                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </CardContent>

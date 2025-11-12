@@ -556,6 +556,25 @@ const brokerOffersSlice = createSlice({
                 state.offersError = action.payload as string
             })
 
+        // Fetch Sender Received Broker Offers
+        builder
+            .addCase(fetchCurrentSenderReceivedBrokerOffers.pending, (state) => {
+                state.offersLoading = true
+                state.offersError = null
+            })
+            .addCase(fetchCurrentSenderReceivedBrokerOffers.fulfilled, (state, action) => {
+                state.offersLoading = false
+                state.offers = action.payload
+
+                // Durumlara göre ayır
+                state.pendingOffers = action.payload.filter(offer => offer.status === OfferStatus.PENDING)
+                state.acceptedOffers = action.payload.filter(offer => offer.status === OfferStatus.ACCEPTED)
+                state.rejectedOffers = action.payload.filter(offer => offer.status === OfferStatus.REJECTED)
+            })
+            .addCase(fetchCurrentSenderReceivedBrokerOffers.rejected, (state, action) => {
+                state.offersLoading = false
+                state.offersError = action.payload as string
+            })
 
     }
 })

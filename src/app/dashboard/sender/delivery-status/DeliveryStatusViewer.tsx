@@ -19,7 +19,8 @@ import {
     Leaf,
     Eye,
     Download,
-    MessageSquare
+    MessageSquare,
+    RefreshCcw
 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { fetchSenderTrackings } from '@/store/slices/deliverySlice';
@@ -48,6 +49,7 @@ export default function DeliveryStatusViewer() {
     const [selectedTracking, setSelectedTracking] = useState<DeliveryTrackingData | null>(null);
     const [messageModalOpen, setMessageModalOpen] = useState(false);
     const [selectedTrackingForMessage, setSelectedTrackingForMessage] = useState<DeliveryTrackingData | null>(null);
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     useEffect(() => {
         const loadSenderTrackings = async () => {
@@ -198,6 +200,31 @@ export default function DeliveryStatusViewer() {
         setSelectedTrackingForMessage(null);
     };
 
+    const handleRefresh = async () => {
+        if (!user?.id) return;
+
+        setIsRefreshing(true);
+        try {
+            const senderProfile = await senderService.getSenderProfileByUserId(user.id);
+            await dispatch(fetchSenderTrackings(senderProfile.id));
+
+            toast({
+                title: "Başarılı",
+                description: "Teslimat takipleri güncellendi",
+                variant: "default",
+            });
+        } catch (error) {
+            console.error('Refresh trackings error:', error);
+            toast({
+                title: "Hata",
+                description: "Teslimat takipleri güncellenirken hata oluştu",
+                variant: "destructive",
+            });
+        } finally {
+            setIsRefreshing(false);
+        }
+    };
+
     if (senderTrackingsLoading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
@@ -217,10 +244,21 @@ export default function DeliveryStatusViewer() {
                     </p>
                 </div>
                 <Button
-                    onClick={() => user?.id && dispatch(fetchSenderTrackings(user.id))}
+                    onClick={handleRefresh}
                     variant="outline"
+                    disabled={isRefreshing || senderTrackingsLoading}
                 >
-                    Yenile
+                    {isRefreshing ? (
+                        <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Yenileniyor...
+                        </>
+                    ) : (
+                        <>
+                            <RefreshCcw className="h-4 w-4 mr-2" />
+                            Yenile
+                        </>
+                    )}
                 </Button>
             </div>
 

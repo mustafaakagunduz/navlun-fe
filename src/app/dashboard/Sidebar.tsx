@@ -41,7 +41,7 @@ import {
     updateLoadCount,
     resetMessageCount
 } from '@/store/slices/notificationsSlice'
-import {fetchCurrentBrokerOffers} from "@/store/slices/brokerOffersSlice";
+import {fetchCurrentBrokerOffers, fetchCurrentSenderReceivedBrokerOffers} from "@/store/slices/brokerOffersSlice";
 
 // Notification Badge komponenti
 const NotificationBadge = ({ count }: { count: number }) => {
@@ -64,7 +64,7 @@ export default function Sidebar() {
 
     const { loadsWithOffers } = useAppSelector(state => state.offers);
     const { acceptedLoads, rejectedOffers } = useAppSelector(state => state.offers);
-    const { pendingOffers } = useAppSelector(state => state.brokerOffers);
+    const { pendingOffers: brokerPendingOffers } = useAppSelector(state => state.brokerOffers);
 
     const notificationCounts = counts;
 
@@ -146,6 +146,8 @@ export default function Sidebar() {
 
         if (user.role === 'SENDER') {
             dispatch(fetchLoadsWithOffers());
+            // Sender'ın aldığı broker tekliflerini de getir
+            dispatch(fetchCurrentSenderReceivedBrokerOffers({}));
         } else if (user.role === 'CARRIER') {
             dispatch(fetchAcceptedLoads());
             dispatch(fetchRejectedOffers());
@@ -156,18 +158,28 @@ export default function Sidebar() {
 
     useEffect(() => {
         if (user?.role === 'SENDER') {
-            const totalPendingOffers = loadsWithOffers.reduce(
+            // Carrier tekliflerini topla
+            const carrierPendingOffers = loadsWithOffers.reduce(
                 (total, loadWithOffers) => total + loadWithOffers.pendingOffersCount,
                 0
             );
+
+            // Broker pending tekliflerini topla (PENDING statuslu olanlar)
+            const brokerPendingCount = brokerPendingOffers.filter(
+                offer => offer.status === 'PENDING'
+            ).length;
+
+            // Toplam pending teklif sayısı
+            const totalPendingOffers = carrierPendingOffers + brokerPendingCount;
+
             dispatch(updateOfferCount(totalPendingOffers));
         } else if (user?.role === 'CARRIER') {
             const totalLoads = acceptedLoads.length + rejectedOffers.length;
             dispatch(updateLoadCount(totalLoads));
         } else if (user?.role === 'BROKER') {
-            dispatch(updateOfferCount(pendingOffers.length));
+            dispatch(updateOfferCount(brokerPendingOffers.length));
         }
-    }, [loadsWithOffers, acceptedLoads, rejectedOffers, pendingOffers, user?.role, dispatch]);
+    }, [loadsWithOffers, acceptedLoads, rejectedOffers, brokerPendingOffers, user?.role, dispatch]);
 
     useEffect(() => {
         if (user?.role === 'SENDER' && pathname === '/dashboard/sender/offers') {
