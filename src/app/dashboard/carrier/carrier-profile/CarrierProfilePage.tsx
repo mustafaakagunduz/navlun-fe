@@ -443,13 +443,27 @@ export default function CarrierProfilePage() {
             {/* Header */}
             <div className="mb-8">
                 <div className="flex items-center justify-between mb-4">
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-900">
-                            Taşıyıcı Profilim
-                        </h1>
-                        <p className="text-gray-600 mt-1">
-                            Profil bilgilerinizi ve araçlarınızı yönetin
-                        </p>
+                    <div className="flex items-center gap-4">
+                        {/* Logo/Fotoğraf */}
+                        <div className="flex-shrink-0">
+                            <div className="w-20 h-20 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border-2 border-blue-200 flex items-center justify-center">
+                                {profileData.company ? (
+                                    <Building2 className="h-10 w-10 text-blue-600" />
+                                ) : (
+                                    <Truck className="h-10 w-10 text-blue-600" />
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Başlık ve Açıklama */}
+                        <div>
+                            <h1 className="text-2xl font-bold text-gray-900">
+                                {profileData.name || 'Taşıyıcı Profilim'}
+                            </h1>
+                            <p className="text-gray-600 mt-1">
+                                {profileData.company ? 'Firma Profili' : 'Bireysel Taşıyıcı Profili'}
+                            </p>
+                        </div>
                     </div>
                     <Button
                         onClick={handleSaveProfile}
