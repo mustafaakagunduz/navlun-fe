@@ -39,15 +39,15 @@ export default function BrokerDeliveryTrackingContent() {
     }, []);
 
     const filteredDeliveries = activeDeliveries.filter(delivery => {
-        return delivery.status === filterStatus;
+        return delivery.currentStatus === filterStatus;
     });
 
     const getStatusCounts = () => {
         return {
-            assigned: activeDeliveries.filter(d => d.status === DeliveryStep.ASSIGNED).length,
-            pickedUp: activeDeliveries.filter(d => d.status === DeliveryStep.PICKED_UP).length,
-            onTheWay: activeDeliveries.filter(d => d.status === DeliveryStep.ON_THE_WAY).length,
-            delivered: activeDeliveries.filter(d => d.status === DeliveryStep.DELIVERED).length,
+            assigned: activeDeliveries.filter(d => d.currentStatus === DeliveryStep.ASSIGNED).length,
+            pickedUp: activeDeliveries.filter(d => d.currentStatus === DeliveryStep.PICKED_UP).length,
+            onTheWay: activeDeliveries.filter(d => d.currentStatus === DeliveryStep.ON_THE_WAY).length,
+            delivered: activeDeliveries.filter(d => d.currentStatus === DeliveryStep.DELIVERED).length,
         };
     };
 
@@ -110,7 +110,7 @@ export default function BrokerDeliveryTrackingContent() {
                         <div className="grid gap-6">
                             {filteredDeliveries.map((delivery) => (
                                 <BrokerDeliveryStatusCard
-                                    key={delivery.id}
+                                    key={delivery.loadId}
                                     delivery={delivery}
                                     onRefresh={loadActiveDeliveries}
                                 />

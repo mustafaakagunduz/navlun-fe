@@ -278,7 +278,8 @@ export default function SenderOffersPage() {
                     active: true
                 } as any,
                 offers: [],
-                pendingOffersCount: 0
+                pendingOffersCount: 0,
+                hasAcceptedOffer: false
             });
         }
     });

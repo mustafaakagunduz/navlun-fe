@@ -49,19 +49,35 @@ export type DeliveryTrackingData = {
     loadId: string; // Backend'den gelen loadId aslında deliveryStatusId
     actualLoadId: string; // Gerçek load ID
     loadTitle: string;
+    loadDescription?: string; // Yük açıklaması
     currentStatus: DeliveryStep;
+    status?: DeliveryStep; // Backward compatibility
     currentLocation?: string;
     lastUpdate: string;
+    lastLocationUpdate?: string; // Son konum güncellemesi zamanı
+    updatedAt?: string; // Son güncelleme zamanı
     statusNote?: string;
     statusHistory: StatusHistoryItem[];
     pickupDocuments: string[];
     deliveryDocuments: string[];
     cancellationDocuments: string[];
+    // Yük detayları
+    goodsType?: string; // Mal türü
+    netWeight?: number; // Net ağırlık (kg)
+    loadingAddress?: string; // Yükleme adresi
+    deliveryAddress?: string; // Teslimat adresi
+    loadingDate?: string; // Yükleme tarihi
+    deliveryDate?: string; // Teslimat tarihi
+    estimatedPrice?: number; // Tahmini fiyat
     carrier?: {
         id?: string;
         name: string;
         phone?: string;
         isEcoFriendly: boolean;
+    };
+    carrierInfo?: { // Backward compatibility
+        name: string;
+        phone?: string;
     };
     vehicle?: {
         plateNumber: string;
@@ -74,6 +90,18 @@ export type DeliveryTrackingData = {
         name: string;
         phone?: string;
         userId?: string; // Broker'ın user ID'si
+    };
+    brokerInfo?: { // Broker bilgileri
+        ecoFriendly?: boolean;
+        commissionAmount?: number;
+    };
+    shipInfo?: { // Gemi bilgileri (deniz taşımacılığı için)
+        name: string;
+        imoNumber: string;
+    };
+    senderInfo?: { // Gönderen bilgileri
+        companyName?: string;
+        contactPerson?: string;
     };
     // Eğer broker varsa ve carrier yoksa, broker ile iletişim kurulabilir
     contactUserId?: string; // İletişim kurulacak kişinin user ID'si (carrier veya broker)

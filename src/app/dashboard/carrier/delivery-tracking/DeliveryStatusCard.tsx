@@ -171,7 +171,7 @@ export default function DeliveryStatusCard({
                         <CardTitle className="flex items-center gap-2">
                             <Package className="h-5 w-5" />
                             {delivery.loadTitle}
-                            {delivery.vehicle.ecoCertified && (
+                            {delivery.vehicle?.ecoCertified && (
                                 <div title="Çevreci Araç">
                                     <Leaf className="h-4 w-4 text-green-600" />
                                 </div>
@@ -183,10 +183,12 @@ export default function DeliveryStatusCard({
                             )}
                         </CardTitle>
                         <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                                <Truck className="h-4 w-4" />
-                                {delivery.vehicle.plateNumber} - {delivery.vehicle.type}
-                            </span>
+                            {delivery.vehicle && (
+                                <span className="flex items-center gap-1">
+                                    <Truck className="h-4 w-4" />
+                                    {delivery.vehicle.plateNumber} - {delivery.vehicle.type}
+                                </span>
+                            )}
                             <span className="flex items-center gap-1">
                                 <Clock className="h-4 w-4" />
                                 {formatDate(delivery.lastUpdate)}
