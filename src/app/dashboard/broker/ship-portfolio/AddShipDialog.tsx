@@ -38,6 +38,24 @@ interface ShipFormData {
     beam: string;
     draught: string;
     maxSpeed: string;
+    netTonnage: string;
+    draft: string;
+
+    // Ana Makine Bilgileri
+    mainEngineType: string;
+    mainEnginePower: string;
+
+    // Ambar Bilgileri
+    numberOfHolds: string;
+    holdCapacities: string;
+
+    // Tahliye/Tahmil Donanımları
+    hasCrane: boolean;
+    numberOfCranes: string;
+    craneCapacity: string;
+    hasWinch: boolean;
+    numberOfWinches: string;
+    winchCapacity: string;
 
     // Çevreci Bilgileri
     ecoFriendly: boolean;
@@ -73,6 +91,18 @@ const initialFormData: ShipFormData = {
     beam: '',
     draught: '',
     maxSpeed: '',
+    netTonnage: '',
+    draft: '',
+    mainEngineType: '',
+    mainEnginePower: '',
+    numberOfHolds: '',
+    holdCapacities: '',
+    hasCrane: false,
+    numberOfCranes: '',
+    craneCapacity: '',
+    hasWinch: false,
+    numberOfWinches: '',
+    winchCapacity: '',
     ecoFriendly: false,
     ecoClassification: '',
     ecoValidUntil: '',
@@ -134,7 +164,20 @@ export default function AddShipDialog({ children }: AddShipDialogProps) {
             currentPort: formData.currentPort,
             registrationPort: formData.registrationPort || undefined,
             nextAvailableDate: formData.nextAvailableDate || undefined,
-            ecoFriendly: formData.ecoFriendly
+            ecoFriendly: formData.ecoFriendly,
+            maxSpeed: formData.maxSpeed ? Number(formData.maxSpeed) : undefined,
+            netTonnage: formData.netTonnage ? Number(formData.netTonnage) : undefined,
+            draft: formData.draft ? Number(formData.draft) : undefined,
+            mainEngineType: formData.mainEngineType || undefined,
+            mainEnginePower: formData.mainEnginePower ? Number(formData.mainEnginePower) : undefined,
+            numberOfHolds: formData.numberOfHolds ? Number(formData.numberOfHolds) : undefined,
+            holdCapacities: formData.holdCapacities || undefined,
+            hasCrane: formData.hasCrane || undefined,
+            numberOfCranes: formData.numberOfCranes ? Number(formData.numberOfCranes) : undefined,
+            craneCapacity: formData.craneCapacity ? Number(formData.craneCapacity) : undefined,
+            hasWinch: formData.hasWinch || undefined,
+            numberOfWinches: formData.numberOfWinches ? Number(formData.numberOfWinches) : undefined,
+            winchCapacity: formData.winchCapacity ? Number(formData.winchCapacity) : undefined
         };
 
         try {
@@ -205,14 +248,9 @@ export default function AddShipDialog({ children }: AddShipDialogProps) {
                                         <SelectValue placeholder="Gemi tipi seçin" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="Bulk Carrier">Bulk Carrier</SelectItem>
-                                        <SelectItem value="Container Ship">Container Ship</SelectItem>
-                                        <SelectItem value="General Cargo">General Cargo</SelectItem>
-                                        <SelectItem value="Tanker">Tanker</SelectItem>
-                                        <SelectItem value="RoRo">RoRo</SelectItem>
-                                        <SelectItem value="Ferry">Ferry</SelectItem>
-                                        <SelectItem value="Crude Oil Tanker">Crude Oil Tanker</SelectItem>
-                                        <SelectItem value="Chemical Tanker">Chemical Tanker</SelectItem>
+                                        <SelectItem value="Tanker Gemisi">Tanker Gemisi</SelectItem>
+                                        <SelectItem value="Kuru Dökme Yük Gemisi">Kuru Dökme Yük Gemisi</SelectItem>
+
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -292,7 +330,7 @@ export default function AddShipDialog({ children }: AddShipDialogProps) {
                     {/* Kapasite Bilgileri */}
                     <div className="space-y-4">
                         <h3 className="text-lg font-medium flex items-center gap-2">
-                            📊 Kapasite Bilgileri
+                            📊 Teknik Özellikler
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -322,76 +360,203 @@ export default function AddShipDialog({ children }: AddShipDialogProps) {
                                     className="mt-1"
                                 />
                             </div>
-                        </div>
-                    </div>
-
-                    <Separator />
-
-                    {/* Boyutlar */}
-                    <div className="space-y-4">
-                        <h3 className="text-lg font-medium flex items-center gap-2">
-                            📐 Boyutlar
-                        </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div>
-                                <Label htmlFor="lengthOverall" className="text-sm font-medium">
-                                    Uzunluk (m)
-                                </Label>
-                                <Input
-                                    id="lengthOverall"
-                                    type="number"
-                                    step="0.1"
-                                    value={formData.lengthOverall}
-                                    onChange={(e) => handleFormChange('lengthOverall', e.target.value)}
-                                    placeholder="180.5"
-                                    className="mt-1"
-                                />
-                            </div>
 
                             <div>
-                                <Label htmlFor="beam" className="text-sm font-medium">
-                                    Genişlik (m)
+                                <Label htmlFor="netTonnage" className="text-sm font-medium">
+                                    NT (Net Tonnage)
                                 </Label>
                                 <Input
-                                    id="beam"
+                                    id="netTonnage"
                                     type="number"
-                                    step="0.1"
-                                    value={formData.beam}
-                                    onChange={(e) => handleFormChange('beam', e.target.value)}
-                                    placeholder="32.2"
-                                    className="mt-1"
-                                />
-                            </div>
-
-                            <div>
-                                <Label htmlFor="draught" className="text-sm font-medium">
-                                    Draft (m)
-                                </Label>
-                                <Input
-                                    id="draught"
-                                    type="number"
-                                    step="0.1"
-                                    value={formData.draught}
-                                    onChange={(e) => handleFormChange('draught', e.target.value)}
-                                    placeholder="12.8"
+                                    value={formData.netTonnage}
+                                    onChange={(e) => handleFormChange('netTonnage', e.target.value)}
+                                    placeholder="35000"
                                     className="mt-1"
                                 />
                             </div>
 
                             <div>
                                 <Label htmlFor="maxSpeed" className="text-sm font-medium">
-                                    Max Hız (knot)
+                                    Maksimum Hız (Knot)
                                 </Label>
                                 <Input
                                     id="maxSpeed"
                                     type="number"
-                                    step="0.1"
                                     value={formData.maxSpeed}
                                     onChange={(e) => handleFormChange('maxSpeed', e.target.value)}
-                                    placeholder="15.5"
+                                    placeholder="14.5"
+                                    step="0.1"
                                     className="mt-1"
                                 />
                             </div>
+
+                            <div>
+                                <Label htmlFor="draft" className="text-sm font-medium">
+                                    Su Çekimi / Draft (metre)
+                                </Label>
+                                <Input
+                                    id="draft"
+                                    type="number"
+                                    value={formData.draft}
+                                    onChange={(e) => handleFormChange('draft', e.target.value)}
+                                    placeholder="12.5"
+                                    step="0.1"
+                                    className="mt-1"
+                                />
+                            </div>
+                        </div>
+
+                        <Separator className="my-4" />
+
+                        <h4 className="text-md font-medium">Ana Makine Bilgileri</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <Label htmlFor="mainEngineType" className="text-sm font-medium">
+                                    Ana Makine Tipi
+                                </Label>
+                                <Input
+                                    id="mainEngineType"
+                                    value={formData.mainEngineType}
+                                    onChange={(e) => handleFormChange('mainEngineType', e.target.value)}
+                                    placeholder="Örn: MAN-B&W 6S50MC"
+                                    className="mt-1"
+                                />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="mainEnginePower" className="text-sm font-medium">
+                                    Ana Makine Gücü (KW)
+                                </Label>
+                                <Input
+                                    id="mainEnginePower"
+                                    type="number"
+                                    value={formData.mainEnginePower}
+                                    onChange={(e) => handleFormChange('mainEnginePower', e.target.value)}
+                                    placeholder="12000"
+                                    className="mt-1"
+                                />
+                            </div>
+                        </div>
+
+                        <Separator className="my-4" />
+
+                        <h4 className="text-md font-medium">Ambar Bilgileri</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <Label htmlFor="numberOfHolds" className="text-sm font-medium">
+                                    Ambar Sayısı
+                                </Label>
+                                <Input
+                                    id="numberOfHolds"
+                                    type="number"
+                                    value={formData.numberOfHolds}
+                                    onChange={(e) => handleFormChange('numberOfHolds', e.target.value)}
+                                    placeholder="5"
+                                    className="mt-1"
+                                />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="holdCapacities" className="text-sm font-medium">
+                                    Ambar Kapasiteleri
+                                </Label>
+                                <Input
+                                    id="holdCapacities"
+                                    value={formData.holdCapacities}
+                                    onChange={(e) => handleFormChange('holdCapacities', e.target.value)}
+                                    placeholder="Örn: 1:15000, 2:18000, 3:20000, 4:18000, 5:15000"
+                                    className="mt-1"
+                                />
+                            </div>
+                        </div>
+
+                        <Separator className="my-4" />
+
+                        <h4 className="text-md font-medium">Tahmil/Tahliye Donanımları</h4>
+                        <div className="space-y-4">
+                            <div className="flex items-center space-x-2">
+                                <Switch
+                                    id="hasCrane"
+                                    checked={formData.hasCrane}
+                                    onCheckedChange={(checked) => handleFormChange('hasCrane', checked)}
+                                />
+                                <Label htmlFor="hasCrane">Crane Mevcut</Label>
+                            </div>
+
+                            {formData.hasCrane && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ml-6">
+                                    <div>
+                                        <Label htmlFor="numberOfCranes" className="text-sm font-medium">
+                                            Crane Sayısı
+                                        </Label>
+                                        <Input
+                                            id="numberOfCranes"
+                                            type="number"
+                                            value={formData.numberOfCranes}
+                                            onChange={(e) => handleFormChange('numberOfCranes', e.target.value)}
+                                            placeholder="4"
+                                            className="mt-1"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <Label htmlFor="craneCapacity" className="text-sm font-medium">
+                                            Crane Kapasitesi (Ton)
+                                        </Label>
+                                        <Input
+                                            id="craneCapacity"
+                                            type="number"
+                                            value={formData.craneCapacity}
+                                            onChange={(e) => handleFormChange('craneCapacity', e.target.value)}
+                                            placeholder="30"
+                                            step="0.1"
+                                            className="mt-1"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="flex items-center space-x-2">
+                                <Switch
+                                    id="hasWinch"
+                                    checked={formData.hasWinch}
+                                    onCheckedChange={(checked) => handleFormChange('hasWinch', checked)}
+                                />
+                                <Label htmlFor="hasWinch">Winch Mevcut</Label>
+                            </div>
+
+                            {formData.hasWinch && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ml-6">
+                                    <div>
+                                        <Label htmlFor="numberOfWinches" className="text-sm font-medium">
+                                            Winch Sayısı
+                                        </Label>
+                                        <Input
+                                            id="numberOfWinches"
+                                            type="number"
+                                            value={formData.numberOfWinches}
+                                            onChange={(e) => handleFormChange('numberOfWinches', e.target.value)}
+                                            placeholder="2"
+                                            className="mt-1"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <Label htmlFor="winchCapacity" className="text-sm font-medium">
+                                            Winch Kapasitesi (Ton)
+                                        </Label>
+                                        <Input
+                                            id="winchCapacity"
+                                            type="number"
+                                            value={formData.winchCapacity}
+                                            onChange={(e) => handleFormChange('winchCapacity', e.target.value)}
+                                            placeholder="25"
+                                            step="0.1"
+                                            className="mt-1"
+                                        />
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 

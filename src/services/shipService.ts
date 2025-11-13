@@ -26,6 +26,18 @@ export interface Ship {
     classificationValid?: boolean;
     availableForBooking?: boolean;
     maxSpeed?: number;
+    netTonnage?: number;
+    draft?: number;
+    mainEngineType?: string;
+    mainEnginePower?: number;
+    numberOfHolds?: number;
+    holdCapacities?: string;
+    hasCrane?: boolean;
+    numberOfCranes?: number;
+    craneCapacity?: number;
+    hasWinch?: boolean;
+    numberOfWinches?: number;
+    winchCapacity?: number;
     createdAt: string;
     updatedAt?: string;
 }
@@ -47,6 +59,19 @@ export interface ShipRequest {
     registrationPort?: string;
     nextAvailableDate?: string;
     ecoFriendly: boolean;
+    maxSpeed?: number;
+    netTonnage?: number;
+    draft?: number;
+    mainEngineType?: string;
+    mainEnginePower?: number;
+    numberOfHolds?: number;
+    holdCapacities?: string;
+    hasCrane?: boolean;
+    numberOfCranes?: number;
+    craneCapacity?: number;
+    hasWinch?: boolean;
+    numberOfWinches?: number;
+    winchCapacity?: number;
 }
 
 export interface ShipUpdateRequest {
@@ -57,6 +82,19 @@ export interface ShipUpdateRequest {
     nextAvailableDate?: string;
     available?: boolean;
     ecoFriendly?: boolean;
+    maxSpeed?: number;
+    netTonnage?: number;
+    draft?: number;
+    mainEngineType?: string;
+    mainEnginePower?: number;
+    numberOfHolds?: number;
+    holdCapacities?: string;
+    hasCrane?: boolean;
+    numberOfCranes?: number;
+    craneCapacity?: number;
+    hasWinch?: boolean;
+    numberOfWinches?: number;
+    winchCapacity?: number;
 }
 
 export interface PageResponse<T> {
