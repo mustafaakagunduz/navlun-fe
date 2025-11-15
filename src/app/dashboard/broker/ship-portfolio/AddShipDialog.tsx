@@ -584,7 +584,7 @@ export default function AddShipDialog({ children }: AddShipDialogProps) {
 
                             <div>
                                 <Label htmlFor="builder" className="text-sm font-medium">
-                                    İnşaat Eden Tersane
+                                    İnşa Eden Tersane
                                 </Label>
                                 <Input
                                     id="builder"
