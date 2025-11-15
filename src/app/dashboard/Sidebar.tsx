@@ -138,6 +138,7 @@ export default function Sidebar() {
         { href: "/dashboard", label: t("dashboard.sidebar.home"), icon: Home },
         { href: "/dashboard/admin/users", label: t("dashboard.sidebar.users"), icon: Users },
         { href: "/dashboard/admin/account-requests", label: "Hesap Değişiklik Talepleri", icon: UserCog },
+        { href: "/dashboard/admin/user-profiles", label: "Kullanıcı Profilleri", icon: FileText },
         { href: "/dashboard/admin/analytics", label: t("dashboard.sidebar.analytics"), icon: BarChart3 },
         { href: "/dashboard/admin/settings", label: t("dashboard.sidebar.settings"), icon: Settings },
     ];
