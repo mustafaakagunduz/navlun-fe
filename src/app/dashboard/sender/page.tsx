@@ -430,11 +430,18 @@ export default function SenderDashboard() {
                         </div>
 
                         {/* Success Story Footer */}
-                        <div className="mt-8 p-6 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg text-white">
+                        <div
+                            className="mt-8 p-6 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg text-white cursor-pointer hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02]"
+                            onClick={() => router.push('/dashboard/sender/data-as-service')}
+                        >
                             <div className="flex items-center justify-between">
                                 <div>
                                     <h3 className="text-xl font-bold">📦 Akıllı Lojistik Lideri</h3>
                                     <p className="text-blue-100 mt-1">Çevre dostu çözümlerle maliyetlerinizi optimize ediyoruz</p>
+                                    <p className="text-blue-50 text-sm mt-2 flex items-center gap-1">
+                                        Daha fazla bilgi için tıklayın
+                                        <span className="inline-block animate-pulse">→</span>
+                                    </p>
                                 </div>
                                 <div className="text-right">
                                     <div className="text-2xl font-bold">{statistics?.totalLoads || 0}</div>

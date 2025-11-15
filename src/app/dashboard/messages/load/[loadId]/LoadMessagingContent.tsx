@@ -61,6 +61,9 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
     const { toast } = useToast();
     const searchParams = useSearchParams();
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
+    const userScrolledUpRef = useRef(false);
+    const previousMessageCountRef = useRef(0);
 
     //edit-delete işleri
     const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
@@ -85,9 +88,46 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
         }
     }, [loadId, user?.id, otherUserId]);
 
-    // Mesajlar değiştiğinde en alta scroll
+    // Scroll pozisyonunu kontrol et
     useEffect(() => {
-        scrollToBottom();
+        const container = messagesContainerRef.current;
+        if (!container) return;
+
+        const handleScroll = () => {
+            const { scrollTop, scrollHeight, clientHeight } = container;
+            // Kullanıcı en alttan 100px yukarıdaysa, yukarı scroll yapmış sayılır
+            const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+            const isAtBottom = distanceFromBottom < 100;
+
+            if (!isAtBottom) {
+                userScrolledUpRef.current = true;
+                console.log('Kullanıcı yukarı scroll yaptı, otomatik scroll devre dışı');
+            } else {
+                userScrolledUpRef.current = false;
+                console.log('Kullanıcı en altta, otomatik scroll aktif');
+            }
+        };
+
+        container.addEventListener('scroll', handleScroll);
+
+        // İlk mount'ta scroll pozisyonunu kontrol et
+        handleScroll();
+
+        return () => container.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    // Mesajlar değiştiğinde sadece kullanıcı en alttaysa scroll yap
+    useEffect(() => {
+        const hasNewMessages = messages.length > previousMessageCountRef.current;
+        previousMessageCountRef.current = messages.length;
+
+        // Sadece yeni mesaj geldiyse ve kullanıcı yukarı scroll yapmadıysa scroll yap
+        if (hasNewMessages && !userScrolledUpRef.current) {
+            console.log('Yeni mesaj var ve kullanıcı en altta, scroll yapılıyor');
+            scrollToBottom();
+        } else if (hasNewMessages && userScrolledUpRef.current) {
+            console.log('Yeni mesaj var ama kullanıcı yukarıda, scroll yapılmıyor');
+        }
     }, [messages]);
 
     // Polling için useEffect
@@ -311,6 +351,15 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
                     isValidDate: !isNaN(new Date(msg.createdAt).getTime())
                 })));
                 setMessages(messagesData);
+                previousMessageCountRef.current = messagesData.length;
+
+                // İlk yükleme yapılınca en alta scroll yap
+                userScrolledUpRef.current = false;
+
+                // Biraz bekleyip scroll yap (DOM render edilene kadar)
+                setTimeout(() => {
+                    scrollToBottom();
+                }, 100);
 
                 // Okunmamış mesajları okundu olarak işaretle
                 const unreadMessages = messagesData.filter(msg =>
@@ -457,6 +506,9 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
             // Mesajı listeye ekle
             setMessages(prev => [...prev, response]);
             setNewMessage('');
+
+            // Mesaj gönderildiğinde her zaman en alta scroll yap
+            userScrolledUpRef.current = false;
 
             toast({
                 title: "Başarılı",
@@ -623,7 +675,7 @@ export default function LoadMessagingContent({ loadId }: LoadMessagingContentPro
                     <CardContent className="p-0">
 
                         {/* Mesaj Listesi */}
-                        <div className="h-96 overflow-y-auto p-4 space-y-4">
+                        <div ref={messagesContainerRef} className="h-96 overflow-y-auto p-4 space-y-4">
                             {messages.length === 0 ? (
                                 <div className="text-center text-gray-500 py-8">
                                     <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />

@@ -104,8 +104,11 @@ export default function CarrierDashboard() {
         delivery.status !== 'delivered'
     );
 
-    // Top routes - eğer gerçek data yoksa dummy data kullan
-    const topRoutes = statistics?.topRoutes && statistics.topRoutes.length > 0
+    // Top routes - eğer gerçek data yoksa veya geçersiz dataysa dummy data kullan
+    const hasValidRoutes = statistics?.topRoutes && statistics.topRoutes.length > 0 &&
+        statistics.topRoutes.some(route => route.distanceKm > 0 && route.earnings > 0);
+
+    const topRoutes = hasValidRoutes
         ? statistics.topRoutes
         : [
             {
@@ -113,21 +116,45 @@ export default function CarrierDashboard() {
                 count: 12,
                 distanceKm: 450,
                 pricePerKm: 3.80,
-                earnings: 20520
+                earnings: 20520,
+                rating: 4.8,
+                efficiency: 92
             },
             {
                 route: 'İzmir → Bursa',
                 count: 8,
                 distanceKm: 320,
                 pricePerKm: 4.20,
-                earnings: 10752
+                earnings: 10752,
+                rating: 4.6,
+                efficiency: 88
             },
             {
                 route: 'Ankara → Konya',
                 count: 10,
                 distanceKm: 265,
                 pricePerKm: 3.50,
-                earnings: 9275
+                earnings: 9275,
+                rating: 4.9,
+                efficiency: 95
+            },
+            {
+                route: 'Bursa → İzmit',
+                count: 6,
+                distanceKm: 95,
+                pricePerKm: 4.50,
+                earnings: 2565,
+                rating: 4.7,
+                efficiency: 90
+            },
+            {
+                route: 'Adana → Mersin',
+                count: 15,
+                distanceKm: 75,
+                pricePerKm: 5.20,
+                earnings: 5850,
+                rating: 4.5,
+                efficiency: 87
             }
         ];
 
@@ -612,11 +639,18 @@ export default function CarrierDashboard() {
                         </div>
 
                         {/* Success Story Footer */}
-                        <div className="mt-8 p-6 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg text-white">
+                        <div
+                            className="mt-8 p-6 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg text-white cursor-pointer hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02]"
+                            onClick={() => router.push('/dashboard/carrier/fleet-analytics')}
+                        >
                             <div className="flex items-center justify-between">
                                 <div>
                                     <h3 className="text-xl font-bold">🚛 Güvenilir Taşımacılık Partneri</h3>
                                     <p className="text-purple-100 mt-1">Teknoloji ile desteklenen akıllı lojistik çözümleri</p>
+                                    <p className="text-purple-50 text-sm mt-2 flex items-center gap-1">
+                                        Detaylı filo analitiği için tıklayın
+                                        <span className="inline-block animate-pulse">→</span>
+                                    </p>
                                 </div>
                                 <div className="text-right">
                                     <div className="text-2xl font-bold">{carrierStats.completionRate}%</div>

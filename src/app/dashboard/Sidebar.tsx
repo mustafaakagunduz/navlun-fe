@@ -108,6 +108,7 @@ export default function Sidebar() {
         },
         { href: "/dashboard/carrier/delivery-tracking", label: "Teslimat Takibi", icon: MapPin },
         { href: "/dashboard/carrier/carrier-completed-deliveries", label: t("dashboard.sidebar.completed"), icon: CheckCheck },
+        { href: "/dashboard/carrier/vehicles", label: "Araçlarım", icon: Truck },
         { href: "/dashboard/carrier/carrier-profile", label: t("dashboard.sidebar.profile"), icon: Users },
     ];
 
