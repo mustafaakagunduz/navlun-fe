@@ -96,6 +96,7 @@ const apiService = {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
+                timeout: 120000, // 2 dakika - dosya yükleme için özel timeout
             });
             return response.data.data;
         } catch (error) {

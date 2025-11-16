@@ -446,7 +446,7 @@ export default function SenderProfilePage() {
                     <Button
                         onClick={handleSave}
                         disabled={isSaving}
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
                     >
                         {isSaving ? (
                             <>
@@ -835,6 +835,27 @@ export default function SenderProfilePage() {
                 {/* Hesap Türü Değiştirme Bölümü */}
                 <div className="mt-8">
                     <AccountTypeChangeSection />
+                </div>
+
+                {/* Alt Kaydet Butonu */}
+                <div className="flex justify-end mt-8">
+                    <Button
+                        onClick={handleSave}
+                        disabled={isSaving}
+                        className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
+                    >
+                        {isSaving ? (
+                            <>
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                {t('senderProfile.saving')}
+                            </>
+                        ) : (
+                            <>
+                                <Save className="h-4 w-4" />
+                                {t('senderProfile.save')}
+                            </>
+                        )}
+                    </Button>
                 </div>
             </div>
         </div>

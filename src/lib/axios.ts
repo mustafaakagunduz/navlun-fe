@@ -19,8 +19,8 @@ const getBaseURL = () => {
 
 const baseURL = getBaseURL();
 
-// Timeout değerini environment'dan al
-const timeout = parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT || '15000');
+// Timeout değerini environment'dan al (dosya yükleme için daha uzun)
+const timeout = parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT || '60000');
 
 const axiosInstance = axios.create({
     baseURL,
