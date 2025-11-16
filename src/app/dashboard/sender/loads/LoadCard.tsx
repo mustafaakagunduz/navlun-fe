@@ -3,9 +3,9 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, Weight, Shield, Leaf, Package } from "lucide-react";
+import { Calendar, MapPin, Weight, Shield, Leaf, Truck, Ship } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
-import { Load, LoadStatus } from "@/services/loadService";
+import { Load, LoadStatus, TransportType } from "@/services/loadService";
 import { formatDate, formatDateTime, formatTime } from '@/utils/dateUtils';
 
 interface LoadCardProps {
@@ -43,7 +43,11 @@ export default function LoadCard({ load, onClick, getStatusColor, getStatusText 
                         </div>
 
                         <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
-                            <Package className="h-4 w-4" />
+                            {load.transportType === 'LAND' ? (
+                                <Truck className="h-6 w-6" />
+                            ) : (
+                                <Ship className="h-6 w-6" />
+                            )}
                             <span>{load.goodsType}</span>
                         </div>
                     </div>

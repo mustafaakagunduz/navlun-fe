@@ -26,7 +26,8 @@ import {
     MessageSquare,
     Building2,
     Clock,
-    DollarSign
+    DollarSign,
+    Search
 } from 'lucide-react';
 import loadService, { Load, LoadStatus, TransportType } from '@/services/loadService';
 import offerService, { OfferRequest, VehicleInfo } from '@/services/offerService';
@@ -51,6 +52,7 @@ export default function AvailableLoadsPage() {
     const [selectedLoad, setSelectedLoad] = useState<Load | null>(null);
     const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
     // Teklif form state
     const [offerForm, setOfferForm] = useState({
@@ -182,8 +184,23 @@ export default function AvailableLoadsPage() {
         }
     };
 
-    // Sadece LAND (kara) taşıma tipindeki yükleri göster
-    const filteredLoads = availableLoads.filter(load => load.transportType === TransportType.LAND);
+    // Sadece LAND (kara) taşıma tipindeki yükleri göster ve arama filtresi uygula
+    const filteredLoads = availableLoads.filter(load => {
+        // Transport type filtresi
+        if (load.transportType !== TransportType.LAND) return false;
+
+        // Arama filtresi (Türkçe karakterler için locale-aware)
+        if (searchQuery) {
+            const query = searchQuery.toLocaleLowerCase('tr-TR');
+            return (
+                load.title.toLocaleLowerCase('tr-TR').includes(query) ||
+                load.loadingAddress.toLocaleLowerCase('tr-TR').includes(query) ||
+                load.deliveryAddress.toLocaleLowerCase('tr-TR').includes(query)
+            );
+        }
+
+        return true;
+    });
 
     if (availableLoadsLoading) {
         return (
@@ -219,15 +236,32 @@ export default function AvailableLoadsPage() {
                 </Badge>
             </div>
 
+            {/* Search Bar */}
+            <div className="relative w-full">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                    placeholder="Yük adı, yükleme noktası veya varış noktası ara..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                />
+            </div>
+
             {filteredLoads.length === 0 ? (
                 <Card>
                     <CardContent className="p-12 text-center">
                         <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                         <h3 className="text-lg font-medium text-gray-900 mb-2">
-                            Henüz müsait yük bulunmuyor
+                            {searchQuery
+                                ? 'Arama sonucu bulunamadı'
+                                : 'Henüz müsait yük bulunmuyor'
+                            }
                         </h3>
                         <p className="text-gray-600">
-                            Şu anda teklif verebileceğiniz yük bulunmamaktadır. Lütfen daha sonra tekrar kontrol edin.
+                            {searchQuery
+                                ? 'Farklı bir arama terimi deneyin.'
+                                : 'Şu anda teklif verebileceğiniz yük bulunmamaktadır. Lütfen daha sonra tekrar kontrol edin.'
+                            }
                         </p>
                     </CardContent>
                 </Card>
@@ -277,10 +311,7 @@ export default function AvailableLoadsPage() {
                                                 }}
                                             >
                                                 <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-2">
-                                                        <Package className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                                                        <span className="font-medium text-gray-900">{load.title}</span>
-                                                    </div>
+                                                    <span className="font-medium text-gray-900">{load.title}</span>
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <span className="text-gray-700">{load.goodsType}</span>
@@ -367,10 +398,7 @@ export default function AvailableLoadsPage() {
                                     <div className="space-y-3">
                                         {/* Header */}
                                         <div className="flex items-start justify-between gap-2">
-                                            <div className="flex items-start gap-2 min-w-0 flex-1">
-                                                <Package className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                                                <span className="font-medium text-gray-900 text-sm">{load.title}</span>
-                                            </div>
+                                            <span className="font-medium text-gray-900 text-sm">{load.title}</span>
                                             <Badge className={`${getStatusBadgeColor(load.status)} border-0 text-xs flex-shrink-0`}>
                                                 {getStatusText(load.status)}
                                             </Badge>
@@ -386,10 +414,7 @@ export default function AvailableLoadsPage() {
 
                                         {/* Goods Type and Weight */}
                                         <div className="flex items-center gap-4 text-xs text-gray-600">
-                                            <div className="flex items-center gap-1">
-                                                <Package className="h-3 w-3 text-gray-400" />
-                                                <span>{load.goodsType}</span>
-                                            </div>
+                                            <span>{load.goodsType}</span>
                                             <div className="flex items-center gap-1">
                                                 <Weight className="h-3 w-3 text-gray-400" />
                                                 <span>{formatWeight(load.netWeight)}</span>

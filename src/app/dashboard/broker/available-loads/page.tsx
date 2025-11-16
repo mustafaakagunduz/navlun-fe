@@ -501,10 +501,7 @@ export default function BrokerAvailableLoads() {
                                                     onClick={() => handleViewDetails(load)}
                                                 >
                                                     <td className="px-6 py-4">
-                                                        <div className="flex items-center gap-2">
-                                                            <Package className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                                                            <span className="font-medium text-gray-900">{load.title}</span>
-                                                        </div>
+                                                        <span className="font-medium text-gray-900">{load.title}</span>
                                                     </td>
                                                     <td className="px-6 py-4">
                                                         <div className="flex items-center gap-2 text-gray-700">
@@ -600,10 +597,7 @@ export default function BrokerAvailableLoads() {
                                         <div className="space-y-3">
                                             {/* Header */}
                                             <div className="flex items-start justify-between gap-2">
-                                                <div className="flex items-start gap-2 min-w-0 flex-1">
-                                                    <Package className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                                                    <span className="font-medium text-gray-900 text-sm">{load.title}</span>
-                                                </div>
+                                                <span className="font-medium text-gray-900 text-sm">{load.title}</span>
                                                 <Badge className={`${getStatusBadgeColor(load.status)} border-0 text-xs flex-shrink-0`}>
                                                     {getStatusText(load.status)}
                                                 </Badge>
@@ -617,10 +611,7 @@ export default function BrokerAvailableLoads() {
 
                                             {/* Goods Type and Weight */}
                                             <div className="flex items-center gap-4 text-xs text-gray-600">
-                                                <div className="flex items-center gap-1">
-                                                    <Package className="h-3 w-3 text-gray-400" />
-                                                    <span>{load.goodsType}</span>
-                                                </div>
+                                                <span>{load.goodsType}</span>
                                                 <div className="flex items-center gap-1">
                                                     <Weight className="h-3 w-3 text-gray-400" />
                                                     <span>{formatWeight(load.netWeight)}</span>

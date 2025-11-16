@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Search, Plus, Filter, Package, Calendar, MapPin, Weight, AlertCircle, Eye } from "lucide-react";
+import { Search, Plus, Filter, Package, Calendar, MapPin, Weight, AlertCircle, Eye, Truck, Ship } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import loadService, { Load, LoadStatus } from '@/services/loadService';
 import LoadDetailsDialog from './LoadDetailsDialog';
@@ -270,7 +270,11 @@ export default function LoadsPageContent() {
                                                 >
                                                     <td className="px-6 py-4">
                                                         <div className="flex items-center gap-2">
-                                                            <Package className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                                                            {load.transportType === 'LAND' ? (
+                                                                <Truck className="h-6 w-6 text-gray-600 flex-shrink-0" />
+                                                            ) : (
+                                                                <Ship className="h-6 w-6 text-blue-600 flex-shrink-0" />
+                                                            )}
                                                             <span className="font-medium text-gray-900">{load.title}</span>
                                                         </div>
                                                     </td>
@@ -338,7 +342,11 @@ export default function LoadsPageContent() {
                                             {/* Header */}
                                             <div className="flex items-start justify-between gap-2">
                                                 <div className="flex items-start gap-2 min-w-0 flex-1">
-                                                    <Package className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                                                    {load.transportType === 'LAND' ? (
+                                                        <Truck className="h-6 w-6 text-gray-600 flex-shrink-0 mt-0.5" />
+                                                    ) : (
+                                                        <Ship className="h-6 w-6 text-blue-600 flex-shrink-0 mt-0.5" />
+                                                    )}
                                                     <span className="font-medium text-gray-900 text-sm">{load.title}</span>
                                                 </div>
                                                 <Badge className={`${getStatusColor(load.status)} border-0 text-xs flex-shrink-0`}>
