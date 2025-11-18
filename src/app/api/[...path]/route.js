@@ -43,10 +43,18 @@ async function handleRequest(request, method, paths) {
             queryParams[key] = value;
         });
 
+        // Content-Type'ı önce kontrol et
+        const contentType = request.headers.get('Content-Type');
+
         // İstek gövdesini al (POST, PUT, PATCH için)
         let requestBody = null;
         if (['POST', 'PUT', 'PATCH'].includes(method)) {
-            requestBody = await request.json().catch(() => ({}));
+            // Multipart/form-data için formData() kullan, diğerleri için json()
+            if (contentType && contentType.includes('multipart/form-data')) {
+                requestBody = await request.formData();
+            } else {
+                requestBody = await request.json().catch(() => ({}));
+            }
         }
 
         // Authorization header'ını al ve aktar
@@ -57,7 +65,6 @@ async function handleRequest(request, method, paths) {
         }
 
         // Content-Type header'ını ayarla (multipart/form-data hariç)
-        const contentType = request.headers.get('Content-Type');
         if (contentType && !contentType.includes('multipart/form-data')) {
             headers['Content-Type'] = contentType;
         } else if (!contentType) {
