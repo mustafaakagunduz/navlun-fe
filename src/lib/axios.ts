@@ -10,7 +10,7 @@ const getBaseURL = () => {
             window.location.hostname === 'www.transyuk.com' ||
             window.location.hostname === 'navlun-fe.vercel.app')) {
         // Frontend proxy route kullan (Mixed Content Policy için)
-        return '/api/v1';
+        return '/api';
     }
 
     // Development için
