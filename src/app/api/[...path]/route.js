@@ -73,7 +73,7 @@ async function handleRequest(request, method, paths) {
         // Backend API'ye istek at
         const response = await axios({
             method: method.toLowerCase(),
-            url: `http://navlun-api-env.eba-isp5uwb8.eu-north-1.elasticbeanstalk.com/api/v1/${pathSegment}`,
+            url: `http://navlun-api-env.eba-isp5uwb8.eu-north-1.elasticbeanstalk.com/api/${pathSegment}`,
             params: queryParams,
             data: requestBody,
             headers,
