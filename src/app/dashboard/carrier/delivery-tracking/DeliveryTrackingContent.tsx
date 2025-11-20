@@ -58,18 +58,22 @@ export default function DeliveryTrackingContent() {
     };
 
     useEffect(() => {
+        console.log('🚚 [CARRIER-TRACKING-FE] Fetching active deliveries...');
         dispatch(fetchActiveDeliveries());
     }, [dispatch]);
 
     useEffect(() => {
         if (activeDeliveriesError) {
+            console.error('❌ [CARRIER-TRACKING-FE-ERROR] Error fetching deliveries:', activeDeliveriesError);
             toast({
                 title: "Hata",
                 description: activeDeliveriesError,
                 variant: "destructive",
             });
+        } else if (activeDeliveries.length > 0) {
+            console.log('✅ [CARRIER-TRACKING-FE-SUCCESS] Loaded', activeDeliveries.length, 'deliveries');
         }
-    }, [activeDeliveriesError, toast]);
+    }, [activeDeliveriesError, activeDeliveries, toast]);
 
     const filteredDeliveries = activeDeliveries.filter(delivery => {
         return delivery.currentStatus === filterStatus;

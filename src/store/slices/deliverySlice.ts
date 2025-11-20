@@ -55,8 +55,12 @@ export const fetchActiveDeliveries = createAsyncThunk(
     'delivery/fetchActiveDeliveries',
     async (_, { rejectWithValue }) => {
         try {
-            return await deliveryService.getCurrentCarrierActiveDeliveries()
+            console.log('🔄 [REDUX-CARRIER] Fetching active deliveries...');
+            const result = await deliveryService.getCurrentCarrierActiveDeliveries();
+            console.log('✅ [REDUX-CARRIER-SUCCESS] Fetched', result.length, 'active deliveries');
+            return result;
         } catch (error: any) {
+            console.error('❌ [REDUX-CARRIER-ERROR] Failed to fetch active deliveries:', error);
             return rejectWithValue(error.response?.data?.message || 'Aktif teslimatlar yüklenemedi')
         }
     }
@@ -66,8 +70,12 @@ export const fetchSenderTrackings = createAsyncThunk(
     'delivery/fetchSenderTrackings',
     async (senderId: string, { rejectWithValue }) => {
         try {
-            return await deliveryService.getSenderDeliveryTrackings(senderId)
+            console.log('🔄 [REDUX-SENDER] Fetching trackings for sender:', senderId);
+            const result = await deliveryService.getSenderDeliveryTrackings(senderId);
+            console.log('✅ [REDUX-SENDER-SUCCESS] Fetched', result.length, 'trackings');
+            return result;
         } catch (error: any) {
+            console.error('❌ [REDUX-SENDER-ERROR] Failed to fetch sender trackings:', error);
             return rejectWithValue(error.response?.data?.message || 'Teslimat takipleri yüklenemedi')
         }
     }

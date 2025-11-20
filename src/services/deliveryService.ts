@@ -430,9 +430,12 @@ const deliveryService = {
 // Carrier'ın aktif teslimatları
     getCurrentCarrierActiveDeliveries: async (): Promise<DeliveryTrackingData[]> => {
         try {
-            return await apiService.get<DeliveryTrackingData[]>('/delivery-status/my-active-deliveries');
+            console.log('📡 [API-CALL] GET /delivery-status/my-active-deliveries');
+            const result = await apiService.get<DeliveryTrackingData[]>('/delivery-status/my-active-deliveries');
+            console.log('✅ [API-SUCCESS] Received', result.length, 'active deliveries');
+            return result;
         } catch (error) {
-            console.error('Get current carrier active deliveries error:', error);
+            console.error('❌ [API-ERROR] Get current carrier active deliveries error:', error);
             throw error;
         }
     },
@@ -440,9 +443,12 @@ const deliveryService = {
 // Sender'ın teslimat takipleri
     getSenderDeliveryTrackings: async (senderId: string): Promise<DeliveryTrackingData[]> => {
         try {
-            return await apiService.get<DeliveryTrackingData[]>(`/delivery-status/sender/${senderId}/trackings`);
+            console.log('📡 [API-CALL] GET /delivery-status/sender/' + senderId + '/trackings');
+            const result = await apiService.get<DeliveryTrackingData[]>(`/delivery-status/sender/${senderId}/trackings`);
+            console.log('✅ [API-SUCCESS] Received', result.length, 'sender trackings');
+            return result;
         } catch (error) {
-            console.error(`Get sender delivery trackings (${senderId}) error:`, error);
+            console.error(`❌ [API-ERROR] Get sender delivery trackings (${senderId}) error:`, error);
             throw error;
         }
     },
