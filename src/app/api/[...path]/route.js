@@ -43,10 +43,18 @@ async function handleRequest(request, method, paths) {
             queryParams[key] = value;
         });
 
+        // Content-Type'ı önce kontrol et
+        const contentType = request.headers.get('Content-Type');
+
         // İstek gövdesini al (POST, PUT, PATCH için)
         let requestBody = null;
         if (['POST', 'PUT', 'PATCH'].includes(method)) {
-            requestBody = await request.json().catch(() => ({}));
+            // Multipart/form-data için formData() kullan, diğerleri için json()
+            if (contentType && contentType.includes('multipart/form-data')) {
+                requestBody = await request.formData();
+            } else {
+                requestBody = await request.json().catch(() => ({}));
+            }
         }
 
         // Authorization header'ını al ve aktar
@@ -57,7 +65,6 @@ async function handleRequest(request, method, paths) {
         }
 
         // Content-Type header'ını ayarla (multipart/form-data hariç)
-        const contentType = request.headers.get('Content-Type');
         if (contentType && !contentType.includes('multipart/form-data')) {
             headers['Content-Type'] = contentType;
         } else if (!contentType) {
@@ -73,7 +80,7 @@ async function handleRequest(request, method, paths) {
         // Backend API'ye istek at
         const response = await axios({
             method: method.toLowerCase(),
-            url: `http://navlun-api-env.eba-isp5uwb8.eu-north-1.elasticbeanstalk.com/api/v1/${pathSegment}`,
+            url: `http://navlun-api-env.eba-isp5uwb8.eu-north-1.elasticbeanstalk.com/api/${pathSegment}`,
             params: queryParams,
             data: requestBody,
             headers,
