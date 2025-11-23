@@ -27,7 +27,9 @@ import {
     Building2,
     Clock,
     DollarSign,
-    Search
+    Search,
+    User,
+    ExternalLink
 } from 'lucide-react';
 import loadService, { Load, LoadStatus, TransportType } from '@/services/loadService';
 import offerService, { OfferRequest, VehicleInfo } from '@/services/offerService';
@@ -508,7 +510,7 @@ export default function AvailableLoadsPage() {
 
             {/* Load Details Modal */}
             <Dialog open={isDetailsModalOpen} onOpenChange={setIsDetailsModalOpen}>
-                <DialogContent className="max-w-2xl">
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>Yük Detayları</DialogTitle>
                         <DialogDescription>
@@ -517,6 +519,39 @@ export default function AvailableLoadsPage() {
                     </DialogHeader>
                     {selectedLoad && (
                         <div className="space-y-6">
+                            {/* Sender Profile Section */}
+                            {selectedLoad.sender && (
+                                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                                                <User className="h-6 w-6 text-blue-600" />
+                                            </div>
+                                            <div>
+                                                <Label className="text-sm font-medium text-gray-500">Gönderici</Label>
+                                                <p className="text-lg font-semibold text-gray-900">
+                                                    {selectedLoad.sender.companyName}
+                                                </p>
+                                                {selectedLoad.sender.contactPerson && (
+                                                    <p className="text-sm text-gray-600">
+                                                        {selectedLoad.sender.contactPerson}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => router.push(`/dashboard/sender-profile/${selectedLoad.sender?.id}`)}
+                                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                        >
+                                            <ExternalLink className="h-4 w-4 mr-2" />
+                                            Profile Git
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <Label className="text-sm font-medium text-gray-500">Yük Başlığı</Label>

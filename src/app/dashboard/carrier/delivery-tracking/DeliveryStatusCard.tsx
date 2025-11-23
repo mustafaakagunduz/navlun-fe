@@ -21,9 +21,11 @@ import {
 } from 'lucide-react';
 import { DeliveryTrackingData, DeliveryStep } from '@/services/deliveryService';
 import deliveryService from '@/services/deliveryService';
+import loadService from '@/services/loadService';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { formatDateTime } from '@/utils/dateUtils';
+import ReviewModal from './ReviewModal';
 
 interface DeliveryStatusCardProps {
     delivery: DeliveryTrackingData;
@@ -42,6 +44,13 @@ export default function DeliveryStatusCard({
                                            }: DeliveryStatusCardProps) {
     const { toast } = useToast();
     const [loading, setLoading] = useState(false);
+    const [showReviewModal, setShowReviewModal] = useState(false);
+    const [reviewData, setReviewData] = useState<{
+        loadId: string;
+        senderId: string;
+        senderName: string;
+    } | null>(null);
+    const [pendingPaymentStatus, setPendingPaymentStatus] = useState<boolean | null>(null);
 
     // formatDate artık dateUtils'den geliyor
     const formatDate = (dateString: string) => {
@@ -125,11 +134,33 @@ export default function DeliveryStatusCard({
         setLoading(true);
         try {
             await deliveryService.completeUnloading(delivery.loadId);
-            toast({
-                title: "Başarılı",
-                description: "Boşaltma tamamlandı",
-            });
-            onRefresh();
+
+            // Teslimat tamamlandı, şimdi review modal'ını aç
+            try {
+                const loadData = await loadService.getLoadById(delivery.actualLoadId);
+
+                if (loadData.sender) {
+                    setReviewData({
+                        loadId: delivery.actualLoadId,
+                        senderId: loadData.sender.id,
+                        senderName: loadData.sender.companyName
+                    });
+                    setShowReviewModal(true);
+                } else {
+                    toast({
+                        title: "Başarılı",
+                        description: "Boşaltma tamamlandı",
+                    });
+                    onRefresh();
+                }
+            } catch (error) {
+                console.error('Could not fetch sender info for review:', error);
+                toast({
+                    title: "Başarılı",
+                    description: "Boşaltma tamamlandı",
+                });
+                onRefresh();
+            }
         } catch (error: any) {
             toast({
                 title: "Hata",
@@ -142,6 +173,29 @@ export default function DeliveryStatusCard({
     };
 
     const handlePaymentStatus = async (paymentReceived: boolean) => {
+        // Önce review modal'ını aç
+        try {
+            const loadData = await loadService.getLoadById(delivery.actualLoadId);
+
+            if (loadData.sender) {
+                setPendingPaymentStatus(paymentReceived);
+                setReviewData({
+                    loadId: delivery.actualLoadId,
+                    senderId: loadData.sender.id,
+                    senderName: loadData.sender.companyName
+                });
+                setShowReviewModal(true);
+                return;
+            }
+        } catch (error) {
+            console.error('Could not fetch sender info for review:', error);
+        }
+
+        // Eğer sender bilgisi alınamazsa direkt ödeme durumunu güncelle
+        await processPaymentStatus(paymentReceived);
+    };
+
+    const processPaymentStatus = async (paymentReceived: boolean) => {
         setLoading(true);
         try {
             await deliveryService.markPaymentStatus(delivery.loadId, paymentReceived);
@@ -368,6 +422,30 @@ export default function DeliveryStatusCard({
                     )}
                 </div>
             </CardContent>
+
+            {/* Review Modal */}
+            {reviewData && (
+                <ReviewModal
+                    isOpen={showReviewModal}
+                    onClose={() => {
+                        setShowReviewModal(false);
+                        setReviewData(null);
+                        setPendingPaymentStatus(null);
+                    }}
+                    loadId={reviewData.loadId}
+                    senderId={reviewData.senderId}
+                    senderName={reviewData.senderName}
+                    onReviewSubmitted={async () => {
+                        // Review submit edildikten sonra pending payment varsa işle
+                        if (pendingPaymentStatus !== null) {
+                            await processPaymentStatus(pendingPaymentStatus);
+                            setPendingPaymentStatus(null);
+                        } else {
+                            onRefresh();
+                        }
+                    }}
+                />
+            )}
         </Card>
     );
 }

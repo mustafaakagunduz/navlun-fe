@@ -13,7 +13,9 @@ import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { setShowStatusModal, updateDeliveryStatus, fetchActiveDeliveries } from '@/store/slices/deliverySlice';
 import { DeliveryStep } from '@/services/deliveryService';
 import deliveryService from '@/services/deliveryService';
+import loadService from '@/services/loadService';
 import { useToast } from '@/hooks/use-toast';
+import ReviewModal from './ReviewModal';
 
 export default function StatusUpdateModal() {
     const dispatch = useAppDispatch();
@@ -30,6 +32,13 @@ export default function StatusUpdateModal() {
         location: '',
         note: ''
     });
+
+    const [showReviewModal, setShowReviewModal] = useState(false);
+    const [reviewData, setReviewData] = useState<{
+        loadId: string;
+        senderId: string;
+        senderName: string;
+    } | null>(null);
 
     useEffect(() => {
         if (selectedDelivery) {
@@ -66,21 +75,41 @@ export default function StatusUpdateModal() {
         if (!selectedDelivery) return;
 
         try {
-            // DÜZELTME: selectedDelivery.loadId zaten doğru delivery status ID'si
-            // Ekstra API çağrısına gerek yok
+            // Teslimat durumunu güncelle
             await dispatch(updateDeliveryStatus({
-                deliveryStatusId: selectedDelivery.loadId, // Bu zaten delivery status ID
+                deliveryStatusId: selectedDelivery.loadId,
                 request: formData
             })).unwrap();
 
-            toast({
-                title: "Başarılı",
-                description: "Teslimat durumu başarıyla güncellendi",
-            });
+            // Eğer durum DELIVERED ise değerlendirme modal'ını aç
+            if (formData.step === DeliveryStep.DELIVERED) {
+                // Load detaylarını al
+                const loadData = await loadService.getLoadById(selectedDelivery.actualLoadId);
 
-            // Active deliveries'i yenile
-            dispatch(fetchActiveDeliveries());
-            handleClose();
+                if (loadData.sender) {
+                    setReviewData({
+                        loadId: selectedDelivery.actualLoadId,
+                        senderId: loadData.sender.id,
+                        senderName: loadData.sender.companyName
+                    });
+                    handleClose();
+                    setShowReviewModal(true);
+                } else {
+                    toast({
+                        title: "Başarılı",
+                        description: "Teslimat durumu başarıyla güncellendi",
+                    });
+                    dispatch(fetchActiveDeliveries());
+                    handleClose();
+                }
+            } else {
+                toast({
+                    title: "Başarılı",
+                    description: "Teslimat durumu başarıyla güncellendi",
+                });
+                dispatch(fetchActiveDeliveries());
+                handleClose();
+            }
         } catch (error) {
             // Error handling redux'ta yapılıyor
         }
@@ -102,7 +131,8 @@ export default function StatusUpdateModal() {
     const possibleSteps = selectedDelivery ? getNextPossibleSteps(selectedDelivery.currentStatus) : [];
 
     return (
-        <Dialog open={showStatusModal} onOpenChange={handleClose}>
+        <>
+            <Dialog open={showStatusModal} onOpenChange={handleClose}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
@@ -188,5 +218,23 @@ export default function StatusUpdateModal() {
                 )}
             </DialogContent>
         </Dialog>
+
+        {/* Review Modal */}
+        {reviewData && (
+            <ReviewModal
+                isOpen={showReviewModal}
+                onClose={() => {
+                    setShowReviewModal(false);
+                    setReviewData(null);
+                }}
+                loadId={reviewData.loadId}
+                senderId={reviewData.senderId}
+                senderName={reviewData.senderName}
+                onReviewSubmitted={() => {
+                    dispatch(fetchActiveDeliveries());
+                }}
+            />
+        )}
+        </>
     );
 }
