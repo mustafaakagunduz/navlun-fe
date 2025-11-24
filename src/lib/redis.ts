@@ -129,7 +129,7 @@ export async function getHash(
 ): Promise<string | null> {
   try {
     const value = await redis.hget(key, field);
-    return value;
+    return value as string | null;
   } catch (error) {
     console.error(`Redis HGET error for key ${key}:`, error);
     return null;
@@ -139,7 +139,7 @@ export async function getHash(
 export async function getAllHash(key: string): Promise<Record<string, string> | null> {
   try {
     const data = await redis.hgetall(key);
-    return data;
+    return data as Record<string, string> | null;
   } catch (error) {
     console.error(`Redis HGETALL error for key ${key}:`, error);
     return null;
