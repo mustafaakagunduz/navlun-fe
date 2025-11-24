@@ -89,7 +89,7 @@ export default function StatusUpdateModal() {
                 if (loadData.sender) {
                     setReviewData({
                         loadId: selectedDelivery.actualLoadId,
-                        senderId: loadData.sender.id,
+                        senderId: loadData.sender.userId || loadData.senderId,
                         senderName: loadData.sender.companyName
                     });
                     handleClose();
