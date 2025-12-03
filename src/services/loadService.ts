@@ -28,6 +28,18 @@ export type Load = {
         userId?: string;
         contactPerson: string;
     };
+    carrierId?: string;
+    carrier?: {
+        id: string;
+        companyName: string;
+        userId?: string;
+    };
+    brokerId?: string;
+    broker?: {
+        id: string;
+        companyName: string;
+        userId?: string;
+    };
     goodsType: string;
     description?: string;
     netWeight: number;

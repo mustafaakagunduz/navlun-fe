@@ -20,7 +20,9 @@ import {
     TruckIcon,
     FileText,
     Download,
-    DollarSign
+    DollarSign,
+    User,
+    Briefcase
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import loadService, { Load } from "@/services/loadService";
@@ -28,6 +30,8 @@ import LoadDetailsDialog from "@/app/dashboard/sender/loads/LoadDetailsDialog";
 import { formatDate as formatDateUtil, formatDateTime } from '@/utils/dateUtils';
 import paymentService, { PaymentMethod } from "@/services/paymentService";
 import { useToast } from "@/hooks/use-toast";
+import offerService from "@/services/offerService";
+import brokerService, { OfferStatus } from "@/services/brokerService";
 import {
     Dialog,
     DialogContent,
@@ -81,8 +85,53 @@ export default function CompletedDeliveriesPage() {
 
             try {
                 const deliveries = await loadService.getCurrentUserCompletedDeliveries();
-                setCompletedDeliveries(deliveries);
-                setFilteredDeliveries(deliveries);
+                console.log('Completed Deliveries:', deliveries); // Debug: Load nesnesini kontrol et
+
+                // Her delivery için accepted offer'ı çek ve carrier/broker bilgisini ekle
+                const deliveriesWithCarriers = await Promise.all(
+                    deliveries.map(async (delivery) => {
+                        try {
+                            // Carrier offer'ları çek
+                            const offers = await offerService.getOffersByLoad(delivery.id);
+                            console.log(`Load ${delivery.id} - All offers:`, offers);
+                            const acceptedOffer = offers.find(offer => offer.status === 'ACCEPTED');
+                            console.log(`Load ${delivery.id} - Accepted offer:`, acceptedOffer);
+
+                            // Broker offer'ları çek
+                            const brokerOffers = await brokerService.getCurrentSenderReceivedBrokerOffers(
+                                delivery.id,
+                                OfferStatus.ACCEPTED
+                            );
+                            const acceptedBrokerOffer = brokerOffers.length > 0 ? brokerOffers[0] : null;
+
+                            const result = {
+                                ...delivery,
+                                carrier: acceptedOffer?.carrierName ? {
+                                    id: acceptedOffer.carrierId || '',
+                                    companyName: acceptedOffer.carrierName,
+                                    userId: ''
+                                } : undefined,
+                                carrierId: acceptedOffer?.carrierId,
+                                broker: acceptedBrokerOffer?.brokerName ? {
+                                    id: acceptedBrokerOffer.brokerProfileId || '',
+                                    companyName: acceptedBrokerOffer.brokerName,
+                                    userId: ''
+                                } : undefined,
+                                brokerId: acceptedBrokerOffer?.brokerProfileId
+                            };
+
+                            console.log(`Load ${delivery.id} - Result with carrier/broker:`, result);
+                            return result;
+                        } catch (error) {
+                            console.error(`Error fetching offers for load ${delivery.id}:`, error);
+                            return delivery;
+                        }
+                    })
+                );
+
+                console.log('Deliveries with carriers:', deliveriesWithCarriers);
+                setCompletedDeliveries(deliveriesWithCarriers);
+                setFilteredDeliveries(deliveriesWithCarriers);
             } catch (err: any) {
                 console.error('Error fetching completed deliveries:', err);
                 setError('Tamamlanmış teslimatlar yüklenirken hata oluştu');
@@ -390,6 +439,64 @@ export default function CompletedDeliveriesPage() {
                                                         <p className="text-sm font-medium text-gray-500 mb-1">Açıklama</p>
                                                         <p className="text-gray-700">{delivery.description}</p>
                                                     </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Carrier and Broker Info */}
+                                        {(delivery.carrier || delivery.broker) && (
+                                            <div className="mt-6 pt-6 border-t border-gray-100">
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    {delivery.carrier && (
+                                                        <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                                                            <div className="flex items-center gap-3">
+                                                                <TruckIcon className="h-5 w-5 text-blue-600" />
+                                                                <div>
+                                                                    <p className="text-xs text-gray-500">Taşıyıcı</p>
+                                                                    <p className="text-sm font-medium text-gray-900">
+                                                                        {delivery.carrier.companyName}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    router.push(`/dashboard/carrier/profile/${delivery.carrier?.id}`);
+                                                                }}
+                                                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-100"
+                                                            >
+                                                                <User className="h-4 w-4 mr-1" />
+                                                                Profil
+                                                            </Button>
+                                                        </div>
+                                                    )}
+                                                    {delivery.broker && (
+                                                        <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                                                            <div className="flex items-center gap-3">
+                                                                <Briefcase className="h-5 w-5 text-purple-600" />
+                                                                <div>
+                                                                    <p className="text-xs text-gray-500">Broker</p>
+                                                                    <p className="text-sm font-medium text-gray-900">
+                                                                        {delivery.broker.companyName}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    router.push(`/dashboard/broker/profile/${delivery.broker?.id}`);
+                                                                }}
+                                                                className="text-purple-600 hover:text-purple-700 hover:bg-purple-100"
+                                                            >
+                                                                <User className="h-4 w-4 mr-1" />
+                                                                Profil
+                                                            </Button>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         )}

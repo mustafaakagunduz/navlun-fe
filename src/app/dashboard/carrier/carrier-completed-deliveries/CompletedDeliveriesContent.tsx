@@ -17,16 +17,19 @@ import {
     Star,
     DollarSign,
     TruckIcon,
-    Clock
+    Clock,
+    User
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { fetchCompletedDeliveries } from '@/store/slices/loadsSlice';
 import { LoadStatus } from '@/services/loadService';
 import { formatDate, formatDateTime, formatTime } from '@/utils/dateUtils';
+import { useRouter } from 'next/navigation';
 
 export default function CompletedDeliveriesContent() {
     const dispatch = useAppDispatch();
+    const router = useRouter();
     const {
         completedDeliveries,
         completedDeliveriesLoading
@@ -244,6 +247,15 @@ export default function CompletedDeliveriesContent() {
                                                 <p className="text-sm font-medium">{load.sender.companyName}</p>
                                             </div>
                                         </div>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => router.push(`/dashboard/sender/profile/${load.sender.id}`)}
+                                            className="flex items-center gap-2"
+                                        >
+                                            <User className="h-4 w-4" />
+                                            Profil
+                                        </Button>
                                     </div>
                                 )}
 
