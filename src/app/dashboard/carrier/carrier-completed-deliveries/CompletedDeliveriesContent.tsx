@@ -250,7 +250,7 @@ export default function CompletedDeliveriesContent() {
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            onClick={() => router.push(`/dashboard/sender/profile/${load.sender.id}`)}
+                                            onClick={() => router.push(`/dashboard/sender/profile/${load.sender?.id}`)}
                                             className="flex items-center gap-2"
                                         >
                                             <User className="h-4 w-4" />

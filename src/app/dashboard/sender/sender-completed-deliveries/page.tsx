@@ -106,9 +106,9 @@ export default function CompletedDeliveriesPage() {
 
                             const result = {
                                 ...delivery,
-                                carrier: acceptedOffer?.carrierName ? {
-                                    id: acceptedOffer.carrierId || '',
-                                    companyName: acceptedOffer.carrierName,
+                                carrier: acceptedOffer?.carrierId ? {
+                                    id: acceptedOffer.carrierId,
+                                    companyName: (acceptedOffer as any).carrierName || 'Carrier',
                                     userId: ''
                                 } : undefined,
                                 carrierId: acceptedOffer?.carrierId,
