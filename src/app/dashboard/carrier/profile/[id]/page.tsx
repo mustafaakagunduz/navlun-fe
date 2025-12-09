@@ -18,18 +18,25 @@ import {
     TrendingUp,
     CheckCircle2,
     Star,
-    MapPin
+    MapPin,
+    Building,
+    FileText,
+    IdCard
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { formatDate } from '@/utils/dateUtils';
+import carrierService from '@/services/carrierService';
+import reviewService, { Review } from '@/services/reviewService';
 
-// Basit Carrier tipi - gerçek API'den gelene kadar
+// Carrier profile type
 type CarrierProfile = {
     id: string;
     userId: string;
     companyName: string;
     email?: string;
     phone?: string;
+    address?: string;
+    taxNumber?: string;
     totalDeliveries?: number;
     completedDeliveries?: number;
     ecoFriendlyDeliveries?: number;
@@ -37,11 +44,21 @@ type CarrierProfile = {
     createdAt?: string;
 };
 
+type Vehicle = {
+    id: string;
+    plate: string;
+    vehicleType: string;
+    capacity: number;
+    isActive: boolean;
+};
+
 export default function CarrierProfilePage() {
     const params = useParams();
     const router = useRouter();
     const { toast } = useToast();
     const [profile, setProfile] = useState<CarrierProfile | null>(null);
+    const [reviews, setReviews] = useState<Review[]>([]);
+    const [vehicles, setVehicles] = useState<Vehicle[]>([]);
     const [loading, setLoading] = useState(true);
 
     const carrierId = params.id as string;
@@ -50,24 +67,34 @@ export default function CarrierProfilePage() {
         const fetchProfileData = async () => {
             try {
                 setLoading(true);
-                // TODO: Gerçek API endpoint'i eklenecek
-                // const profileData = await carrierService.getCarrierProfileById(carrierId);
 
-                // Şimdilik mock data
-                setProfile({
-                    id: carrierId,
-                    userId: '',
-                    companyName: 'Taşıyıcı Firma',
-                    totalDeliveries: 0,
-                    completedDeliveries: 0,
-                    ecoFriendlyDeliveries: 0,
-                    rating: 0
-                });
+                // Fetch carrier profile
+                const profileData = await carrierService.getCarrierProfileById(carrierId);
+                console.log('Carrier profile data:', profileData);
+                setProfile(profileData);
+
+                // Fetch reviews for this carrier
+                try {
+                    const reviewsData = await reviewService.getReviewsByCarrierId(carrierId);
+                    setReviews(reviewsData);
+                } catch (reviewError) {
+                    console.error('Error fetching reviews:', reviewError);
+                    setReviews([]);
+                }
+
+                // Fetch vehicles for this carrier
+                try {
+                    const vehiclesData = await carrierService.getVehiclesByCarrier(carrierId);
+                    setVehicles(vehiclesData);
+                } catch (vehicleError) {
+                    console.error('Error fetching vehicles:', vehicleError);
+                    setVehicles([]);
+                }
             } catch (error: any) {
                 console.error('Error fetching carrier profile:', error);
                 toast({
                     title: 'Hata',
-                    description: error.message || 'Profil yüklenirken bir hata oluştu',
+                    description: error.response?.data?.message || 'Profil yüklenirken bir hata oluştu',
                     variant: 'destructive',
                 });
             } finally {
@@ -115,6 +142,10 @@ export default function CarrierProfilePage() {
         ? ((profile.ecoFriendlyDeliveries || 0) / profile.totalDeliveries * 100).toFixed(1)
         : '0';
 
+    const averageRating = reviews && reviews.length > 0
+        ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)
+        : '0';
+
     return (
         <div className="p-8 space-y-6">
             {/* Header */}
@@ -142,13 +173,21 @@ export default function CarrierProfilePage() {
                                 <Truck className="h-8 w-8 text-blue-600" />
                             </div>
                             <div>
-                                <CardTitle className="text-2xl">{profile.companyName}</CardTitle>
+                                <CardTitle className="text-2xl">
+                                    {profile.companyName || (profile as any).name || 'Taşıyıcı Firma'}
+                                </CardTitle>
                                 <div className="flex items-center gap-2 mt-2">
                                     <Badge variant="default">Taşıyıcı</Badge>
                                     {profile.ecoFriendlyDeliveries && profile.ecoFriendlyDeliveries > 0 && (
                                         <Badge className="bg-green-100 text-green-800 border-green-200">
                                             <Leaf className="h-3 w-3 mr-1" />
                                             Çevre Dostu
+                                        </Badge>
+                                    )}
+                                    {reviews && reviews.length > 0 && (
+                                        <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">
+                                            <Star className="h-3 w-3 mr-1" />
+                                            {averageRating} / 5.0
                                         </Badge>
                                     )}
                                 </div>
@@ -178,18 +217,25 @@ export default function CarrierProfilePage() {
                                 </div>
                             </div>
                         )}
-                    </div>
-
-                    {/* Rating */}
-                    {profile.rating !== undefined && profile.rating > 0 && (
-                        <div className="flex items-center gap-3 pt-4 border-t">
-                            <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
-                            <div>
-                                <p className="text-xs text-gray-500">Ortalama Puan</p>
-                                <p className="text-lg font-semibold">{profile.rating.toFixed(1)} / 5.0</p>
+                        {profile.taxNumber && (
+                            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                <IdCard className="h-5 w-5 text-gray-500" />
+                                <div>
+                                    <p className="text-xs text-gray-500">Vergi No</p>
+                                    <p className="text-sm font-medium">{profile.taxNumber}</p>
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
+                        {profile.address && (
+                            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                <MapPin className="h-5 w-5 text-gray-500" />
+                                <div>
+                                    <p className="text-xs text-gray-500">Adres</p>
+                                    <p className="text-sm font-medium">{profile.address}</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
 
                     {/* Member Since */}
                     {profile.createdAt && (
@@ -260,15 +306,100 @@ export default function CarrierProfilePage() {
                 </Card>
             </div>
 
-            {/* Info Note */}
-            <Card className="bg-blue-50 border-blue-200">
-                <CardContent className="pt-6">
-                    <p className="text-sm text-blue-800">
-                        <strong>Not:</strong> Taşıyıcı profili bilgileri geliştirme aşamasındadır.
-                        Daha detaylı bilgiler yakında eklenecektir.
-                    </p>
+            {/* Reviews Section - Always Show */}
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Star className="h-5 w-5 text-yellow-500" />
+                        Değerlendirmeler ve Yorumlar ({reviews ? reviews.length : 0})
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    {reviews && reviews.length > 0 ? (
+                        <div className="space-y-4">
+                            {reviews.map((review) => (
+                                <div key={review.id} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                            {[...Array(5)].map((_, i) => (
+                                                <Star
+                                                    key={i}
+                                                    className={`h-4 w-4 ${
+                                                        i < review.rating
+                                                            ? 'text-yellow-500 fill-yellow-500'
+                                                            : 'text-gray-300'
+                                                    }`}
+                                                />
+                                            ))}
+                                            <span className="text-sm font-semibold text-gray-700">
+                                                {review.rating}/5
+                                            </span>
+                                        </div>
+                                        <span className="text-xs text-gray-500">
+                                            {formatDate(review.createdAt)}
+                                        </span>
+                                    </div>
+                                    {review.comment && (
+                                        <p className="text-sm text-gray-700 mt-2">{review.comment}</p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-12">
+                            <Star className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                            <h3 className="text-lg font-semibold text-gray-600 mb-2">
+                                Henüz Değerlendirme Yapılmamış
+                            </h3>
+                            <p className="text-sm text-gray-500">
+                                Bu taşıyıcı için henüz değerlendirme ve yorum bulunmamaktadır.
+                            </p>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
+
+            {/* Vehicles Section */}
+            {vehicles && vehicles.length > 0 && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Truck className="h-5 w-5 text-blue-600" />
+                            Araçlar ({vehicles.length})
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                            {vehicles.map((vehicle) => (
+                                <div
+                                    key={vehicle.id}
+                                    className="p-4 bg-blue-50 rounded-lg border-2 border-blue-200 text-center hover:shadow-md transition-shadow"
+                                >
+                                    <div className="flex flex-col items-center gap-2">
+                                        <Truck className="h-8 w-8 text-blue-600" />
+                                        <p className="font-bold text-base text-gray-900">
+                                            {vehicle.vehicleType || 'Araç'}
+                                        </p>
+                                        {vehicle.capacity && (
+                                            <div className="flex items-center gap-1 text-xs text-gray-600">
+                                                <Package className="h-3 w-3" />
+                                                <span>{vehicle.capacity} kg</span>
+                                            </div>
+                                        )}
+                                        <Badge
+                                            variant={vehicle.isActive ? 'default' : 'secondary'}
+                                            className={vehicle.isActive ? 'bg-green-500 text-white mt-1' : 'bg-gray-400 text-white mt-1'}
+                                        >
+                                            {vehicle.isActive ? 'Aktif' : 'Pasif'}
+                                        </Badge>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+
         </div>
     );
 }

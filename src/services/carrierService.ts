@@ -109,6 +109,15 @@ class CarrierService {
         }
     }
 
+    async getCarrierProfileById(carrierId: string): Promise<any> {
+        try {
+            return await apiService.get(`${this.baseUrl}/${carrierId}`);
+        } catch (error) {
+            console.error('Get carrier profile by ID error:', error);
+            throw error;
+        }
+    }
+
     async createCarrierProfile(profileData: any): Promise<any> {
         try {
             return await apiService.post(this.baseUrl, profileData);

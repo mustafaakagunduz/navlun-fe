@@ -22,7 +22,9 @@ import {
     Download,
     DollarSign,
     User,
-    Briefcase
+    Briefcase,
+    Star,
+    AlertCircle
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import loadService, { Load } from "@/services/loadService";
@@ -32,6 +34,7 @@ import paymentService, { PaymentMethod } from "@/services/paymentService";
 import { useToast } from "@/hooks/use-toast";
 import offerService from "@/services/offerService";
 import brokerService, { OfferStatus } from "@/services/brokerService";
+import reviewService, { Review, ReviewRequest } from "@/services/reviewService";
 import {
     Dialog,
     DialogContent,
@@ -67,6 +70,13 @@ export default function CompletedDeliveriesPage() {
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.BANK_TRANSFER);
     const [paymentDescription, setPaymentDescription] = useState('');
     const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
+
+    // Review states
+    const [reviewsMap, setReviewsMap] = useState<Map<string, Review | null>>(new Map());
+    const [showReviewDialog, setShowReviewDialog] = useState(false);
+    const [reviewRating, setReviewRating] = useState(0);
+    const [reviewComment, setReviewComment] = useState('');
+    const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
     // Giriş yapmamış veya sender olmayan kullanıcıları yönlendir
     useEffect(() => {
@@ -132,6 +142,31 @@ export default function CompletedDeliveriesPage() {
                 console.log('Deliveries with carriers:', deliveriesWithCarriers);
                 setCompletedDeliveries(deliveriesWithCarriers);
                 setFilteredDeliveries(deliveriesWithCarriers);
+
+                // Fetch reviews for each delivery
+                const reviewsData = new Map<string, Review | null>();
+                await Promise.all(
+                    deliveriesWithCarriers.map(async (delivery) => {
+                        try {
+                            const review = await reviewService.getReviewByLoadId(delivery.id);
+                            console.log(`Review for load ${delivery.id}:`, review);
+
+                            // Only count the review if it was made by the current sender
+                            if (review && review.senderId === user.id) {
+                                console.log(`✓ Review was made by current sender (${user.id})`);
+                                reviewsData.set(delivery.id, review);
+                            } else {
+                                console.log(`✗ Review was NOT made by current sender. Review senderId: ${review?.senderId}, Current user: ${user.id}`);
+                                reviewsData.set(delivery.id, null);
+                            }
+                        } catch (error) {
+                            console.error(`Error fetching review for load ${delivery.id}:`, error);
+                            reviewsData.set(delivery.id, null);
+                        }
+                    })
+                );
+                console.log('All reviews map:', reviewsData);
+                setReviewsMap(reviewsData);
             } catch (err: any) {
                 console.error('Error fetching completed deliveries:', err);
                 setError('Tamamlanmış teslimatlar yüklenirken hata oluştu');
@@ -257,6 +292,98 @@ export default function CompletedDeliveriesPage() {
             });
         } finally {
             setIsSubmittingPayment(false);
+        }
+    };
+
+    // Review dialog handlers
+    const handleOpenReviewDialog = (load: Load) => {
+        setSelectedLoad(load);
+        setReviewRating(0);
+        setReviewComment('');
+        setShowReviewDialog(true);
+    };
+
+    const handleCloseReviewDialog = () => {
+        setShowReviewDialog(false);
+        setSelectedLoad(null);
+        setReviewRating(0);
+        setReviewComment('');
+    };
+
+    const handleSubmitReview = async () => {
+        if (!selectedLoad || !user?.id) return;
+
+        if (reviewRating === 0) {
+            toast({
+                title: "Hata",
+                description: "Lütfen bir puan seçin (1-5 yıldız)",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        if (!reviewComment || reviewComment.trim().length < 10) {
+            toast({
+                title: "Hata",
+                description: "Yorum en az 10 karakter olmalıdır",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        if (reviewComment.length > 500) {
+            toast({
+                title: "Hata",
+                description: "Yorum en fazla 500 karakter olmalıdır",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        const carrierId = (selectedLoad as any).carrierId;
+        if (!carrierId) {
+            toast({
+                title: "Hata",
+                description: "Taşıyıcı bilgisi bulunamadı",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        setIsSubmittingReview(true);
+        try {
+            const reviewData: ReviewRequest = {
+                senderId: user.id,
+                carrierId: carrierId,
+                loadId: selectedLoad.id,
+                rating: reviewRating,
+                comment: reviewComment.trim(),
+            };
+
+            console.log('Sending review data:', reviewData);
+            const newReview = await reviewService.createReview(reviewData);
+            console.log('Review created successfully:', newReview);
+
+            // Update reviews map
+            const updatedReviewsMap = new Map(reviewsMap);
+            updatedReviewsMap.set(selectedLoad.id, newReview);
+            setReviewsMap(updatedReviewsMap);
+
+            toast({
+                title: "Başarılı",
+                description: "Değerlendirme başarıyla kaydedildi",
+            });
+
+            handleCloseReviewDialog();
+        } catch (error: any) {
+            console.error('Review creation error:', error);
+            toast({
+                title: "Hata",
+                description: error.response?.data?.message || "Değerlendirme kaydedilirken hata oluştu",
+                variant: "destructive",
+            });
+        } finally {
+            setIsSubmittingReview(false);
         }
     };
 
@@ -443,58 +570,85 @@ export default function CompletedDeliveriesPage() {
                                             </div>
                                         )}
 
-                                        {/* Carrier and Broker Info */}
+                                        {/* Carrier and Broker Info with Review */}
                                         {(delivery.carrier || delivery.broker) && (
                                             <div className="mt-6 pt-6 border-t border-gray-100">
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div className="grid grid-cols-1 gap-4">
                                                     {delivery.carrier && (
-                                                        <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                                                            <div className="flex items-center gap-3">
-                                                                <TruckIcon className="h-5 w-5 text-blue-600" />
-                                                                <div>
-                                                                    <p className="text-xs text-gray-500">Taşıyıcı</p>
-                                                                    <p className="text-sm font-medium text-gray-900">
-                                                                        {delivery.carrier.companyName}
-                                                                    </p>
+                                                        <div className="p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
+                                                            <div className="flex items-center justify-between mb-3">
+                                                                <div className="flex items-center gap-3">
+                                                                    <TruckIcon className="h-6 w-6 text-blue-600" />
+                                                                    <div>
+                                                                        <p className="text-sm font-semibold text-blue-600 uppercase">Taşıyıcı</p>
+                                                                        <p className="text-lg font-bold text-gray-900">
+                                                                            {delivery.carrier.companyName}
+                                                                        </p>
+                                                                    </div>
                                                                 </div>
+                                                                <Button
+                                                                    size="default"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        router.push(`/dashboard/carrier/profile/${delivery.carrier?.id}`);
+                                                                    }}
+                                                                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                                                                >
+                                                                    <User className="h-4 w-4 mr-2" />
+                                                                    Profil Git
+                                                                </Button>
                                                             </div>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    router.push(`/dashboard/carrier/profile/${delivery.carrier?.id}`);
-                                                                }}
-                                                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-100"
-                                                            >
-                                                                <User className="h-4 w-4 mr-1" />
-                                                                Profil
-                                                            </Button>
+                                                            {/* Review Status */}
+                                                            {!reviewsMap.get(delivery.id) ? (
+                                                                <div className="mt-2 flex items-center gap-2">
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            handleOpenReviewDialog(delivery);
+                                                                        }}
+                                                                        className="bg-red-50 border-red-300 text-red-700 hover:bg-red-100 hover:border-red-400"
+                                                                    >
+                                                                        <AlertCircle className="h-4 w-4 mr-2 text-red-600 animate-pulse" />
+                                                                        <Star className="h-4 w-4 mr-1" />
+                                                                        Taşıyıcıyı Değerlendir (Zorunlu)
+                                                                    </Button>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="mt-2 flex items-center gap-2 text-green-700 bg-green-50 px-3 py-2 rounded-md border border-green-200">
+                                                                    <CheckCircle className="h-4 w-4" />
+                                                                    <span className="text-sm font-medium">
+                                                                        Değerlendirme yapıldı ({reviewsMap.get(delivery.id)?.rating}/5 ⭐)
+                                                                    </span>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     )}
                                                     {delivery.broker && (
-                                                        <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
-                                                            <div className="flex items-center gap-3">
-                                                                <Briefcase className="h-5 w-5 text-purple-600" />
-                                                                <div>
-                                                                    <p className="text-xs text-gray-500">Broker</p>
-                                                                    <p className="text-sm font-medium text-gray-900">
-                                                                        {delivery.broker.companyName}
-                                                                    </p>
+                                                        <div className="p-4 bg-purple-50 rounded-lg border-2 border-purple-200">
+                                                            <div className="flex items-center justify-between">
+                                                                <div className="flex items-center gap-3">
+                                                                    <Briefcase className="h-6 w-6 text-purple-600" />
+                                                                    <div>
+                                                                        <p className="text-sm font-semibold text-purple-600 uppercase">Broker</p>
+                                                                        <p className="text-lg font-bold text-gray-900">
+                                                                            {delivery.broker.companyName}
+                                                                        </p>
+                                                                    </div>
                                                                 </div>
+                                                                <Button
+                                                                    size="default"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        router.push(`/dashboard/broker/profile/${delivery.broker?.id}`);
+                                                                    }}
+                                                                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                                                                >
+                                                                    <User className="h-4 w-4 mr-2" />
+                                                                    Profil Git
+                                                                </Button>
                                                             </div>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    router.push(`/dashboard/broker/profile/${delivery.broker?.id}`);
-                                                                }}
-                                                                className="text-purple-600 hover:text-purple-700 hover:bg-purple-100"
-                                                            >
-                                                                <User className="h-4 w-4 mr-1" />
-                                                                Profil
-                                                            </Button>
                                                         </div>
                                                     )}
                                                 </div>
@@ -657,6 +811,117 @@ export default function CompletedDeliveriesPage() {
                                         <>
                                             <DollarSign className="h-4 w-4 mr-2" />
                                             Ödemeyi Kaydet
+                                        </>
+                                    )}
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+
+                    {/* Review Dialog */}
+                    <Dialog open={showReviewDialog} onOpenChange={setShowReviewDialog}>
+                        <DialogContent className="sm:max-w-[500px]">
+                            <DialogHeader>
+                                <DialogTitle>Taşıyıcıyı Değerlendir</DialogTitle>
+                                <DialogDescription asChild>
+                                    <div>
+                                        {selectedLoad && (
+                                            <>
+                                                <div className="flex items-center gap-2 mt-2">
+                                                    <TruckIcon className="h-4 w-4 text-blue-600" />
+                                                    <span className="font-semibold">{(selectedLoad as any).carrier?.companyName}</span>
+                                                </div>
+                                                <div className="text-sm text-gray-500 mt-1">
+                                                    Teslimat: {selectedLoad.title}
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                </DialogDescription>
+                            </DialogHeader>
+
+                            <div className="grid gap-4 py-4">
+                                <div className="grid gap-2">
+                                    <Label>Puan (1-5 Yıldız) *</Label>
+                                    <div className="flex gap-2">
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <button
+                                                key={star}
+                                                type="button"
+                                                onClick={() => setReviewRating(star)}
+                                                className={`text-3xl transition-all ${
+                                                    star <= reviewRating
+                                                        ? 'text-yellow-400 scale-110'
+                                                        : 'text-gray-300 hover:text-yellow-200'
+                                                }`}
+                                            >
+                                                ★
+                                            </button>
+                                        ))}
+                                    </div>
+                                    {reviewRating > 0 && (
+                                        <p className="text-sm text-gray-600">
+                                            Seçilen puan: <span className="font-semibold">{reviewRating}/5</span>
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="reviewComment">Yorumunuz (Zorunlu - Min 10, Maks 500 karakter) *</Label>
+                                    <Textarea
+                                        id="reviewComment"
+                                        placeholder="Taşıyıcı hakkında yorumunuzu yazın... (En az 10 karakter)"
+                                        value={reviewComment}
+                                        onChange={(e) => setReviewComment(e.target.value)}
+                                        rows={4}
+                                        maxLength={500}
+                                    />
+                                    <div className="flex justify-between text-xs">
+                                        <span className={reviewComment.length < 10 ? 'text-red-600' : 'text-green-600'}>
+                                            {reviewComment.length < 10
+                                                ? `En az ${10 - reviewComment.length} karakter daha gerekli`
+                                                : '✓ Yeterli karakter'}
+                                        </span>
+                                        <span className="text-gray-500">
+                                            {reviewComment.length}/500
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex items-start gap-2">
+                                    <AlertCircle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                                    <div className="text-sm text-yellow-800">
+                                        <p className="font-semibold">Değerlendirme Zorunludur</p>
+                                        <p className="text-xs mt-1">
+                                            Teslimat tamamlandıktan sonra taşıyıcıyı değerlendirmeniz gerekmektedir.
+                                            Bu, platformumuzun kalitesini korumamıza yardımcı olur.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <DialogFooter>
+                                <Button
+                                    variant="outline"
+                                    onClick={handleCloseReviewDialog}
+                                    disabled={isSubmittingReview}
+                                >
+                                    İptal
+                                </Button>
+                                <Button
+                                    onClick={handleSubmitReview}
+                                    disabled={isSubmittingReview || reviewRating === 0}
+                                    className="bg-green-600 hover:bg-green-700"
+                                >
+                                    {isSubmittingReview ? (
+                                        <>
+                                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                            Kaydediliyor...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Star className="h-4 w-4 mr-2" />
+                                            Değerlendirmeyi Kaydet
                                         </>
                                     )}
                                 </Button>
