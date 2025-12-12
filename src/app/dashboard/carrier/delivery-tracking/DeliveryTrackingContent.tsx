@@ -10,6 +10,7 @@ import { Loader2, Package, MapPin, Calendar, Weight, Upload, Navigation, FileTex
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { fetchActiveDeliveries, setSelectedDelivery, setShowStatusModal, setShowDocumentModal, setSelectedDocumentType } from '@/store/slices/deliverySlice';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/context/AuthContext';
 import DeliveryStatusCard from './DeliveryStatusCard';
 import StatusUpdateModal from './StatusUpdateModal';
 import DocumentUploadModal from './DocumentUploadModal';
@@ -22,6 +23,7 @@ export default function DeliveryTrackingContent() {
     const dispatch = useAppDispatch();
     const router = useRouter();
     const { toast } = useToast();
+    const { user } = useAuth();
     const {
         activeDeliveries,
         activeDeliveriesLoading,
@@ -58,9 +60,11 @@ export default function DeliveryTrackingContent() {
     };
 
     useEffect(() => {
-        console.log('🚚 [CARRIER-TRACKING-FE] Fetching active deliveries...');
-        dispatch(fetchActiveDeliveries());
-    }, [dispatch]);
+        if (user?.role && (user.role === 'CARRIER' || user.role === 'BROKER')) {
+            console.log('🚚 [TRACKING-FE] Fetching active deliveries for role:', user.role);
+            dispatch(fetchActiveDeliveries(user.role));
+        }
+    }, [dispatch, user?.role]);
 
     useEffect(() => {
         if (activeDeliveriesError) {
@@ -109,7 +113,11 @@ export default function DeliveryTrackingContent() {
                     </p>
                 </div>
                 <Button
-                    onClick={() => dispatch(fetchActiveDeliveries())}
+                    onClick={() => {
+                        if (user?.role && (user.role === 'CARRIER' || user.role === 'BROKER')) {
+                            dispatch(fetchActiveDeliveries(user.role));
+                        }
+                    }}
                     variant="outline"
                 >
                     Yenile
@@ -159,7 +167,11 @@ export default function DeliveryTrackingContent() {
                                         dispatch(setShowDocumentModal(true));
                                     }}
                                     onGoToChat={() => handleGoToChat(delivery.actualLoadId)}
-                                    onRefresh={() => dispatch(fetchActiveDeliveries())}
+                                    onRefresh={() => {
+                                        if (user?.role && (user.role === 'CARRIER' || user.role === 'BROKER')) {
+                                            dispatch(fetchActiveDeliveries(user.role));
+                                        }
+                                    }}
                                 />
                             ))}
                         </div>

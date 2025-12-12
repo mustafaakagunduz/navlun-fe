@@ -352,9 +352,9 @@ const AuthForms = ({ initialRole }: AuthFormsProps) => {
     return (
         <div className="w-full space-y-6">
             {error && (
-                <Alert className="bg-red-50/90 backdrop-blur-sm border border-red-200/50 text-red-800 rounded-2xl shadow-lg">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription className="font-medium">{error}</AlertDescription>
+                <Alert className="relative z-50 bg-red-50 backdrop-blur-sm border-2 border-red-400 text-red-900 rounded-2xl shadow-2xl animate-in fade-in slide-in-from-top-2 duration-300">
+                    <AlertCircle className="h-5 w-5 text-red-600" />
+                    <AlertDescription className="font-semibold text-base ml-2">{error}</AlertDescription>
                 </Alert>
             )}
 

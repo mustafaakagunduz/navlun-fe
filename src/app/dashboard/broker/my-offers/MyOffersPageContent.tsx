@@ -15,7 +15,7 @@ import {
     Shield,
     Leaf,
     Ship,
-    DollarSign,
+    Banknote,
     Clock,
     CheckCircle,
     XCircle,
@@ -131,7 +131,7 @@ function MyOffersPageContent() {
                     </div>
                     <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                            <DollarSign className="h-4 w-4 text-muted-foreground" />
+                            <Banknote className="h-4 w-4 text-muted-foreground" />
                             <span className="text-sm">Navlun: {formatCurrency(offer.freightRate)}</span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -296,7 +296,7 @@ function MyOffersPageContent() {
                                 <p className="text-sm font-medium text-muted-foreground">Başarı Oranı</p>
                                 <p className="text-2xl font-bold text-blue-600">{stats.successRate.toFixed(1)}%</p>
                             </div>
-                            <DollarSign className="h-8 w-8 text-blue-600" />
+                            <Banknote className="h-8 w-8 text-blue-600" />
                         </div>
                     </CardContent>
                 </Card>

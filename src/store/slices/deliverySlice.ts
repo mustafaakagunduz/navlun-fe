@@ -53,14 +53,18 @@ const initialState: DeliveryState = {
 // Async Thunks
 export const fetchActiveDeliveries = createAsyncThunk(
     'delivery/fetchActiveDeliveries',
-    async (_, { rejectWithValue }) => {
+    async (userRole: 'CARRIER' | 'BROKER' | undefined, { rejectWithValue }) => {
         try {
-            console.log('🔄 [REDUX-CARRIER] Fetching active deliveries...');
-            const result = await deliveryService.getCurrentCarrierActiveDeliveries();
-            console.log('✅ [REDUX-CARRIER-SUCCESS] Fetched', result.length, 'active deliveries');
+            console.log('🔄 [REDUX] Fetching active deliveries for role:', userRole);
+
+            const result = userRole === 'BROKER'
+                ? await deliveryService.getCurrentBrokerActiveDeliveries()
+                : await deliveryService.getCurrentCarrierActiveDeliveries();
+
+            console.log('✅ [REDUX-SUCCESS] Fetched', result.length, 'active deliveries for', userRole);
             return result;
         } catch (error: any) {
-            console.error('❌ [REDUX-CARRIER-ERROR] Failed to fetch active deliveries:', error);
+            console.error('❌ [REDUX-ERROR] Failed to fetch active deliveries:', error);
             return rejectWithValue(error.response?.data?.message || 'Aktif teslimatlar yüklenemedi')
         }
     }
