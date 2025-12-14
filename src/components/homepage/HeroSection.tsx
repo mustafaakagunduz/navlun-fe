@@ -30,17 +30,31 @@ const HeroSection = () => {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.6, delay: 0.2 }}
                                 >
-                                    <span className="text-green-400">{t("hero.title")}</span>
+                                    <span className="text-green-400">{t("hero.mainTitle")}</span>
                                 </motion.h1>
 
                                 <motion.p
                                     className="text-lg sm:text-xl text-gray-200 max-w-2xl leading-relaxed"
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.6, delay: 0.3 }}
+                                >
+                                    {t("hero.subtitle")}
+                                </motion.p>
+
+                                <motion.div
+                                    className="pt-4 space-y-2"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.6, delay: 0.4 }}
                                 >
-                                    {t("hero.description")}
-                                </motion.p>
+                                    <h2 className="text-2xl sm:text-3xl font-semibold text-white">
+                                        {t("hero.designedForYou")}
+                                    </h2>
+                                    <p className="text-base sm:text-lg text-gray-300">
+                                        {t("hero.designedDescription")}
+                                    </p>
+                                </motion.div>
                             </div>
 
                             {/* Özellikler */}
