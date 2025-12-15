@@ -1,7 +1,6 @@
 "use client"
 
-import Image from "next/image"
-import { Globe, Leaf, Truck } from "lucide-react"
+import { Globe, Leaf, Users } from "lucide-react"
 import { useLanguage } from "@/context/LanguageContext"
 
 const AboutSection = () => {
@@ -9,69 +8,63 @@ const AboutSection = () => {
 
     return (
         <section id="about" className="w-full pt-8 md:pt-16 lg:pt-20 pb-12 md:pb-24 lg:pb-32 bg-background">
-            <div className="mx-auto px-4 md:px-6 max-w-7xl">
-                <div className="flex flex-col items-center justify-center space-y-4 text-center">
-                    <div className="space-y-2">
-                        <div className="inline-block rounded-lg bg-green-100 px-3 py-1 text-sm text-green-800">
-                            {t("about.subtitle")}
-                        </div>
-                        <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-                            {t("about.title")}
-                        </h2>
-                        <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                            {t("about.description")}
-                        </p>
-                    </div>
+            <div className="mx-auto px-6 md:px-12 lg:px-16 max-w-[1400px]">
+                {/* Başlık */}
+                <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
+                    <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
+                        {t("about.title")}
+                    </h2>
                 </div>
 
-                <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:grid-cols-2 lg:gap-12">
-                    {/* Görsel Alanı */}
-                    <div className="relative h-[300px] sm:h-[400px] rounded-xl overflow-hidden shadow-md bg-white">
-                        <Image
-                            src="/assets/images/eco-trans.webp"
-                            alt={t("about.title")}
-                            fill
-                            className="object-cover"
-                        />
+                {/* İki sütunlu içerik */}
+                <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+                    {/* Sol Sütun - Genel Açıklama */}
+                    <div className="flex flex-col space-y-6">
+                        <p className="text-muted-foreground text-base leading-relaxed">
+                            {t("about.description")}
+                        </p>
+                        <p className="text-muted-foreground text-base leading-relaxed">
+                            {t("about.platformValues")}
+                        </p>
+                        <p className="text-muted-foreground text-base leading-relaxed">
+                            {t("about.differentiator")}
+                        </p>
+                        <p className="text-muted-foreground text-base leading-relaxed font-semibold text-green-700">
+                            {t("about.contribution")}
+                        </p>
                     </div>
 
-                    {/* Metin Alanı */}
-                    <div className="flex flex-col justify-center space-y-4 p-6 shadow-md bg-white rounded-xl">
-                        <ul className="grid gap-6">
-                            <li>
-                                <div className="grid gap-1">
-                                    <div className="flex items-center gap-2">
-                                        <Globe className="h-5 w-5 text-green-600" />
-                                        <h3 className="text-xl font-bold">{t("about.mission.title")}</h3>
-                                    </div>
-                                    <p className="text-muted-foreground">
-                                        {t("about.mission.description")}
-                                    </p>
-                                </div>
-                            </li>
-                            <li>
-                                <div className="grid gap-1">
-                                    <div className="flex items-center gap-2">
-                                        <Leaf className="h-5 w-5 text-green-600" />
-                                        <h3 className="text-xl font-bold">{t("about.vision.title")}</h3>
-                                    </div>
-                                    <p className="text-muted-foreground">
-                                        {t("about.vision.description")}
-                                    </p>
-                                </div>
-                            </li>
-                            <li>
-                                <div className="grid gap-1">
-                                    <div className="flex items-center gap-2">
-                                        <Truck className="h-5 w-5 text-green-600" />
-                                        <h3 className="text-xl font-bold">{t("about.values.title")}</h3>
-                                    </div>
-                                    <p className="text-muted-foreground">
-                                        {t("about.values.description")}
-                                    </p>
-                                </div>
-                            </li>
-                        </ul>
+                    {/* Sağ Sütun - Misyon, Vizyon, Ekibimiz */}
+                    <div className="flex flex-col space-y-8">
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-3">
+                                <Globe className="h-7 w-7 text-green-600" />
+                                <h3 className="text-2xl font-bold">{t("about.mission.title")}</h3>
+                            </div>
+                            <p className="text-muted-foreground text-base leading-relaxed">
+                                {t("about.mission.description")}
+                            </p>
+                        </div>
+
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-3">
+                                <Leaf className="h-7 w-7 text-green-600" />
+                                <h3 className="text-2xl font-bold">{t("about.vision.title")}</h3>
+                            </div>
+                            <p className="text-muted-foreground text-base leading-relaxed">
+                                {t("about.vision.description")}
+                            </p>
+                        </div>
+
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-3">
+                                <Users className="h-7 w-7 text-green-600" />
+                                <h3 className="text-2xl font-bold">{t("about.team.title")}</h3>
+                            </div>
+                            <p className="text-muted-foreground text-base leading-relaxed">
+                                {t("about.team.description")}
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>

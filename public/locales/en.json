@@ -9,6 +9,10 @@
     "logout": "Logout"
   },
   "hero": {
+    "mainTitle": "YOUR ACCESS POINT TO THE LOGISTICS ECOSYSTEM",
+    "subtitle": "Manage your shipment data, increase your efficiency",
+    "designedForYou": "Designed For You",
+    "designedDescription": "Carry out your shipping processes in an environmentally friendly and interactive way",
     "title": "Ecological Transportation Solutions",
     "description": "We connect carriers and those who need transport services. The right address for environmentally friendly, efficient and economical transportation.",
     "getService": "Get Transport Service",
@@ -22,50 +26,56 @@
     "sustainable": "Sustainable"
   },
   "about": {
-    "title": "Pioneer of Ecological Transportation",
+    "title": "About Us",
     "subtitle": "About Us",
-    "description": "Since 2015, we have been providing environmentally friendly solutions in the transportation industry. Our goal is to provide efficient and economical transportation services while reducing the carbon footprint.",
+    "description": "Transyük aims to provide efficient, transparent, reliable and environmentally friendly solutions in all dimensions of transportation by creating sustainable business flow models, providing qualified data sets that will benefit relevant parties in decision-making processes and developing technologies that will shape the future in this context.",
+    "platformValues": "The main values offered by the platform are; creating a transparent and reliable business environment in the context of sustainability in transportation activities, eliminating complex process management, laying the groundwork for the creation of multi-faceted collaborations, and maximizing resource use for a greener and bluer future.",
+    "differentiator": "At this point, what distinguishes us from our national and international competitors is that we provide the infrastructure that will enable commercial activities to be carried out with a holistic perspective by bringing together cargo owners and logistics service providers in the same ecosystem.",
+    "contribution": "How do we contribute to the transportation ecosystem? In addition to solutions that minimize time, cost and resource use; we create and support transportation activities that will enable open, fair, reliable and accessible process management.",
     "mission": {
-      "title": "Our Mission",
-      "description": "To minimize environmental damage by offering ecological solutions in the transportation sector and contribute to a sustainable future."
+      "title": "Mission",
+      "description": "To eliminate uncertainty and complexity encountered in logistics business flow processes, to lay the groundwork for transparent and questionable collaborations among all parties, and to maximize resource use for a sustainable future."
     },
     "vision": {
-      "title": "Our Vision",
-      "description": "To become Turkey's largest ecological transportation platform and lead the spread of environmentally friendly practices in the industry."
+      "title": "Vision",
+      "description": "To establish a holistic ecosystem that stands out with its reliable, transparent, innovative and environmentally friendly solutions within the scope of the sustainability principle in world trade, not just a system that meets the needs of the current time; but builds the trade standards of the future."
     },
-    "values": {
-      "title": "Our Values",
-      "description": "Sustainability, reliability, transparency and customer satisfaction are our core values."
+    "team": {
+      "title": "Our Team",
+      "description": "The Transyük.com team is a versatile team that aims to shape the production and logistics world of tomorrow, far beyond being a team that meets today's needs."
     }
   },
   "services": {
-    "title": "Our Ecological Transportation Solutions",
+    "title": "How Does It Work?",
     "subtitle": "Our Services",
-    "description": "Meet our environmentally friendly transportation services tailored to your needs.",
+    "description": "Meet our transportation services tailored to your needs.",
+    "userRoles": {
+      "sender": {
+        "title": "CARGO OWNER",
+        "description": "Create your loads and create your listing from the system according to the load characteristics. Evaluate the offers from carriers within the scope of your listing and finalize your agreement with the carrier you choose"
+      },
+      "seaCarrier": {
+        "title": "SEA CARRIER",
+        "description": "Select the appropriate ship type from your portfolio according to the cargo listing and communicate your offers regarding the process to the cargo owner"
+      },
+      "landCarrier": {
+        "title": "LAND CARRIER",
+        "description": "Select the appropriate vehicle from your portfolio according to the cargo listing and communicate your offers regarding the process to the cargo owner"
+      }
+    },
+    "howItWorks": {
+      "senderProcess": "Cargo owners define their loads by type, date, weight, address information, transportation type and additional descriptions if any, and post their loads to be displayed to carriers. They can evaluate incoming offers for the relevant load, see delivery information, upload necessary documents related to the process to the system, and operate many more functions through the system.",
+      "brokerProcess": "Ship Brokers initiate the negotiation process for the transportation operation by making offers with the appropriate ship type for loads posted by cargo owners within the scope of various metrics. Ship Brokers can operate many functions on the system such as brokerage performance, offers, best performing partners, market analysis and payment tracking.",
+      "carrierProcess": "Land Carriers initiate the negotiation process for the transportation activity or activities by selecting the appropriate vehicle for the loads posted by cargo owners. Land Carriers can view and direct many functions from the system such as transportation performance, offers, most profitable routes, fleet and operation analysis, and monitoring of environmental performance."
+    },
     "items": [
       {
-        "title": "Urban Transportation",
-        "description": "We provide fast and reliable transportation services within the city."
+        "title": "Ship Transportation",
+        "description": "We provide reliable and economical ship transportation services by sea."
       },
       {
-        "title": "Intercity Transportation",
-        "description": "Ecological and economical transportation solutions between cities."
-      },
-      {
-        "title": "International Transportation",
-        "description": "Environmentally friendly international transportation services that cross borders."
-      },
-      {
-        "title": "Special Goods Transportation",
-        "description": "Special transportation solutions for your valuable and delicate items."
-      },
-      {
-        "title": "Home & Office Moving",
-        "description": "Professional and ecological service in home and office moving."
-      },
-      {
-        "title": "Logistics Consulting",
-        "description": "Sustainable logistics solutions and consulting for your company."
+        "title": "Road Transportation",
+        "description": "We provide fast and reliable road transportation solutions."
       }
     ],
     "moreInfo": "More Information"

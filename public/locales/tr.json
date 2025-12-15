@@ -9,6 +9,10 @@
     "logout": "Çıkış Yap"
   },
   "hero": {
+    "mainTitle": "LOJİSTİK EKOSİSTEMİNE ERİŞİM NOKTANIZ",
+    "subtitle": "Sevkiyat verilerinizi yönetin, verimliliğinizi arttırın",
+    "designedForYou": "Sizin İçin Tasarlandı",
+    "designedDescription": "Sevkiyat süreçlerinizi çevreye duyarlı ve interaktif bir şekilde gerçekleştirin",
     "title": "Ekolojik Taşımacılık Çözümleri",
     "description": "Taşımacıları ve taşıma hizmetine ihtiyaç duyanları birleştiriyoruz. Çevre dostu, verimli ve ekonomik taşımacılık için doğru adres.",
     "getService": "Taşıma Hizmeti Al",
@@ -22,26 +26,48 @@
     "sustainable": "Sürdürülebilir"
   },
   "about": {
-    "title": "Ekolojik Taşımacılığın Öncüsü",
+    "title": "Hakkımızda",
     "subtitle": "Hakkımızda",
-    "description": "2015 yılından bu yana, taşımacılık sektöründe çevre dostu çözümler sunuyoruz. Amacımız, karbon ayak izini azaltırken verimli ve ekonomik taşımacılık hizmetleri sağlamaktır.",
+    "description": "Transyük; taşımacılığın tüm boyutlarında verimli, şeffaf, güvenilir ve çevreci çözümler sunarak sürdürülebilir iş akış modellerini oluşturan, ilgili taraflara karar süreçlerinde fayda sağlayacak nitelikli veri setini sunmak ve geleceği bu bağlamda şekillendirecek teknolojileri geliştirmeyi hedeflemektedir.",
+    "platformValues": "Platformun sunduğu temel değerler; ulaştırma faaliyetlerinde sürdürülebilirlik bağlamında şeffaf ve güvenilir iş ortamının oluşturulması, karmaşık süreç yönetiminin ortadan kaldırılması, çok yönlü iş birliklerinin oluşmasına zemin hazırlamak, daha yeşil ve mavi bir gelecek için kaynak kullanımını en verimli düzeye taşımaktır.",
+    "differentiator": "Bu noktada ulusal ve uluslararası rakiplerimizden farklılaştığımız nokta, yük sahipleri ile lojistik hizmet sağlayıcılarını aynı ekosistemde buluşturarak ticari faaliyetlere bütüncül bir bakış açısıyla yapılmasını sağlayacak altyapıyı sağlıyor olmamızdır.",
+    "contribution": "Ulaştırma ekosisteme nasıl katkı sağlıyoruz? Zaman, maliyet ve kaynak kullanımını en aza indiren çözümlere ek olarak; açık, adil, güvenilir ve erişilebilir süreç yönetimine imkân verecek ulaştırma faaliyetlerini oluşturuyor, destekliyoruz.",
     "mission": {
-      "title": "Misyonumuz",
+      "title": "Misyon",
       "description": "Lojistik iş akış süreçlerinde karşılaşılan belirsizlik ve karmaşıklıkları ortadan kaldırmak, tüm taraflar arasında şeffaf ve sorgulanabilir iş birliklerinin oluşmasına zemin hazırlamak ve sürdürülebilir bir gelecek için kaynak kullanımını en verimli düzeye taşımaktır."
     },
     "vision": {
-      "title": "Vizyonumuz",
+      "title": "Vizyon",
       "description": "Dünya ticaretinde sürdürülebilirlik ilkesi kapsamında güvenilir, şeffaf, yenilikçi ve çevreci çözümleriyle öne çıkan, yalnızca içinde bulunduğu zamanın ihtiyaçlarını karşılayan bir sistem değil; geleceğin ticaret standartlarını inşa eden bütüncül bir ekosistemi kurmak."
     },
-    "values": {
-      "title": "Değerlerimiz",
-      "description": "Sürdürülebilirlik, güvenilirlik, şeffaflık ve müşteri memnuniyeti temel değerlerimizdir."
+    "team": {
+      "title": "Ekibimiz",
+      "description": "Transyük.com ekibi yalnızca bugünün ihtiyaçlarını karşılayan bir ekip olmanın çok ötesinde, yarının üretim ve lojistik dünyasına yön vermeyi hedefleyen çok yönlü bir ekiptir."
     }
   },
   "services": {
-    "title": "Taşımacılık Çözümlerimiz",
+    "title": "Nasıl Çalışır?",
     "subtitle": "Hizmetlerimiz",
     "description": "İhtiyacınıza uygun taşımacılık hizmetlerimiz ile tanışın.",
+    "userRoles": {
+      "sender": {
+        "title": "YÜK SAHİBİ",
+        "description": "Yüklerinizi oluşturun ve yük özelliklerine göre sistemden ilanınızı oluşturun. İlanınız kapsamında taşıyıcılardan gelecek teklifleri değerlendirin ve seçtiğiniz taşıyıcı ile anlaşmanızı gerçekleştirin"
+      },
+      "seaCarrier": {
+        "title": "DENİZ YOLU TAŞIYICISI",
+        "description": "Portföyünüzden yük ilanına uygun gemi türünü seçin ve sürece ilişkin tekliflerinizi yük sahibine iletin"
+      },
+      "landCarrier": {
+        "title": "KARA YOLU TAŞIYICISI",
+        "description": "Portföyünüzden yük ilanına uygun aracınızı seçin ve sürece ilişkin tekliflerinizi yük sahibine iletin"
+      }
+    },
+    "howItWorks": {
+      "senderProcess": "Yük sahipleri yüklerini tür, tarih, ağırlık, adres bilgileri, ulaştırma türü ve varsa ek açıklamalarını tanımlar ve taşıyıcılarda görüntülenmek üzeri yüklerini ilan ederler. İlgili yüke ait gelen teklifleri değerlendirebilir, teslimat bilgilerini görebilir, sürece dair gerekli belgeleri sisteme yükleyebilir ve daha birçok fonksiyonu sistem üzerinden işletebilirler.",
+      "brokerProcess": "Gemi Brokerleri, yük sahipleri tarafından çeşitli metrikler kapsamında ilan edilen yüklere ilişkin uygun gemi tipi ile teklif vererek taşıma operasyonu için müzakere sürecini başlatır. Gemi Brokeri aracılık performansını, tekliflerini, en iyi performans gösteren ortaklarını, pazar analizlerini ve ödeme takibi gibi birçok fonksiyonu sistem üzerinde çalıştırabilirler.",
+      "carrierProcess": "Kara Yolu Taşıyıcıları, yük sahipleri tarafından ilan edilen yüklere uygun araç seçimini yaparak taşımacılık faaliyeti ya da faaliyetleri için müzakere sürecini başlatır. Kara Yolu Taşıyıcıları, taşımacılık performanslarını, tekliflerini, en kârlı rotalarını, filo ve operasyon analizleri ve çevresel performanslarının izlenmesi gibi birçok işlevi sistem üzerinden görebilir ve yönlendirebilirler."
+    },
     "items": [
       {
         "title": "Gemi Taşımacılığı",
