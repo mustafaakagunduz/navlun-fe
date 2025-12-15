@@ -142,11 +142,8 @@ export default function ReviewModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => {
-            // Modal'ı sadece review submit edildiğinde kapatabiliriz
-            // ESC veya dışarı tıklama ile kapatmayı engelle
             if (!open) {
-                // Modal kapatılmak istendiğinde uyarı göster
-                return;
+                onClose();
             }
         }}>
             <DialogContent className="sm:max-w-lg">
@@ -210,9 +207,9 @@ export default function ReviewModal({
                     </div>
 
                     {/* Info Box */}
-                    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                        <p className="text-sm text-yellow-800">
-                            <strong>Önemli:</strong> Değerlendirmeniz gönderilmeden teslimat işleminiz tamamlanmayacaktır.
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p className="text-sm text-blue-800">
+                            <strong>Bilgi:</strong> Değerlendirmeniz göndericinin profil puanını etkiler ve diğer taşıyıcılar için yol gösterici olur.
                         </p>
                     </div>
 

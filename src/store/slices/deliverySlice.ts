@@ -102,8 +102,12 @@ export const updateDeliveryStatus = createAsyncThunk(
            { rejectWithValue, dispatch }) => {
         try {
             await deliveryService.updateStatusWithNotification(deliveryStatusId, request)
-            // Status güncelledikten sonra tracking'i yenile
-            dispatch(fetchDeliveryTracking(deliveryStatusId))
+            // Status güncelledikten sonra tracking'i yenile (hata olsa bile devam et)
+            try {
+                await dispatch(fetchDeliveryTracking(deliveryStatusId)).unwrap()
+            } catch (trackingError) {
+                console.warn('⚠️ [UPDATE-STATUS] Tracking refresh failed, but status was updated successfully:', trackingError)
+            }
             return request.step
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Status güncellenemedi')
@@ -133,8 +137,13 @@ export const uploadDocument = createAsyncThunk(
                 await deliveryService.uploadCancellationDocument(deliveryStatusId, file, description)
             }
 
-            // Belge yüklendikten sonra tracking'i yenile
-            dispatch(fetchDeliveryTracking(deliveryStatusId))
+            // Belge yüklendikten sonra tracking'i yenile (hata olsa bile devam et)
+            try {
+                await dispatch(fetchDeliveryTracking(deliveryStatusId)).unwrap()
+            } catch (trackingError) {
+                console.warn('⚠️ [UPLOAD-DOC] Tracking refresh failed, but document was uploaded successfully:', trackingError)
+            }
+
             return documentType
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Belge yüklenemedi')
@@ -148,8 +157,12 @@ export const updateLocation = createAsyncThunk(
            { rejectWithValue, dispatch }) => {
         try {
             await deliveryService.updateLocationOnly(deliveryStatusId, location)
-            // Konum güncelledikten sonra tracking'i yenile
-            dispatch(fetchDeliveryTracking(deliveryStatusId))
+            // Konum güncelledikten sonra tracking'i yenile (hata olsa bile devam et)
+            try {
+                await dispatch(fetchDeliveryTracking(deliveryStatusId)).unwrap()
+            } catch (trackingError) {
+                console.warn('⚠️ [UPDATE-LOCATION] Tracking refresh failed, but location was updated successfully:', trackingError)
+            }
             return location
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Konum güncellenemedi')

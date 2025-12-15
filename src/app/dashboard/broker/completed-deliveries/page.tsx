@@ -2,7 +2,8 @@
 "use client"
 
 import { useEffect, useState } from 'react'
-import { CheckCircle, Package, Clock, MapPin, DollarSign, Calendar, Search, Weight, TruckIcon } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { CheckCircle, Package, Clock, MapPin, DollarSign, Calendar, Search, Weight, TruckIcon, User } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -10,8 +11,10 @@ import { Input } from '@/components/ui/input'
 import deliveryService from '@/services/deliveryService'
 import { DeliveryTrackingData } from '@/services/deliveryService'
 import { useToast } from '@/hooks/use-toast'
+import { formatDateTime } from '@/utils/dateUtils'
 
 export default function BrokerCompletedDeliveriesPage() {
+    const router = useRouter()
     const [deliveries, setDeliveries] = useState<DeliveryTrackingData[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState('')
@@ -49,23 +52,24 @@ export default function BrokerCompletedDeliveriesPage() {
         return <Badge variant={statusInfo.variant} className="bg-green-100 text-green-800 border-green-200">{statusInfo.label}</Badge>
     }
 
-    const formatDate = (dateString?: string) => {
-        if (!dateString) return '-'
-        return new Date(dateString).toLocaleDateString('tr-TR', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        })
-    }
-
     const formatCurrency = (amount?: number) => {
         if (!amount) return '-'
         return new Intl.NumberFormat('tr-TR', {
             style: 'currency',
             currency: 'TRY'
         }).format(amount)
+    }
+
+    const handleViewSenderProfile = (senderId?: string) => {
+        if (senderId) {
+            router.push(`/dashboard/sender-profile/${senderId}`)
+        } else {
+            toast({
+                title: 'Hata',
+                description: 'Gönderici bilgisi bulunamadı.',
+                variant: 'destructive',
+            })
+        }
     }
 
     if (isLoading) {
@@ -256,7 +260,7 @@ export default function BrokerCompletedDeliveriesPage() {
                                             Alım
                                         </span>
                                         <p className="font-medium">
-                                            {formatDate(delivery.statusHistory?.find(h => h.status === 'PICKED_UP')?.timestamp || delivery.lastUpdate)}
+                                            {formatDateTime(delivery.statusHistory?.find(h => h.status === 'PICKED_UP')?.timestamp || delivery.lastUpdate)}
                                         </p>
                                     </div>
                                     <div>
@@ -265,7 +269,7 @@ export default function BrokerCompletedDeliveriesPage() {
                                             Teslim
                                         </span>
                                         <p className="font-medium">
-                                            {formatDate(delivery.statusHistory?.find(h => h.status === 'DELIVERED' || h.status === 'COMPLETED')?.timestamp || delivery.lastUpdate)}
+                                            {formatDateTime(delivery.statusHistory?.find(h => h.status === 'DELIVERED' || h.status === 'COMPLETED')?.timestamp || delivery.lastUpdate)}
                                         </p>
                                     </div>
                                     {delivery.brokerInfo?.commissionAmount && (
@@ -284,7 +288,7 @@ export default function BrokerCompletedDeliveriesPage() {
                                             <Calendar className="h-3 w-3" />
                                             Son Güncelleme
                                         </span>
-                                        <p className="font-medium">{formatDate(delivery.lastUpdate)}</p>
+                                        <p className="font-medium">{formatDateTime(delivery.lastUpdate)}</p>
                                     </div>
                                 </div>
 
@@ -306,6 +310,41 @@ export default function BrokerCompletedDeliveriesPage() {
                                         <p className="text-gray-600 mt-1">{delivery.statusNote}</p>
                                     </div>
                                 )}
+
+                                {/* Profile Git Butonu */}
+                                <div className="pt-3 border-t flex gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={async () => {
+                                            try {
+                                                // Load detaylarını fetch et ve sender ID'yi al
+                                                const loadService = await import('@/services/loadService');
+                                                const loadData = await loadService.default.getLoadById(delivery.actualLoadId);
+                                                if (loadData.sender?.id) {
+                                                    handleViewSenderProfile(loadData.sender.id);
+                                                } else {
+                                                    toast({
+                                                        title: 'Hata',
+                                                        description: 'Gönderici bilgisi bulunamadı.',
+                                                        variant: 'destructive',
+                                                    });
+                                                }
+                                            } catch (error) {
+                                                console.error('Error fetching sender info:', error);
+                                                toast({
+                                                    title: 'Hata',
+                                                    description: 'Gönderici bilgisi alınamadı.',
+                                                    variant: 'destructive',
+                                                });
+                                            }
+                                        }}
+                                        className="flex-1 sm:flex-none"
+                                    >
+                                        <User className="h-4 w-4 mr-2" />
+                                        Gönderici Profili
+                                    </Button>
+                                </div>
                             </CardContent>
                         </Card>
                     ))}

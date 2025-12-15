@@ -432,8 +432,8 @@ const deliveryService = {
         try {
             console.log('📡 [API-CALL] GET /delivery-status/my-active-deliveries');
             const result = await apiService.get<DeliveryTrackingData[]>('/delivery-status/my-active-deliveries');
-            console.log('✅ [API-SUCCESS] Received', result.length, 'active deliveries');
-            return result;
+            console.log('✅ [API-SUCCESS] Received', result?.length || 0, 'active deliveries');
+            return result || [];
         } catch (error) {
             console.error('❌ [API-ERROR] Get current carrier active deliveries error:', error);
             throw error;

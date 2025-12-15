@@ -35,7 +35,7 @@ import {
     Route,
     AlertCircle,
     // MessageSquare, // Şimdilik kullanılmıyor
-    Loader2, CheckCircle
+    Loader2, CheckCircle, User
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { Load, LoadStatus, TransportType } from "@/services/loadService";
@@ -461,35 +461,35 @@ export default function BrokerAvailableLoads() {
                         <Card className="hidden md:block">
                             <CardContent className="p-0">
                                 <div className="overflow-x-auto">
-                                    <table className="w-full">
+                                    <table className="w-full min-w-full">
                                         <thead className="bg-gray-50 border-b">
                                             <tr>
-                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                    Yük Adı
+                                                <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-tight">
+                                                    Yük
                                                 </th>
-                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-tight">
                                                     Şirket
                                                 </th>
-                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                    Mal Türü
+                                                <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-tight">
+                                                    Mal
                                                 </th>
-                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-tight">
                                                     Ağırlık
                                                 </th>
-                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-tight">
                                                     Yükleme
                                                 </th>
-                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-tight">
                                                     Teslimat
                                                 </th>
-                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-tight">
                                                     Tarih
                                                 </th>
-                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-tight">
                                                     Durum
                                                 </th>
-                                                <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                    İşlemler
+                                                <th className="px-3 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-tight">
+                                                    İşlem
                                                 </th>
                                             </tr>
                                         </thead>
@@ -500,49 +500,49 @@ export default function BrokerAvailableLoads() {
                                                     className="hover:bg-gray-50 cursor-pointer transition-colors"
                                                     onClick={() => handleViewDetails(load)}
                                                 >
-                                                    <td className="px-6 py-4">
-                                                        <span className="font-medium text-gray-900">{load.title}</span>
+                                                    <td className="px-3 py-3">
+                                                        <span className="font-medium text-gray-900 text-sm truncate block max-w-[120px]" title={load.title}>{load.title}</span>
                                                     </td>
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex items-center gap-2 text-gray-700">
-                                                            <Building2 className="h-4 w-4 text-gray-400" />
-                                                            <span className="truncate max-w-xs">{load.sender?.companyName || 'Şirket bilgisi yok'}</span>
+                                                    <td className="px-3 py-3">
+                                                        <div className="flex items-center gap-1 text-gray-700">
+                                                            <Building2 className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                                                            <span className="truncate max-w-[100px] text-sm" title={load.sender?.companyName}>{load.sender?.companyName || 'N/A'}</span>
                                                         </div>
                                                     </td>
-                                                    <td className="px-6 py-4">
-                                                        <span className="text-gray-700">{load.goodsType}</span>
+                                                    <td className="px-3 py-3">
+                                                        <span className="text-gray-700 text-sm truncate block max-w-[90px]" title={load.goodsType}>{load.goodsType}</span>
                                                     </td>
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex items-center gap-2 text-gray-700">
-                                                            <Weight className="h-4 w-4 text-gray-400" />
-                                                            <span>{formatWeight(load.netWeight)}</span>
+                                                    <td className="px-3 py-3 whitespace-nowrap">
+                                                        <div className="flex items-center gap-1 text-gray-700">
+                                                            <Weight className="h-3 w-3 text-gray-400" />
+                                                            <span className="text-sm">{formatWeight(load.netWeight)}</span>
                                                         </div>
                                                     </td>
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex items-center gap-2 text-gray-700">
-                                                            <MapPin className="h-4 w-4 text-green-600 flex-shrink-0" />
-                                                            <span className="truncate max-w-xs">{load.loadingAddress}</span>
+                                                    <td className="px-3 py-3">
+                                                        <div className="flex items-center gap-1 text-gray-700">
+                                                            <MapPin className="h-3 w-3 text-green-600 flex-shrink-0" />
+                                                            <span className="truncate max-w-[100px] text-sm" title={load.loadingAddress}>{load.loadingAddress}</span>
                                                         </div>
                                                     </td>
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex items-center gap-2 text-gray-700">
-                                                            <MapPin className="h-4 w-4 text-red-600 flex-shrink-0" />
-                                                            <span className="truncate max-w-xs">{load.deliveryAddress}</span>
+                                                    <td className="px-3 py-3">
+                                                        <div className="flex items-center gap-1 text-gray-700">
+                                                            <MapPin className="h-3 w-3 text-red-600 flex-shrink-0" />
+                                                            <span className="truncate max-w-[100px] text-sm" title={load.deliveryAddress}>{load.deliveryAddress}</span>
                                                         </div>
                                                     </td>
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex items-center gap-2 text-gray-700">
-                                                            <Calendar className="h-4 w-4 text-gray-400" />
-                                                            <span>{formatDate(load.loadingDate)}</span>
+                                                    <td className="px-3 py-3 whitespace-nowrap">
+                                                        <div className="flex items-center gap-1 text-gray-700">
+                                                            <Calendar className="h-3 w-3 text-gray-400" />
+                                                            <span className="text-sm">{formatDate(load.loadingDate)}</span>
                                                         </div>
                                                     </td>
-                                                    <td className="px-6 py-4">
-                                                        <Badge className={`${getStatusBadgeColor(load.status)} border-0`}>
+                                                    <td className="px-3 py-3 whitespace-nowrap">
+                                                        <Badge className={`${getStatusBadgeColor(load.status)} border-0 text-xs px-2 py-0.5`}>
                                                             {getStatusText(load.status)}
                                                         </Badge>
                                                     </td>
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex items-center justify-center gap-2">
+                                                    <td className="px-3 py-3">
+                                                        <div className="flex items-center justify-center gap-1">
                                                             <Button
                                                                 variant="ghost"
                                                                 size="sm"
@@ -550,15 +550,14 @@ export default function BrokerAvailableLoads() {
                                                                     e.stopPropagation();
                                                                     handleViewDetails(load);
                                                                 }}
-                                                                className="text-green-600 hover:text-green-700 hover:bg-green-50 border border-green-200"
+                                                                className="text-green-600 hover:text-green-700 hover:bg-green-50 border border-green-200 h-8 px-2"
                                                             >
-                                                                <Eye className="h-4 w-4 mr-2" />
-                                                                Detaylar
+                                                                <Eye className="h-3 w-3" />
                                                             </Button>
                                                             {offeredLoads.includes(load.id) ? (
-                                                                <Badge className="bg-green-100 text-green-800 text-xs px-2 border border-green-200">
+                                                                <Badge className="bg-green-100 text-green-800 text-xs px-2 border border-green-200 whitespace-nowrap">
                                                                     <CheckCircle className="h-3 w-3 mr-1" />
-                                                                    Teklif Verildi
+                                                                    Verildi
                                                                 </Badge>
                                                             ) : (
                                                                 <Button
@@ -569,10 +568,9 @@ export default function BrokerAvailableLoads() {
                                                                         handleOfferClick(load);
                                                                     }}
                                                                     disabled={load.status !== 'PENDING' && load.status !== 'ACTIVE'}
-                                                                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border border-blue-200"
+                                                                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border border-blue-200 h-8 px-2"
                                                                 >
-                                                                    <HandshakeIcon className="h-4 w-4 mr-2" />
-                                                                    Teklif Ver
+                                                                    <HandshakeIcon className="h-3 w-3" />
                                                                 </Button>
                                                             )}
                                                         </div>
@@ -763,7 +761,7 @@ export default function BrokerAvailableLoads() {
 
                 {/* Load Detail Modal */}
                 <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
-                    <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                    <DialogContent className="max-w-[95vw] md:max-w-2xl lg:max-w-3xl max-h-[90vh] overflow-y-auto">
                         {selectedLoad && (
                             <>
                                 <DialogHeader>
@@ -818,7 +816,7 @@ export default function BrokerAvailableLoads() {
                                                 Yük Detayları
                                             </CardTitle>
                                         </CardHeader>
-                                        <CardContent className="grid grid-cols-2 gap-4">
+                                        <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
                                                 <p className="text-sm text-gray-600">Mal Türü</p>
                                                 <p className="font-medium">{selectedLoad.goodsType}</p>
@@ -845,7 +843,7 @@ export default function BrokerAvailableLoads() {
                                                 Tarih ve Fiyat Bilgileri
                                             </CardTitle>
                                         </CardHeader>
-                                        <CardContent className="grid grid-cols-2 gap-4">
+                                        <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
                                                 <p className="text-sm text-gray-600">Yükleme Tarihi</p>
                                                 <p className="font-medium">{formatDate(selectedLoad.loadingDate)}</p>
@@ -905,6 +903,25 @@ export default function BrokerAvailableLoads() {
 
                                     {/* Action Buttons */}
                                     <div className="flex gap-3 pt-4 border-t">
+                                        {/* Profile Git butonu */}
+                                        <Button
+                                            variant="outline"
+                                            className="flex-1"
+                                            onClick={() => {
+                                                if (selectedLoad.sender?.id) {
+                                                    router.push(`/dashboard/sender-profile/${selectedLoad.sender.id}`);
+                                                } else {
+                                                    toast({
+                                                        title: 'Hata',
+                                                        description: 'Gönderici bilgisi bulunamadı.',
+                                                        variant: 'destructive',
+                                                    });
+                                                }
+                                            }}
+                                        >
+                                            <User className="h-4 w-4 mr-2" />
+                                            Profile Git
+                                        </Button>
                                         {/* Mesajlaşma butonu - şimdilik devre dışı */}
                                         {/* <Button
                                             variant="outline"

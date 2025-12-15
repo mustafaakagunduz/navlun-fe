@@ -59,14 +59,18 @@ export default function SenderProfileViewPage() {
 
             // Değerlendirmeleri çek (varsa)
             try {
+                console.log('🔍 [SENDER-PROFILE] Fetching reviews for sender:', senderId);
                 const reviewsData = await reviewService.getReviewsBySenderId(senderId);
+                console.log('✅ [SENDER-PROFILE] Reviews fetched:', reviewsData);
                 setReviews(reviewsData);
 
+                console.log('🔍 [SENDER-PROFILE] Fetching statistics for sender:', senderId);
                 const statsData = await reviewService.getSenderReviewStatistics(senderId);
+                console.log('✅ [SENDER-PROFILE] Statistics fetched:', statsData);
                 setStatistics(statsData);
             } catch (error) {
                 // Review sistemi henüz backend'de yoksa hata gösterme
-                console.log('Reviews not available yet');
+                console.error('❌ [SENDER-PROFILE] Error fetching reviews:', error);
             }
 
         } catch (error: any) {

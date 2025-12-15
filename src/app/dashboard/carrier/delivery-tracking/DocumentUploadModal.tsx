@@ -18,10 +18,12 @@ import {
 } from '@/store/slices/deliverySlice';
 import deliveryService from '@/services/deliveryService';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/context/AuthContext';
 
 export default function DocumentUploadModal() {
     const dispatch = useAppDispatch();
     const { toast } = useToast();
+    const { user } = useAuth();
     const {
         showDocumentModal,
         selectedDelivery,
@@ -134,7 +136,7 @@ export default function DocumentUploadModal() {
             });
 
             // Active deliveries'i yenile
-            dispatch(fetchActiveDeliveries());
+            dispatch(fetchActiveDeliveries(user?.role as 'CARRIER' | 'BROKER'));
             handleClose();
         } catch (error) {
             // Error handling redux'ta yapılıyor
