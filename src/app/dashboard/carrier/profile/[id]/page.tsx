@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { formatDate } from '@/utils/dateUtils';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import carrierService from '@/services/carrierService';
 import reviewService, { Review } from '@/services/reviewService';
 
@@ -73,9 +74,10 @@ export default function CarrierProfilePage() {
                 console.log('Carrier profile data:', profileData);
                 setProfile(profileData);
 
-                // Fetch reviews for this carrier
+                // Fetch reviews for this carrier (userId kullan, profile ID değil!)
                 try {
-                    const reviewsData = await reviewService.getReviewsByCarrierId(carrierId);
+                    const reviewsData = await reviewService.getReviewsForUser(profileData.userId);
+                    console.log('Reviews for carrier:', reviewsData);
                     setReviews(reviewsData);
                 } catch (reviewError) {
                     console.error('Error fetching reviews:', reviewError);
@@ -145,6 +147,15 @@ export default function CarrierProfilePage() {
     const averageRating = reviews && reviews.length > 0
         ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)
         : '0';
+
+    const getInitials = (name: string) => {
+        return name
+            .split(' ')
+            .map(n => n[0])
+            .join('')
+            .toUpperCase()
+            .slice(0, 2);
+    };
 
     return (
         <div className="p-8 space-y-6">
@@ -319,28 +330,43 @@ export default function CarrierProfilePage() {
                         <div className="space-y-4">
                             {reviews.map((review) => (
                                 <div key={review.id} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <div className="flex items-center gap-2">
-                                            {[...Array(5)].map((_, i) => (
-                                                <Star
-                                                    key={i}
-                                                    className={`h-4 w-4 ${
-                                                        i < review.rating
-                                                            ? 'text-yellow-500 fill-yellow-500'
-                                                            : 'text-gray-300'
-                                                    }`}
-                                                />
-                                            ))}
-                                            <span className="text-sm font-semibold text-gray-700">
-                                                {review.rating}/5
-                                            </span>
+                                    <div className="flex items-start justify-between mb-3">
+                                        <div className="flex items-center gap-3">
+                                            <Avatar className="h-10 w-10">
+                                                <AvatarFallback className="bg-blue-100 text-blue-700">
+                                                    {review.reviewerName ? getInitials(review.reviewerName) : 'K'}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <div>
+                                                <div className="font-medium text-gray-900">
+                                                    {review.reviewerName || 'Kullanıcı'}
+                                                </div>
+                                                <div className="text-xs text-gray-500">
+                                                    {review.reviewerType}
+                                                </div>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    {[...Array(5)].map((_, i) => (
+                                                        <Star
+                                                            key={i}
+                                                            className={`h-4 w-4 ${
+                                                                i < review.rating
+                                                                    ? 'text-yellow-500 fill-yellow-500'
+                                                                    : 'text-gray-300'
+                                                            }`}
+                                                        />
+                                                    ))}
+                                                    <span className="text-sm font-semibold text-gray-700">
+                                                        {review.rating}/5
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
                                         <span className="text-xs text-gray-500">
                                             {formatDate(review.createdAt)}
                                         </span>
                                     </div>
                                     {review.comment && (
-                                        <p className="text-sm text-gray-700 mt-2">{review.comment}</p>
+                                        <p className="text-sm text-gray-700 leading-relaxed pl-13">{review.comment}</p>
                                     )}
                                 </div>
                             ))}

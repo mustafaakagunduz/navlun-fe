@@ -34,7 +34,8 @@ import paymentService, { PaymentMethod } from "@/services/paymentService";
 import { useToast } from "@/hooks/use-toast";
 import offerService from "@/services/offerService";
 import brokerService, { OfferStatus } from "@/services/brokerService";
-import reviewService, { Review, ReviewRequest } from "@/services/reviewService";
+import carrierService from "@/services/carrierService";
+import reviewService, { Review, ReviewRequest, UserType } from "@/services/reviewService";
 import {
     Dialog,
     DialogContent,
@@ -148,15 +149,17 @@ export default function CompletedDeliveriesPage() {
                 await Promise.all(
                     deliveriesWithCarriers.map(async (delivery) => {
                         try {
-                            const review = await reviewService.getReviewByLoadId(delivery.id);
-                            console.log(`Review for load ${delivery.id}:`, review);
+                            const reviews = await reviewService.getReviewsForLoad(delivery.id);
+                            console.log(`Reviews for load ${delivery.id}:`, reviews);
 
-                            // Only count the review if it was made by the current sender
-                            if (review && review.senderId === user.id) {
+                            // Find the review made by the current sender (reviewerId = current user)
+                            const senderReview = reviews.find(r => r.reviewerId === user.id);
+
+                            if (senderReview) {
                                 console.log(`✓ Review was made by current sender (${user.id})`);
-                                reviewsData.set(delivery.id, review);
+                                reviewsData.set(delivery.id, senderReview);
                             } else {
-                                console.log(`✗ Review was NOT made by current sender. Review senderId: ${review?.senderId}, Current user: ${user.id}`);
+                                console.log(`✗ No review found by current sender (${user.id})`);
                                 reviewsData.set(delivery.id, null);
                             }
                         } catch (error) {
@@ -340,8 +343,8 @@ export default function CompletedDeliveriesPage() {
             return;
         }
 
-        const carrierId = (selectedLoad as any).carrierId;
-        if (!carrierId) {
+        const carrierProfileId = (selectedLoad as any).carrierId;
+        if (!carrierProfileId) {
             toast({
                 title: "Hata",
                 description: "Taşıyıcı bilgisi bulunamadı",
@@ -352,9 +355,12 @@ export default function CompletedDeliveriesPage() {
 
         setIsSubmittingReview(true);
         try {
+            // Carrier profile'dan userId'yi al
+            const carrierProfile = await carrierService.getCarrierProfileById(carrierProfileId);
+
             const reviewData: ReviewRequest = {
-                senderId: user.id,
-                carrierId: carrierId,
+                reviewedUserId: carrierProfile.userId,  // <- USER ID kullan!
+                reviewedUserType: UserType.CARRIER,
                 loadId: selectedLoad.id,
                 rating: reviewRating,
                 comment: reviewComment.trim(),

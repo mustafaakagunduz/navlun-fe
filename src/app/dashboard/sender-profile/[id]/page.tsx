@@ -57,15 +57,15 @@ export default function SenderProfileViewPage() {
             const profileData = await senderService.getSenderProfileById(senderId);
             setProfile(profileData);
 
-            // Değerlendirmeleri çek (varsa)
+            // Değerlendirmeleri çek (userId kullan, profile ID değil!)
             try {
-                console.log('🔍 [SENDER-PROFILE] Fetching reviews for sender:', senderId);
-                const reviewsData = await reviewService.getReviewsBySenderId(senderId);
+                console.log('🔍 [SENDER-PROFILE] Fetching reviews for user:', profileData.userId);
+                const reviewsData = await reviewService.getReviewsForUser(profileData.userId);
                 console.log('✅ [SENDER-PROFILE] Reviews fetched:', reviewsData);
                 setReviews(reviewsData);
 
-                console.log('🔍 [SENDER-PROFILE] Fetching statistics for sender:', senderId);
-                const statsData = await reviewService.getSenderReviewStatistics(senderId);
+                console.log('🔍 [SENDER-PROFILE] Fetching statistics for user:', profileData.userId);
+                const statsData = await reviewService.getUserStatistics(profileData.userId);
                 console.log('✅ [SENDER-PROFILE] Statistics fetched:', statsData);
                 setStatistics(statsData);
             } catch (error) {
@@ -367,12 +367,15 @@ export default function SenderProfileViewPage() {
                                                         <div className="flex items-center gap-3">
                                                             <Avatar className="h-10 w-10">
                                                                 <AvatarFallback className="bg-blue-100 text-blue-700">
-                                                                    {review.carrierName ? getInitials(review.carrierName) : 'T'}
+                                                                    {review.reviewerName ? getInitials(review.reviewerName) : 'K'}
                                                                 </AvatarFallback>
                                                             </Avatar>
                                                             <div>
                                                                 <div className="font-medium text-gray-900">
-                                                                    {review.carrierName || 'Taşıyıcı'}
+                                                                    {review.reviewerName || 'Kullanıcı'}
+                                                                </div>
+                                                                <div className="text-xs text-gray-500">
+                                                                    {review.reviewerType}
                                                                 </div>
                                                                 {renderStars(review.rating)}
                                                             </div>

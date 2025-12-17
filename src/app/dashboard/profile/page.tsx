@@ -7,10 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import accountTypeChangeService, { CreateRequestDto, AccountTypeChangeRequest, RequestStatus } from '@/services/accountTypeChangeService';
-import { RefreshCw, AlertCircle, CheckCircle, XCircle, User, Briefcase } from 'lucide-react';
+import linkedAccountService, { LinkedAccount, CreateLinkedAccountDto } from '@/services/linkedAccountService';
+import { RefreshCw, AlertCircle, CheckCircle, XCircle, User, Briefcase, Mail, Lock, Trash2, Plus } from 'lucide-react';
 import {
     Select,
     SelectContent,
@@ -18,6 +20,14 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function ProfilePage() {
     const { user } = useAuth();
@@ -30,9 +40,21 @@ export default function ProfilePage() {
     const [myRequests, setMyRequests] = useState<AccountTypeChangeRequest[]>([]);
     const [loadingRequests, setLoadingRequests] = useState(true);
 
+    // Linked Accounts states
+    const [linkedAccounts, setLinkedAccounts] = useState<LinkedAccount[]>([]);
+    const [loadingLinkedAccounts, setLoadingLinkedAccounts] = useState(true);
+    const [showAddDialog, setShowAddDialog] = useState(false);
+    const [newLinkedAccount, setNewLinkedAccount] = useState<CreateLinkedAccountDto>({
+        email: '',
+        password: '',
+        displayName: ''
+    });
+    const [addingLinkedAccount, setAddingLinkedAccount] = useState(false);
+
     useEffect(() => {
         loadMyRequests();
         checkPendingRequest();
+        loadLinkedAccounts();
     }, []);
 
     const loadMyRequests = async () => {
@@ -140,6 +162,70 @@ export default function ProfilePage() {
                 return <CheckCircle className="h-4 w-4 text-green-600" />;
             case RequestStatus.REJECTED:
                 return <XCircle className="h-4 w-4 text-red-600" />;
+        }
+    };
+
+    // Linked Accounts fonksiyonları
+    const loadLinkedAccounts = async () => {
+        try {
+            const accounts = await linkedAccountService.getLinkedAccounts();
+            setLinkedAccounts(accounts);
+        } catch (error) {
+            console.error('Load linked accounts error:', error);
+        } finally {
+            setLoadingLinkedAccounts(false);
+        }
+    };
+
+    const handleAddLinkedAccount = async () => {
+        if (!newLinkedAccount.email || !newLinkedAccount.password) {
+            toast({
+                title: "Hata",
+                description: "Email ve şifre gereklidir",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        setAddingLinkedAccount(true);
+        try {
+            await linkedAccountService.createLinkedAccount(newLinkedAccount);
+            toast({
+                title: "Başarılı",
+                description: "Bağlı hesap başarıyla eklendi",
+            });
+            setShowAddDialog(false);
+            setNewLinkedAccount({ email: '', password: '', displayName: '' });
+            loadLinkedAccounts();
+        } catch (error: any) {
+            toast({
+                title: "Hata",
+                description: error.response?.data?.message || "Bağlı hesap eklenirken bir hata oluştu",
+                variant: "destructive",
+            });
+        } finally {
+            setAddingLinkedAccount(false);
+        }
+    };
+
+    const handleDeleteLinkedAccount = async (id: string) => {
+        if (!confirm('Bu bağlı hesabı silmek istediğinize emin misiniz?')) {
+            return;
+        }
+
+        try {
+            await linkedAccountService.deleteLinkedAccount(id);
+            toast({
+                title: "Başarılı",
+                description: "Bağlı hesap başarıyla silindi",
+            });
+            loadLinkedAccounts();
+        } catch (error: any) {
+            toast({
+                title: "Hata",
+                description: error.response?.data?.message || "Bağlı hesap silinirken bir hata oluştu",
+                variant: "destructive",
+            });
         }
     };
 
@@ -318,6 +404,129 @@ export default function ProfilePage() {
                     )}
                 </CardContent>
             </Card>
+
+            {/* Bağlı Hesaplar */}
+            <Card>
+                <CardHeader>
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <CardTitle className="flex items-center gap-2">
+                                <Mail className="h-5 w-5" />
+                                Bağlı Hesaplar
+                            </CardTitle>
+                            <CardDescription>
+                                Farklı email adresleri ile aynı hesaba giriş yapabilirsiniz
+                            </CardDescription>
+                        </div>
+                        <Button onClick={() => setShowAddDialog(true)} size="sm">
+                            <Plus className="h-4 w-4 mr-2" />
+                            Hesap Ekle
+                        </Button>
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    {loadingLinkedAccounts ? (
+                        <div className="text-center py-8">
+                            <RefreshCw className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
+                            <p className="text-muted-foreground mt-2">Yükleniyor...</p>
+                        </div>
+                    ) : linkedAccounts.length === 0 ? (
+                        <div className="text-center py-8 text-muted-foreground">
+                            <Mail className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                            <p>Henüz bağlı hesap eklemediniz</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            {linkedAccounts.map((account) => (
+                                <div
+                                    key={account.id}
+                                    className="border rounded-lg p-4 hover:bg-muted/50 transition-colors flex items-center justify-between"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <Mail className="h-5 w-5 text-muted-foreground" />
+                                        <div>
+                                            <p className="font-medium">{account.email}</p>
+                                            {account.displayName && (
+                                                <p className="text-sm text-muted-foreground">{account.displayName}</p>
+                                            )}
+                                            <p className="text-xs text-muted-foreground">
+                                                Eklendi: {new Date(account.createdAt).toLocaleDateString('tr-TR')}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleDeleteLinkedAccount(account.id)}
+                                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+
+            {/* Bağlı Hesap Ekleme Dialog */}
+            <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Yeni Bağlı Hesap Ekle</DialogTitle>
+                        <DialogDescription>
+                            Bu email ve şifre ile de aynı hesaba giriş yapabilirsiniz
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div>
+                            <Label htmlFor="linked-email">Email</Label>
+                            <Input
+                                id="linked-email"
+                                type="email"
+                                placeholder="ornek@email.com"
+                                value={newLinkedAccount.email}
+                                onChange={(e) => setNewLinkedAccount({ ...newLinkedAccount, email: e.target.value })}
+                            />
+                        </div>
+                        <div>
+                            <Label htmlFor="linked-password">Şifre</Label>
+                            <Input
+                                id="linked-password"
+                                type="password"
+                                placeholder="••••••••"
+                                value={newLinkedAccount.password}
+                                onChange={(e) => setNewLinkedAccount({ ...newLinkedAccount, password: e.target.value })}
+                            />
+                        </div>
+                        <div>
+                            <Label htmlFor="linked-display-name">Görünen İsim (Opsiyonel)</Label>
+                            <Input
+                                id="linked-display-name"
+                                type="text"
+                                placeholder="İş Hesabı, Kişisel vb."
+                                value={newLinkedAccount.displayName}
+                                onChange={(e) => setNewLinkedAccount({ ...newLinkedAccount, displayName: e.target.value })}
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowAddDialog(false)}>
+                            İptal
+                        </Button>
+                        <Button onClick={handleAddLinkedAccount} disabled={addingLinkedAccount}>
+                            {addingLinkedAccount ? (
+                                <>
+                                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                                    Ekleniyor...
+                                </>
+                            ) : (
+                                'Ekle'
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

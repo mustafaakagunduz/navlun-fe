@@ -8,7 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Loader2, Star, Send, Building2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import reviewService, { ReviewRequest } from '@/services/reviewService';
+import reviewService, { ReviewRequest, UserType } from '@/services/reviewService';
+import senderService from '@/services/senderService';
 
 interface ReviewModalProps {
     isOpen: boolean;
@@ -66,10 +67,13 @@ export default function ReviewModal({
         try {
             setIsSubmitting(true);
 
+            // Sender profile'dan userId'yi al (senderId muhtemelen profile ID)
+            const senderProfile = await senderService.getSenderProfileById(senderId);
+
             // Review request oluştur
             const reviewData: ReviewRequest = {
-                senderId,
-                carrierId: '', // Backend'de current user'dan alınacak
+                reviewedUserId: senderProfile.userId,  // <- USER ID kullan!
+                reviewedUserType: UserType.SENDER,
                 loadId,
                 rating,
                 comment: comment.trim()

@@ -1,12 +1,23 @@
 // src/services/reviewService.ts
 import apiService from '@/services/apiService';
+import axiosInstance from '@/lib/axios';
+
+// User Type Enum - Backend ile senkronize
+export enum UserType {
+    SENDER = 'SENDER',
+    CARRIER = 'CARRIER',
+    BROKER = 'BROKER'
+}
 
 // Tip tanımlamaları
 export type Review = {
     id: string;
-    senderId: string;
-    carrierId: string;
-    carrierName?: string;
+    reviewerId: string;
+    reviewerName?: string;
+    reviewerType: UserType;
+    reviewedUserId: string;
+    reviewedUserName?: string;
+    reviewedUserType: UserType;
     loadId: string;
     rating: number; // 1-5 arası
     comment?: string;
@@ -15,8 +26,8 @@ export type Review = {
 };
 
 export type ReviewRequest = {
-    senderId: string;
-    carrierId: string;
+    reviewedUserId: string;
+    reviewedUserType: UserType;
     loadId: string;
     rating: number;
     comment?: string;
@@ -41,45 +52,49 @@ const reviewService = {
         }
     },
 
-    // Sender'a yapılmış tüm değerlendirmeleri getirir
-    getReviewsBySenderId: async (senderId: string): Promise<Review[]> => {
+    // Kullanıcıya yapılmış tüm değerlendirmeleri getirir (bu kullanıcı hakkındaki değerlendirmeler)
+    getReviewsForUser: async (userId: string): Promise<Review[]> => {
         try {
-            return await apiService.get<Review[]>(`/reviews/sender/${senderId}`);
+            const response = await axiosInstance.get<Review[]>(`/reviews/user/${userId}`);
+            return response.data;
         } catch (error) {
-            console.error(`Get reviews by sender ID (${senderId}) error:`, error);
+            console.error(`Get reviews for user (${userId}) error:`, error);
             throw error;
         }
     },
 
-    // Carrier'ın yaptığı tüm değerlendirmeleri getirir
-    getReviewsByCarrierId: async (carrierId: string): Promise<Review[]> => {
+    // Kullanıcının yaptığı tüm değerlendirmeleri getirir
+    getReviewsByUser: async (userId: string): Promise<Review[]> => {
         try {
-            return await apiService.get<Review[]>(`/reviews/carrier/${carrierId}`);
+            const response = await axiosInstance.get<Review[]>(`/reviews/by-user/${userId}`);
+            return response.data;
         } catch (error) {
-            console.error(`Get reviews by carrier ID (${carrierId}) error:`, error);
+            console.error(`Get reviews by user (${userId}) error:`, error);
             throw error;
         }
     },
 
-    // Belirli bir yük için değerlendirmeyi getirir
-    getReviewByLoadId: async (loadId: string): Promise<Review | null> => {
+    // Belirli bir yük için tüm değerlendirmeleri getirir
+    getReviewsForLoad: async (loadId: string): Promise<Review[]> => {
         try {
-            return await apiService.get<Review>(`/reviews/load/${loadId}`);
+            const response = await axiosInstance.get<Review[]>(`/reviews/load/${loadId}`);
+            return response.data;
         } catch (error: any) {
             if (error.response?.status === 404) {
-                return null;
+                return [];
             }
-            console.error(`Get review by load ID (${loadId}) error:`, error);
+            console.error(`Get reviews for load (${loadId}) error:`, error);
             throw error;
         }
     },
 
-    // Sender için değerlendirme istatistiklerini getirir
-    getSenderReviewStatistics: async (senderId: string): Promise<ReviewStatistics> => {
+    // Kullanıcı için değerlendirme istatistiklerini getirir
+    getUserStatistics: async (userId: string): Promise<ReviewStatistics> => {
         try {
-            return await apiService.get<ReviewStatistics>(`/reviews/sender/${senderId}/statistics`);
+            const response = await axiosInstance.get<ReviewStatistics>(`/reviews/user/${userId}/statistics`);
+            return response.data;
         } catch (error) {
-            console.error(`Get sender review statistics (${senderId}) error:`, error);
+            console.error(`Get user review statistics (${userId}) error:`, error);
             throw error;
         }
     },
@@ -102,6 +117,22 @@ const reviewService = {
             console.error(`Delete review (${reviewId}) error:`, error);
             throw error;
         }
+    },
+
+    // DEPRECATED - Backward compatibility için bırakıldı
+    getReviewsBySenderId: async (senderId: string): Promise<Review[]> => {
+        console.warn('getReviewsBySenderId is deprecated, use getReviewsForUser instead');
+        return reviewService.getReviewsForUser(senderId);
+    },
+
+    getSenderReviewStatistics: async (senderId: string): Promise<ReviewStatistics> => {
+        console.warn('getSenderReviewStatistics is deprecated, use getUserStatistics instead');
+        return reviewService.getUserStatistics(senderId);
+    },
+
+    getReviewsByCarrierId: async (carrierId: string): Promise<Review[]> => {
+        console.warn('getReviewsByCarrierId is deprecated, use getReviewsForUser instead');
+        return reviewService.getReviewsForUser(carrierId);
     },
 };
 

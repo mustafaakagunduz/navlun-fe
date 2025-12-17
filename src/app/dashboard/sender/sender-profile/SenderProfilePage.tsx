@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from "@/context/AuthContext";
 import { formatDate, formatDateTime, formatTime } from '@/utils/dateUtils';
+import linkedAccountService, { LinkedAccount, CreateLinkedAccountDto } from '@/services/linkedAccountService';
 
 // Local User type with phone property
 type UserWithPhone = {
@@ -39,11 +40,22 @@ import {
     AlertCircle,
     CheckCircle2,
     Eye,
-    Download
+    Download,
+    Trash2,
+    Plus,
+    Lock
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import senderService from '@/services/senderService';
 import AccountTypeChangeSection from '@/components/AccountTypeChangeSection';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function SenderProfilePage() {
     const { user } = useAuth();
@@ -84,6 +96,17 @@ export default function SenderProfilePage() {
         uploadDate: string;
         isPermanent?: boolean;
     }[]>([]);
+
+    // Linked Accounts states
+    const [linkedAccounts, setLinkedAccounts] = useState<LinkedAccount[]>([]);
+    const [loadingLinkedAccounts, setLoadingLinkedAccounts] = useState(true);
+    const [showAddDialog, setShowAddDialog] = useState(false);
+    const [newLinkedAccount, setNewLinkedAccount] = useState<CreateLinkedAccountDto>({
+        email: '',
+        password: '',
+        displayName: ''
+    });
+    const [addingLinkedAccount, setAddingLinkedAccount] = useState(false);
 
     // Predefined data
     const productionTypeOptions = [
@@ -177,7 +200,59 @@ export default function SenderProfilePage() {
         };
 
         loadProfile();
+        loadLinkedAccounts();
     }, [userWithPhone]);
+
+    // Linked Accounts fonksiyonları
+    const loadLinkedAccounts = async () => {
+        try {
+            const accounts = await linkedAccountService.getLinkedAccounts();
+            setLinkedAccounts(accounts);
+        } catch (error) {
+            console.error('Load linked accounts error:', error);
+        } finally {
+            setLoadingLinkedAccounts(false);
+        }
+    };
+
+    const handleAddLinkedAccount = async () => {
+        if (!newLinkedAccount.email || !newLinkedAccount.password) {
+            setError('Email ve şifre gereklidir');
+            setTimeout(() => setError(''), 3000);
+            return;
+        }
+
+        setAddingLinkedAccount(true);
+        try {
+            await linkedAccountService.createLinkedAccount(newLinkedAccount);
+            setSuccess('Bağlı hesap başarıyla eklendi');
+            setTimeout(() => setSuccess(''), 3000);
+            setShowAddDialog(false);
+            setNewLinkedAccount({ email: '', password: '', displayName: '' });
+            loadLinkedAccounts();
+        } catch (error: any) {
+            setError(error.response?.data?.message || 'Bağlı hesap eklenirken bir hata oluştu');
+            setTimeout(() => setError(''), 3000);
+        } finally {
+            setAddingLinkedAccount(false);
+        }
+    };
+
+    const handleDeleteLinkedAccount = async (id: string) => {
+        if (!confirm('Bu bağlı hesabı silmek istediğinize emin misiniz?')) {
+            return;
+        }
+
+        try {
+            await linkedAccountService.deleteLinkedAccount(id);
+            setSuccess('Bağlı hesap başarıyla silindi');
+            setTimeout(() => setSuccess(''), 3000);
+            loadLinkedAccounts();
+        } catch (error: any) {
+            setError(error.response?.data?.message || 'Bağlı hesap silinirken bir hata oluştu');
+            setTimeout(() => setError(''), 3000);
+        }
+    };
 
     // Handle form changes
     const handleInputChange = (field: string, value: any) => {
@@ -836,6 +911,129 @@ export default function SenderProfilePage() {
                 <div className="mt-8">
                     <AccountTypeChangeSection />
                 </div>
+
+                {/* Bağlı Hesaplar */}
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <CardTitle className="flex items-center gap-2">
+                                    <Mail className="h-5 w-5" />
+                                    Bağlı Hesaplar
+                                </CardTitle>
+                                <p className="text-sm text-gray-500 mt-1">
+                                    Farklı email adresleri ile aynı hesaba giriş yapabilirsiniz
+                                </p>
+                            </div>
+                            <Button onClick={() => setShowAddDialog(true)} size="sm">
+                                <Plus className="h-4 w-4 mr-2" />
+                                Hesap Ekle
+                            </Button>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        {loadingLinkedAccounts ? (
+                            <div className="text-center py-8">
+                                <Loader2 className="h-8 w-8 animate-spin mx-auto text-gray-400" />
+                                <p className="text-gray-500 mt-2">Yükleniyor...</p>
+                            </div>
+                        ) : linkedAccounts.length === 0 ? (
+                            <div className="text-center py-8 text-gray-500">
+                                <Mail className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                                <p>Henüz bağlı hesap eklemediniz</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {linkedAccounts.map((account) => (
+                                    <div
+                                        key={account.id}
+                                        className="border rounded-lg p-4 hover:bg-gray-50 transition-colors flex items-center justify-between"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <Mail className="h-5 w-5 text-gray-400" />
+                                            <div>
+                                                <p className="font-medium">{account.email}</p>
+                                                {account.displayName && (
+                                                    <p className="text-sm text-gray-500">{account.displayName}</p>
+                                                )}
+                                                <p className="text-xs text-gray-400">
+                                                    Eklendi: {new Date(account.createdAt).toLocaleDateString('tr-TR')}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => handleDeleteLinkedAccount(account.id)}
+                                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {/* Bağlı Hesap Ekleme Dialog */}
+                <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Yeni Bağlı Hesap Ekle</DialogTitle>
+                            <DialogDescription>
+                                Bu email ve şifre ile de aynı hesaba giriş yapabilirsiniz
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                            <div>
+                                <Label htmlFor="linked-email">Email</Label>
+                                <Input
+                                    id="linked-email"
+                                    type="email"
+                                    placeholder="ornek@email.com"
+                                    value={newLinkedAccount.email}
+                                    onChange={(e) => setNewLinkedAccount({ ...newLinkedAccount, email: e.target.value })}
+                                />
+                            </div>
+                            <div>
+                                <Label htmlFor="linked-password">Şifre</Label>
+                                <Input
+                                    id="linked-password"
+                                    type="password"
+                                    placeholder="••••••••"
+                                    value={newLinkedAccount.password}
+                                    onChange={(e) => setNewLinkedAccount({ ...newLinkedAccount, password: e.target.value })}
+                                />
+                            </div>
+                            <div>
+                                <Label htmlFor="linked-display-name">Görünen İsim (Opsiyonel)</Label>
+                                <Input
+                                    id="linked-display-name"
+                                    type="text"
+                                    placeholder="İş Hesabı, Kişisel vb."
+                                    value={newLinkedAccount.displayName}
+                                    onChange={(e) => setNewLinkedAccount({ ...newLinkedAccount, displayName: e.target.value })}
+                                />
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setShowAddDialog(false)}>
+                                İptal
+                            </Button>
+                            <Button onClick={handleAddLinkedAccount} disabled={addingLinkedAccount}>
+                                {addingLinkedAccount ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                        Ekleniyor...
+                                    </>
+                                ) : (
+                                    'Ekle'
+                                )}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
 
                 {/* Alt Kaydet Butonu */}
                 <div className="flex justify-end mt-8">

@@ -5,6 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
 import {
     Loader2,
     Building2,
@@ -18,10 +20,13 @@ import {
     TrendingUp,
     DollarSign,
     Users,
-    CheckCircle2
+    CheckCircle2,
+    Star,
+    MessageSquare
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import brokerService, { BrokerProfile } from '@/services/brokerService';
+import reviewService, { Review, ReviewStatistics } from '@/services/reviewService';
 import { formatDate } from '@/utils/dateUtils';
 
 export default function BrokerProfilePage() {
@@ -29,6 +34,8 @@ export default function BrokerProfilePage() {
     const router = useRouter();
     const { toast } = useToast();
     const [profile, setProfile] = useState<BrokerProfile | null>(null);
+    const [reviews, setReviews] = useState<Review[]>([]);
+    const [statistics, setStatistics] = useState<ReviewStatistics | null>(null);
     const [loading, setLoading] = useState(true);
 
     const brokerId = params.id as string;
@@ -37,8 +44,23 @@ export default function BrokerProfilePage() {
         const fetchProfileData = async () => {
             try {
                 setLoading(true);
+
+                // Profil bilgilerini çek
                 const profileData = await brokerService.getBrokerProfileById(brokerId);
                 setProfile(profileData);
+
+                // Değerlendirmeleri ve istatistikleri çek (userId kullan!)
+                try {
+                    const reviewsData = await reviewService.getReviewsForUser(profileData.userId);
+                    console.log('Reviews for broker:', reviewsData);
+                    setReviews(reviewsData);
+
+                    const statsData = await reviewService.getUserStatistics(profileData.userId);
+                    setStatistics(statsData);
+                } catch (reviewError) {
+                    console.error('Error fetching reviews:', reviewError);
+                    // Review hatası profil yüklemeyi engellemez
+                }
             } catch (error: any) {
                 console.error('Error fetching broker profile:', error);
                 toast({
@@ -90,6 +112,32 @@ export default function BrokerProfilePage() {
     const ecoRatio = profile.facilitatedDeals > 0
         ? ((profile.ecoFriendlyDeals / profile.facilitatedDeals) * 100).toFixed(1)
         : '0';
+
+    const renderStars = (rating: number) => {
+        return (
+            <div className="flex gap-0.5">
+                {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                        key={star}
+                        className={`h-4 w-4 ${
+                            star <= rating
+                                ? 'fill-yellow-400 text-yellow-400'
+                                : 'fill-gray-200 text-gray-200'
+                        }`}
+                    />
+                ))}
+            </div>
+        );
+    };
+
+    const getInitials = (name: string) => {
+        return name
+            .split(' ')
+            .map(n => n[0])
+            .join('')
+            .toUpperCase()
+            .slice(0, 2);
+    };
 
     return (
         <div className="p-8 space-y-6">
@@ -278,6 +326,104 @@ export default function BrokerProfilePage() {
                     </Card>
                 )}
             </div>
+
+            {/* Reviews Section */}
+            <Card>
+                <CardHeader className="bg-gradient-to-r from-yellow-50 to-white">
+                    <CardTitle className="flex items-center gap-2">
+                        <Star className="h-5 w-5 text-yellow-500" />
+                        Değerlendirmeler
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                    {statistics && statistics.totalReviews > 0 ? (
+                        <div className="space-y-6">
+                            {/* Overall Rating */}
+                            <div className="grid md:grid-cols-2 gap-6 p-6 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl border border-yellow-200">
+                                <div className="text-center md:border-r border-yellow-200">
+                                    <div className="text-5xl font-bold text-gray-900 mb-2">
+                                        {statistics.averageRating.toFixed(1)}
+                                    </div>
+                                    <div className="flex justify-center mb-2">
+                                        {renderStars(Math.round(statistics.averageRating))}
+                                    </div>
+                                    <div className="text-sm text-gray-600">
+                                        <MessageSquare className="h-4 w-4 inline mr-1" />
+                                        {statistics.totalReviews} değerlendirme
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    {[5, 4, 3, 2, 1].map((rating) => {
+                                        const count = statistics.ratingDistribution[rating] || 0;
+                                        const percentage = statistics.totalReviews > 0
+                                            ? (count / statistics.totalReviews * 100)
+                                            : 0;
+                                        return (
+                                            <div key={rating} className="flex items-center gap-2">
+                                                <span className="text-sm font-medium text-gray-700 w-8">{rating}★</span>
+                                                <div className="flex-1 h-3 bg-white rounded-full overflow-hidden border border-yellow-200">
+                                                    <div
+                                                        className="h-full bg-gradient-to-r from-yellow-400 to-yellow-500 transition-all duration-300"
+                                                        style={{ width: `${percentage}%` }}
+                                                    />
+                                                </div>
+                                                <span className="text-sm text-gray-600 w-10 text-right">{count}</span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            <Separator />
+
+                            {/* Individual Reviews */}
+                            <div className="space-y-4">
+                                <h4 className="font-semibold text-gray-900">Son Değerlendirmeler</h4>
+                                {reviews.slice(0, 5).map((review) => (
+                                    <div key={review.id} className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+                                        <div className="flex items-start justify-between mb-3">
+                                            <div className="flex items-center gap-3">
+                                                <Avatar className="h-10 w-10">
+                                                    <AvatarFallback className="bg-blue-100 text-blue-700">
+                                                        {review.reviewerName ? getInitials(review.reviewerName) : 'K'}
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                                <div>
+                                                    <div className="font-medium text-gray-900">
+                                                        {review.reviewerName || 'Kullanıcı'}
+                                                    </div>
+                                                    <div className="text-xs text-gray-500">
+                                                        {review.reviewerType}
+                                                    </div>
+                                                    {renderStars(review.rating)}
+                                                </div>
+                                            </div>
+                                            <span className="text-xs text-gray-500">
+                                                {formatDate(review.createdAt)}
+                                            </span>
+                                        </div>
+                                        {review.comment && (
+                                            <p className="text-sm text-gray-700 leading-relaxed pl-13">
+                                                {review.comment}
+                                            </p>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="text-center py-12">
+                            <div className="h-20 w-20 rounded-full bg-gray-100 mx-auto mb-4 flex items-center justify-center">
+                                <Star className="h-10 w-10 text-gray-400" />
+                            </div>
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">Henüz Değerlendirme Yok</h3>
+                            <p className="text-gray-600">
+                                Bu broker için henüz değerlendirme yapılmamış.
+                            </p>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
 
             {/* Additional Info */}
             {(profile.ecoFriendlyDealPercentage || profile.companyRegistrationNumber) && (
