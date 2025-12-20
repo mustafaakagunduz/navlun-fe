@@ -15,6 +15,8 @@ export type User = {
     phone?: string;
     role: 'ADMIN' | 'SENDER' | 'CARRIER' | 'BROKER' | 'PENDING';
     emailVerified?: boolean;
+    loginEmail?: string;        // Hangi email ile giriş yapıldı
+    isLinkedAccount?: boolean;  // Linked account ile mi giriş yapıldı
 };
 
 // Auth state type

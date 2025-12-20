@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
     Accordion,
     AccordionContent,
@@ -456,40 +455,25 @@ export default function SenderOffersPage() {
                                         </div>
                                     )}
 
-                                    {/* Carrier ve Broker Teklifleri - Tabs */}
-                                    <Tabs defaultValue="carrier" className="w-full">
-                                        <TabsList className="grid w-full grid-cols-2">
-                                            <TabsTrigger value="carrier" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
-                                                <TruckIcon className="h-3 w-3 md:h-4 md:w-4" />
-                                                <span className="hidden sm:inline">Carrier</span>
-                                                <span className="sm:hidden">C</span>
-                                                ({loadWithOffers.offers.length})
-                                            </TabsTrigger>
-                                            <TabsTrigger value="broker" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
-                                                <Ship className="h-3 w-3 md:h-4 md:w-4" />
-                                                <span className="hidden sm:inline">Broker</span>
-                                                <span className="sm:hidden">B</span>
-                                                ({brokerOffersByLoad[loadWithOffers.load.id]?.length || 0})
-                                            </TabsTrigger>
-                                        </TabsList>
-
-                                        {/* Carrier Teklifleri */}
-                                        <TabsContent value="carrier" className="space-y-3 mt-4">
-                                            {loadWithOffers.offers.length === 0 ? (
-                                                <div className="text-center py-8 text-gray-500">
-                                                    <TruckIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                                                    <p>Bu yük için henüz carrier teklifi bulunmuyor.</p>
-                                                </div>
-                                            ) : (
-                                                <div className="space-y-3">
-                                                    {[...loadWithOffers.offers]
-                                                        .sort((a, b) => {
-                                                            // Çevreci araçları öne çıkar, sonra fiyata göre sırala
-                                                            if (a.vehicleEcoCertified && !b.vehicleEcoCertified) return -1;
-                                                            if (!a.vehicleEcoCertified && b.vehicleEcoCertified) return 1;
-                                                            return a.price - b.price;
-                                                        })
-                                                        .map((offer) => (
+                                    {/* Teklifler */}
+                                    <div className="space-y-3 mt-4">
+                                        {loadWithOffers.offers.length === 0 &&
+                                         (!brokerOffersByLoad[loadWithOffers.load.id] || brokerOffersByLoad[loadWithOffers.load.id].length === 0) ? (
+                                            <div className="text-center py-8 text-gray-500">
+                                                <Package className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                                                <p>Bu yük için henüz teklif bulunmuyor.</p>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-3">
+                                                {/* Carrier Teklifleri */}
+                                                {[...loadWithOffers.offers]
+                                                    .sort((a, b) => {
+                                                        // Çevreci araçları öne çıkar, sonra fiyata göre sırala
+                                                        if (a.vehicleEcoCertified && !b.vehicleEcoCertified) return -1;
+                                                        if (!a.vehicleEcoCertified && b.vehicleEcoCertified) return 1;
+                                                        return a.price - b.price;
+                                                    })
+                                                    .map((offer) => (
                                                             <div
                                                                 key={offer.offerId}
                                                                 className={`p-3 md:p-4 border rounded-lg cursor-pointer transition-colors hover:bg-muted/50 ${
@@ -545,20 +529,11 @@ export default function SenderOffersPage() {
                                                                 )}
                                                             </div>
                                                         ))}
-                                                </div>
-                                            )}
-                                        </TabsContent>
 
-                                        {/* Broker Teklifleri */}
-                                        <TabsContent value="broker" className="space-y-3 mt-4">
-                                            {!brokerOffersByLoad[loadWithOffers.load.id] || brokerOffersByLoad[loadWithOffers.load.id].length === 0 ? (
-                                                <div className="text-center py-8 text-gray-500">
-                                                    <Ship className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                                                    <p>Bu yük için henüz broker teklifi bulunmuyor.</p>
-                                                </div>
-                                            ) : (
-                                                <div className="space-y-3">
-                                                    {brokerOffersByLoad[loadWithOffers.load.id]
+                                                {/* Broker Teklifleri */}
+                                                {brokerOffersByLoad[loadWithOffers.load.id] &&
+                                                 brokerOffersByLoad[loadWithOffers.load.id].length > 0 &&
+                                                    brokerOffersByLoad[loadWithOffers.load.id]
                                                         .sort((a, b) => {
                                                             // Çevreci gemileri öne çıkar, sonra fiyata göre sırala
                                                             if (a.ecoFriendly && !b.ecoFriendly) return -1;
@@ -624,10 +599,9 @@ export default function SenderOffersPage() {
                                                                 )}
                                                             </div>
                                                         ))}
-                                                </div>
-                                            )}
-                                        </TabsContent>
-                                    </Tabs>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </AccordionContent>
                         </AccordionItem>

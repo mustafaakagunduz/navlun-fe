@@ -205,6 +205,16 @@ export default function Sidebar() {
         menuItems = brokerMenuItems;
     }
 
+    // Linked account için profil sayfasını gizle
+    if (user?.isLinkedAccount) {
+        menuItems = menuItems.filter(item =>
+            !item.href.includes('/profile') &&
+            !item.href.includes('sender-profile') &&
+            !item.href.includes('carrier-profile') &&
+            !item.href.includes('broker-profile')
+        );
+    }
+
     // PENDING kullanıcılar için sidebar gösterme
     if (user?.role === 'PENDING') {
         return null;

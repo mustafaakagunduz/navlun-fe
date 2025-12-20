@@ -103,15 +103,17 @@ export default function DeliveryStatusViewer() {
         }
     }, [senderTrackingsError, toast]);
 
-    // State'lere göre sıralama önceliği: ON_THE_WAY -> PICKED_UP -> DELIVERED
+    // State'lere göre sıralama önceliği: ASSIGNED -> ON_THE_WAY -> PICKED_UP
     const getStatusPriority = (status: DeliveryStep): number => {
         switch (status) {
-            case DeliveryStep.ON_THE_WAY:
+            case DeliveryStep.ASSIGNED:
                 return 1;
-            case DeliveryStep.PICKED_UP:
+            case DeliveryStep.ON_THE_WAY:
                 return 2;
-            case DeliveryStep.DELIVERED:
+            case DeliveryStep.PICKED_UP:
                 return 3;
+            case DeliveryStep.DELIVERED:
+                return 999; // Artık gösterilmiyor
             default:
                 return 999;
         }
@@ -119,7 +121,17 @@ export default function DeliveryStatusViewer() {
 
     const filteredTrackings = senderTrackings
         .filter(tracking => {
+            // DELIVERED durumundakileri hiç gösterme
+            if (tracking.currentStatus === DeliveryStep.DELIVERED) return false;
+
             if (filterStatus === 'ALL') return true;
+
+            // ON_THE_WAY sekmesinde ASSIGNED olanları da göster
+            if (filterStatus === DeliveryStep.ON_THE_WAY) {
+                return tracking.currentStatus === DeliveryStep.ON_THE_WAY ||
+                       tracking.currentStatus === DeliveryStep.ASSIGNED;
+            }
+
             return tracking.currentStatus === filterStatus;
         })
         .sort((a, b) => {
@@ -132,11 +144,18 @@ export default function DeliveryStatusViewer() {
         });
 
     const getStatusCounts = () => {
+        // DELIVERED olanları sayıya dahil etme
+        const activeTrackings = senderTrackings.filter(t => t.currentStatus !== DeliveryStep.DELIVERED);
+
         return {
-            all: senderTrackings.length,
-            onTheWay: senderTrackings.filter(t => t.currentStatus === DeliveryStep.ON_THE_WAY).length,
+            all: activeTrackings.length,
+            // ON_THE_WAY sekmesi ASSIGNED ve ON_THE_WAY'i birlikte gösterir
+            onTheWay: senderTrackings.filter(t =>
+                t.currentStatus === DeliveryStep.ON_THE_WAY ||
+                t.currentStatus === DeliveryStep.ASSIGNED
+            ).length,
             pickedUp: senderTrackings.filter(t => t.currentStatus === DeliveryStep.PICKED_UP).length,
-            delivered: senderTrackings.filter(t => t.currentStatus === DeliveryStep.DELIVERED).length,
+            delivered: 0, // Artık göstermediğimiz için 0
         };
     };
 
@@ -263,7 +282,7 @@ export default function DeliveryStatusViewer() {
             </div>
 
             <Tabs value={filterStatus} onValueChange={(value) => setFilterStatus(value as DeliveryStep | 'ALL')}>
-                <TabsList className="grid grid-cols-4 w-full gap-1 md:gap-2 h-auto bg-transparent p-0">
+                <TabsList className="grid grid-cols-3 w-full gap-1 md:gap-2 h-auto bg-transparent p-0">
                     <TabsTrigger
                         value="ALL"
                         className="text-xs md:text-lg font-semibold h-14 md:h-20 data-[state=active]:bg-gray-100 data-[state=inactive]:bg-gray-50 hover:bg-gray-100 border-l-4 border-l-gray-500 px-1 md:px-4"
@@ -281,12 +300,6 @@ export default function DeliveryStatusViewer() {
                         className="text-xs md:text-lg font-semibold h-14 md:h-20 data-[state=active]:bg-orange-100 data-[state=inactive]:bg-orange-50 hover:bg-orange-100 border-l-4 border-l-orange-500 px-1 md:px-4"
                     >
                         Alındı ({counts.pickedUp})
-                    </TabsTrigger>
-                    <TabsTrigger
-                        value={DeliveryStep.DELIVERED}
-                        className="text-xs md:text-lg font-semibold h-14 md:h-20 data-[state=active]:bg-green-100 data-[state=inactive]:bg-green-50 hover:bg-green-100 border-l-4 border-l-green-500 px-1 md:px-4"
-                    >
-                        Teslim Edildi ({counts.delivered})
                     </TabsTrigger>
                 </TabsList>
 

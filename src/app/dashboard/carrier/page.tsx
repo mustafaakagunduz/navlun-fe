@@ -294,7 +294,7 @@ export default function CarrierDashboard() {
                                     <div className="flex items-center justify-between">
                                         <div>
                                             <p className="text-sm font-medium text-gray-600">Tamamlanma Oranı</p>
-                                            <p className="text-3xl font-bold text-green-600">{carrierStats.completionRate}%</p>
+                                            <p className="text-3xl font-bold text-green-600">{carrierStats.completionRate.toFixed(2)}%</p>
                                             <div className="flex items-center mt-2">
                                                 <Target className="h-4 w-4 text-green-600 mr-1" />
                                                 <span className="text-sm text-green-600 font-medium">
@@ -653,7 +653,7 @@ export default function CarrierDashboard() {
                                     </p>
                                 </div>
                                 <div className="text-right">
-                                    <div className="text-2xl font-bold">{carrierStats.completionRate}%</div>
+                                    <div className="text-2xl font-bold">{carrierStats.completionRate.toFixed(2)}%</div>
                                     <div className="text-purple-100">tamamlanma oranı</div>
                                 </div>
                             </div>
