@@ -581,12 +581,20 @@ export default function SenderOffersPage() {
 
                                                                     <div className="flex flex-col gap-1 md:text-right">
                                                                         <div className="text-lg md:text-2xl font-bold text-blue-600">
-                                                                            {formatCurrency(offer.freightRate)}
+                                                                            {formatCurrency(offer.totalAmount || offer.freightRate)}
                                                                         </div>
-                                                                        <div className="text-xs text-muted-foreground">
-                                                                            Komisyon: %{offer.commissionRate}
-                                                                        </div>
-                                                                        <div className="text-xs text-muted-foreground">
+                                                                        {(offer.demurrageRate && offer.demurrageRate > 0) || (offer.despatchRate && offer.despatchRate > 0) ? (
+                                                                            <div className="text-xs text-muted-foreground mt-1 space-y-0.5">
+                                                                                <div className="font-medium">Özel Koşullar:</div>
+                                                                                {offer.demurrageRate && offer.demurrageRate > 0 && (
+                                                                                    <div>Demuraj: {formatCurrency(offer.demurrageRate)}</div>
+                                                                                )}
+                                                                                {offer.despatchRate && offer.despatchRate > 0 && (
+                                                                                    <div>Dispeç: {formatCurrency(offer.despatchRate)}</div>
+                                                                                )}
+                                                                            </div>
+                                                                        ) : null}
+                                                                        <div className="text-xs text-muted-foreground mt-2">
                                                                             {formatDateTime(offer.createdAt)}
                                                                         </div>
                                                                     </div>
@@ -611,13 +619,13 @@ export default function SenderOffersPage() {
 
             {/* Carrier Teklif Detay Modal */}
             <Dialog open={isOfferDetailModalOpen} onOpenChange={setIsOfferDetailModalOpen}>
-                <DialogContent className="max-w-2xl">
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>Carrier Teklif Detayları</DialogTitle>
                     </DialogHeader>
 
                     {selectedOffer && selectedLoad && (
-                        <div className="space-y-6">
+                        <div className="space-y-4">
                             {/* Yük Bilgisi */}
                             <div className="p-4 bg-muted rounded-lg">
                                 <h4 className="font-semibold mb-2">{selectedLoad.load.title}</h4>
@@ -735,13 +743,13 @@ export default function SenderOffersPage() {
 
             {/* Broker Teklif Detay Modal */}
             <Dialog open={isBrokerOfferDetailModalOpen} onOpenChange={setIsBrokerOfferDetailModalOpen}>
-                <DialogContent className="max-w-2xl">
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>Broker Teklif Detayları</DialogTitle>
                     </DialogHeader>
 
                     {selectedBrokerOffer && (
-                        <div className="space-y-6">
+                        <div className="space-y-4">
                             {/* Yük Bilgisi */}
                             <div className="p-4 bg-muted rounded-lg">
                                 <h4 className="font-semibold mb-2">{selectedBrokerOffer.loadTitle}</h4>
@@ -765,16 +773,6 @@ export default function SenderOffersPage() {
                                         <div>
                                             <span className="text-muted-foreground">Firma:</span>
                                             <span className="ml-2">{selectedBrokerOffer.brokerName}</span>
-                                        </div>
-                                        <div>
-                                            <span className="text-muted-foreground">Navlun Ücreti:</span>
-                                            <span className="ml-2 font-bold text-primary">
-                                                {formatCurrency(selectedBrokerOffer.freightRate)}
-                                            </span>
-                                        </div>
-                                        <div>
-                                            <span className="text-muted-foreground">Komisyon:</span>
-                                            <span className="ml-2">%{selectedBrokerOffer.commissionRate}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -811,6 +809,45 @@ export default function SenderOffersPage() {
                                 <div>
                                     <span className="text-muted-foreground">Tahmini Teslimat:</span>
                                     <span className="ml-2">{formatDateHelper(selectedBrokerOffer.estimatedDeliveryDate)}</span>
+                                </div>
+                            </div>
+
+                            {/* Fiyat Detayları */}
+                            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                <h5 className="font-semibold text-blue-800 mb-3">Fiyat Detayları</h5>
+                                <div className="space-y-3 text-sm">
+                                    <div className="border-b pb-3">
+                                        <div className="flex justify-between items-center">
+                                            <span className="font-semibold text-blue-800 text-base">Toplam Taşıma Ücreti:</span>
+                                            <span className="font-bold text-blue-600 text-xl">
+                                                {formatCurrency(selectedBrokerOffer.totalAmount || selectedBrokerOffer.freightRate)}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {((selectedBrokerOffer.demurrageRate && selectedBrokerOffer.demurrageRate > 0) ||
+                                      (selectedBrokerOffer.despatchRate && selectedBrokerOffer.despatchRate > 0)) && (
+                                        <div className="pt-2">
+                                            <div className="font-medium text-gray-700 mb-2">Özel Koşullar (Toplam ücrete dahil değildir):</div>
+                                            <div className="space-y-1.5 pl-3">
+                                                {selectedBrokerOffer.demurrageRate && selectedBrokerOffer.demurrageRate > 0 && (
+                                                    <div className="flex justify-between text-gray-600">
+                                                        <span>• Demuraj Ücreti:</span>
+                                                        <span className="font-medium">{formatCurrency(selectedBrokerOffer.demurrageRate)}</span>
+                                                    </div>
+                                                )}
+                                                {selectedBrokerOffer.despatchRate && selectedBrokerOffer.despatchRate > 0 && (
+                                                    <div className="flex justify-between text-gray-600">
+                                                        <span>• Dispeç Ücreti:</span>
+                                                        <span className="font-medium">{formatCurrency(selectedBrokerOffer.despatchRate)}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <p className="text-xs text-gray-500 mt-2 italic">
+                                                * Bu ücretler yükleme/boşaltma süreleri aşıldığında veya erken tamamlandığında uygulanır.
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 

@@ -252,19 +252,18 @@ function BrokerOfferCreate() {
         return Object.keys(errors).length === 0;
     };
 
-    // Calculate total amount
+    // Calculate total amount (sadece freight + commission, demuraj/dispeç dahil değil)
     const calculateTotalAmount = () => {
         const freight = parseFloat(formData.freightRate) || 0;
-        const demurrage = parseFloat(formData.demurrageRate) || 0;
-        const despatch = parseFloat(formData.despatchRate) || 0;
-        return freight + demurrage + despatch;
+        const commission = calculateCommission();
+        return freight + commission;
     };
 
-    // Calculate commission
+    // Calculate commission (sadece freight üzerinden)
     const calculateCommission = () => {
-        const total = calculateTotalAmount();
+        const freight = parseFloat(formData.freightRate) || 0;
         const rate = parseFloat(formData.commissionRate) || 0;
-        return (total * rate) / 100;
+        return (freight * rate) / 100;
     };
 
     // Form submission
@@ -625,32 +624,43 @@ function BrokerOfferCreate() {
                                     <Card className="bg-gray-50 border-gray-200">
                                         <CardContent className="p-4">
                                             <h4 className="font-semibold mb-2">Fiyat Özeti</h4>
-                                            <div className="space-y-1 text-sm">
+                                            <div className="space-y-2 text-sm">
                                                 <div className="flex justify-between">
                                                     <span>Navlun Ücreti:</span>
                                                     <span>{formatPrice(parseFloat(formData.freightRate) || 0)}</span>
-                                                </div>
-                                                {formData.demurrageRate && (
-                                                    <div className="flex justify-between">
-                                                        <span>Demuraj Ücreti:</span>
-                                                        <span>{formatPrice(parseFloat(formData.demurrageRate))}</span>
-                                                    </div>
-                                                )}
-                                                {formData.despatchRate && (
-                                                    <div className="flex justify-between">
-                                                        <span>Dispeç Ücreti:</span>
-                                                        <span>{formatPrice(parseFloat(formData.despatchRate))}</span>
-                                                    </div>
-                                                )}
-                                                <Separator />
-                                                <div className="flex justify-between font-semibold">
-                                                    <span>Toplam Tutar:</span>
-                                                    <span>{formatPrice(calculateTotalAmount())}</span>
                                                 </div>
                                                 <div className="flex justify-between text-amber-600">
                                                     <span>Komisyon (%{formData.commissionRate}):</span>
                                                     <span>{formatPrice(calculateCommission())}</span>
                                                 </div>
+                                                <Separator />
+                                                <div className="flex justify-between font-semibold text-base">
+                                                    <span>Sender'a Gönderilecek Toplam:</span>
+                                                    <span className="text-green-600">{formatPrice(calculateTotalAmount())}</span>
+                                                </div>
+
+                                                {(formData.demurrageRate || formData.despatchRate) && (
+                                                    <>
+                                                        <Separator className="my-2" />
+                                                        <div className="pt-2 border-t">
+                                                            <div className="text-xs font-medium text-gray-600 mb-2">
+                                                                Özel Koşullar (Toplam ücrete dahil değildir):
+                                                            </div>
+                                                            {formData.demurrageRate && (
+                                                                <div className="flex justify-between text-gray-500 text-xs">
+                                                                    <span>• Demuraj Ücreti:</span>
+                                                                    <span>{formatPrice(parseFloat(formData.demurrageRate))}</span>
+                                                                </div>
+                                                            )}
+                                                            {formData.despatchRate && (
+                                                                <div className="flex justify-between text-gray-500 text-xs">
+                                                                    <span>• Dispeç Ücreti:</span>
+                                                                    <span>{formatPrice(parseFloat(formData.despatchRate))}</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </>
+                                                )}
                                             </div>
                                         </CardContent>
                                     </Card>
@@ -877,12 +887,12 @@ function BrokerOfferCreate() {
                                                     <p className="font-medium">{selectedShip?.name}</p>
                                                 </div>
                                                 <div>
-                                                    <span className="text-gray-600">Toplam Tutar:</span>
-                                                    <p className="font-medium">{formatPrice(calculateTotalAmount())}</p>
+                                                    <span className="text-gray-600">Sender'a Giden Toplam:</span>
+                                                    <p className="font-medium text-green-600">{formatPrice(calculateTotalAmount())}</p>
                                                 </div>
                                                 <div>
-                                                    <span className="text-gray-600">Komisyon:</span>
-                                                    <p className="font-medium">{formatPrice(calculateCommission())}</p>
+                                                    <span className="text-gray-600">Sizin Komisyonunuz:</span>
+                                                    <p className="font-medium text-amber-600">{formatPrice(calculateCommission())}</p>
                                                 </div>
                                                 <div>
                                                     <span className="text-gray-600">Geçerlilik:</span>

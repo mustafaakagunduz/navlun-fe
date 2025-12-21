@@ -187,22 +187,27 @@ export default function AvailableLoadsPage() {
     };
 
     // Sadece LAND (kara) taşıma tipindeki yükleri göster ve arama filtresi uygula
-    const filteredLoads = availableLoads.filter(load => {
-        // Transport type filtresi
-        if (load.transportType !== TransportType.LAND) return false;
+    const filteredLoads = availableLoads
+        .filter(load => {
+            // Transport type filtresi
+            if (load.transportType !== TransportType.LAND) return false;
 
-        // Arama filtresi (Türkçe karakterler için locale-aware)
-        if (searchQuery) {
-            const query = searchQuery.toLocaleLowerCase('tr-TR');
-            return (
-                load.title.toLocaleLowerCase('tr-TR').includes(query) ||
-                load.loadingAddress.toLocaleLowerCase('tr-TR').includes(query) ||
-                load.deliveryAddress.toLocaleLowerCase('tr-TR').includes(query)
-            );
-        }
+            // Arama filtresi (Türkçe karakterler için locale-aware)
+            if (searchQuery) {
+                const query = searchQuery.toLocaleLowerCase('tr-TR');
+                return (
+                    load.title.toLocaleLowerCase('tr-TR').includes(query) ||
+                    load.loadingAddress.toLocaleLowerCase('tr-TR').includes(query) ||
+                    load.deliveryAddress.toLocaleLowerCase('tr-TR').includes(query)
+                );
+            }
 
-        return true;
-    });
+            return true;
+        })
+        // Duplicate yükleri filtrele (aynı id'ye sahip yüklerden sadece birini al)
+        .filter((load, index, self) =>
+            index === self.findIndex((l) => l.id === load.id)
+        );
 
     if (availableLoadsLoading) {
         return (

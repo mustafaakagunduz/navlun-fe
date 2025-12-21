@@ -8,8 +8,6 @@ import { Button } from '@/components/ui/button';
 import {
     Loader2,
     Building2,
-    Phone,
-    Mail,
     Award,
     Package,
     Leaf,
@@ -42,13 +40,16 @@ export default function SenderProfilePage() {
         const fetchProfileData = async () => {
             try {
                 setLoading(true);
-                const [profileData, statsData, reviewsData, reviewStatsData] = await Promise.all([
-                    senderService.getSenderProfileById(senderId),
-                    senderService.getSenderStatistics(senderId).catch(() => null),
-                    reviewService.getReviewsBySenderId(senderId).catch(() => []),
-                    reviewService.getSenderReviewStatistics(senderId).catch(() => null)
-                ]);
+                // İlk önce profili al
+                const profileData = await senderService.getSenderProfileById(senderId);
                 setProfile(profileData);
+
+                // Profil verisiyle userId'yi kullanarak diğer verileri al
+                const [statsData, reviewsData, reviewStatsData] = await Promise.all([
+                    senderService.getSenderStatistics(senderId).catch(() => null),
+                    reviewService.getReviewsForUser(profileData.userId).catch(() => []),
+                    reviewService.getUserStatistics(profileData.userId).catch(() => null)
+                ]);
                 setStatistics(statsData);
                 setReviews(reviewsData);
                 setReviewStats(reviewStatsData);
@@ -153,28 +154,6 @@ export default function SenderProfilePage() {
                 </CardHeader>
 
                 <CardContent className="space-y-6">
-                    {/* Contact Information */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {profile.phone && (
-                            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                <Phone className="h-5 w-5 text-gray-500" />
-                                <div>
-                                    <p className="text-xs text-gray-500">Telefon</p>
-                                    <p className="text-sm font-medium">{profile.phone}</p>
-                                </div>
-                            </div>
-                        )}
-                        {profile.email && (
-                            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                <Mail className="h-5 w-5 text-gray-500" />
-                                <div>
-                                    <p className="text-xs text-gray-500">E-posta</p>
-                                    <p className="text-sm font-medium">{profile.email}</p>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
                     {/* Production Types */}
                     {profile.productionTypes && profile.productionTypes.length > 0 && (
                         <div>
@@ -296,7 +275,7 @@ export default function SenderProfilePage() {
                         <CardTitle className="text-lg">Detaylı İstatistikler</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="text-center">
                                 <p className="text-2xl font-bold text-blue-600">
                                     {statistics.totalWeight.toLocaleString()} kg
@@ -314,12 +293,6 @@ export default function SenderProfilePage() {
                                     {statistics.pendingShipments}
                                 </p>
                                 <p className="text-sm text-gray-600">Bekleyen</p>
-                            </div>
-                            <div className="text-center">
-                                <p className="text-2xl font-bold text-purple-600">
-                                    {statistics.ecoFriendlyRatio.toFixed(1)}%
-                                </p>
-                                <p className="text-sm text-gray-600">Çevreci Oranı</p>
                             </div>
                         </div>
                     </CardContent>
